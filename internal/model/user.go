@@ -10,9 +10,7 @@ type User struct {
 }
 
 func HashPassword(password string) (string, error) {
-	const COST int = 10 // just for example (no requirements are provided)
-
-	bytes, err := bcrypt.GenerateFromPassword([]byte(password), COST) // $2a$10$TVXESRL0IiN3YdNJjKAuDe4j8K3ggwPfqoUsQz73YWPiwHikyhJxG
+	bytes, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	return string(bytes), err
 }
 

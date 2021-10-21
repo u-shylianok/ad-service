@@ -49,7 +49,7 @@ CREATE TABLE ads_tags
 );
 
 INSERT INTO users(name, username, password) VALUES
-    ('Тестовый пользователь', 'test', '$2a$10$jSmo/VbSIwrmQGGVc/w3R.K99.1gW4zU1XoB4BNUYITaUyG/2GH0W'); -- u: test, p: test
+    ('Тестовый пользователь', 'test', '$2a$10$1hN6TfPRPS9usxbx9DVoY.ix6a8o.kxsednj6CPTkHujR2JGbvLXG'); -- u: test, p: test
 
 INSERT INTO ads(user_id, name, date, price, description) VALUES
     (1, 'Объявление 1', '2021-10-11', 1000, 'Тестовое объявление 1'),
