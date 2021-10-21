@@ -1,7 +1,10 @@
 package main
 
-import "fmt"
+import (
+	_ "github.com/jackc/pgx/v4/stdlib"
+	"github.com/u-shylianok/ad-service/internal/server"
+)
 
 func main() {
-	fmt.Println("Hello, services!")
+	server.Run()
 }
