@@ -1,28 +1,39 @@
 package repository
 
 import (
-	"github.com/u-shylianok/ad-service/internal/model"
+	"errors"
+	"fmt"
+	"strings"
+
+	"github.com/jmoiron/sqlx"
+	"github.com/sirupsen/logrus"
 )
 
-// AdTx createPhoto rolls back the transaction if something goes wrong
-func (tx AdTx) createPhoto(photo model.Photo, adId int, isMain bool) (int, error) {
-	var photoId int
-	createPhotoQuery := "INSERT INTO photos (link) VALUES ($1) RETURNING id"
-	row1 := tx.QueryRow(createPhotoQuery, photo.Link)
-	err := row1.Scan(&photoId)
-	if err != nil {
+func (r *AdPostgres) createPhotos(tx *sqlx.Tx, adId int, links []string, isMains []bool) error {
+	if len(links) != len(isMains) {
+		err := errors.New("(un)expected error")
+		logrus.Errorf("[create photos] error: %s", err.Error())
 		tx.Rollback()
-		return 0, err
+		return err
 	}
 
-	var adsPhotosId int
-	createAdsPhotosQuery := "INSERT INTO ads_photos (ad_id, photo_id, is_main) VALUES ($1, $2, $3) RETURNING ad_id"
-	row2 := tx.QueryRow(createAdsPhotosQuery, adId, photoId, isMain)
-	err = row2.Scan(&adsPhotosId)
-	if err != nil {
-		tx.Rollback()
-		return 0, err
+	values := []string{}
+	args := []interface{}{}
+
+	args = append(args, adId)
+	argId := 2
+	for i := 0; i < len(links); i++ {
+		args = append(args, links[i], isMains[i])
+		values = append(values, fmt.Sprintf("($1, $%d, $%d)", argId, argId+1))
+		argId += 2
 	}
 
-	return photoId, nil
+	createPhotosQuery := fmt.Sprintf("INSERT INTO photos (ad_id, link, is_main) VALUES %s", strings.Join(values, ","))
+	_, err := tx.Exec(createPhotosQuery, args...)
+	if err != nil {
+		logrus.Errorf("[create photos] error: %s", err.Error())
+		tx.Rollback()
+		return err
+	}
+	return nil
 }

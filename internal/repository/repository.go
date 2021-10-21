@@ -17,8 +17,8 @@ type Auth interface {
 
 type Ad interface {
 	Create(ad model.Ad) (int, error)
-	List(filter model.Ad) ([]model.Ad, error)
-	Get(adId int) (model.Ad, error)
+	List(sortBy, order string) ([]model.Ad, error)
+	Get(adId int, fields []string) (model.Ad, error)
 	Update(ad model.Ad) error
 	Delete(adId int) error
 }

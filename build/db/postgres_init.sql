@@ -20,17 +20,10 @@ CREATE TABLE ads
 CREATE TABLE photos
 (
     id      SERIAL PRIMARY KEY,
-    link    TEXT NOT NULL
-);
-
-CREATE TABLE ads_photos
-(
-    ad_id       INTEGER NOT NULL,
-    photo_id    INTEGER NOT NULL,
-    is_main     BOOLEAN NOT NULL,
-    PRIMARY KEY (ad_id, photo_id),
-    FOREIGN KEY (ad_id) REFERENCES ads(id),
-    FOREIGN KEY (photo_id) REFERENCES photos(id)
+    ad_id   INTEGER NOT NULL,
+    link    TEXT NOT NULL,
+    is_main BOOLEAN NOT NULL,
+    FOREIGN KEY (ad_id) REFERENCES ads(id)
 );
 
 CREATE TABLE tags
@@ -61,57 +54,31 @@ INSERT INTO ads(user_id, name, date, price, description) VALUES
     (1, 'Объявление 7', '2021-10-17', 7000, 'Тестовое объявление 7'),
     (1, 'Объявление 8', '2021-10-18', 8000, 'Тестовое объявление 8');
 
-INSERT INTO photos(link) VALUES
-    ('https://picsum.photos/id/101/200/200'),
-    ('https://picsum.photos/id/102/200/200'),
-    ('https://picsum.photos/id/103/200/200'),
-    ('https://picsum.photos/id/201/200/200'),
-    ('https://picsum.photos/id/202/200/200'),
-    ('https://picsum.photos/id/203/200/200'),
-    ('https://picsum.photos/id/301/200/200'),
-    ('https://picsum.photos/id/302/200/200'),
-    ('https://picsum.photos/id/303/200/200'),
-    ('https://picsum.photos/id/401/200/200'),
-    ('https://picsum.photos/id/402/200/200'),
-    ('https://picsum.photos/id/403/200/200'),
-    ('https://picsum.photos/id/501/200/200'),
-    ('https://picsum.photos/id/502/200/200'),
-    ('https://picsum.photos/id/503/200/200'),
-    ('https://picsum.photos/id/601/200/200'),
-    ('https://picsum.photos/id/602/200/200'),
-    ('https://picsum.photos/id/603/200/200'),
-    ('https://picsum.photos/id/701/200/200'),
-    ('https://picsum.photos/id/702/200/200'),
-    ('https://picsum.photos/id/703/200/200'),
-    ('https://picsum.photos/id/801/200/200'),
-    ('https://picsum.photos/id/802/200/200'),
-    ('https://picsum.photos/id/803/200/200');
-
-INSERT INTO ads_photos(ad_id, photo_id, is_main) VALUES
-    (1, 1, TRUE),
-    (1, 2, FALSE),
-    (1, 3, FALSE),
-    (2, 4, FALSE),
-    (2, 5, TRUE),
-    (2, 6, FALSE),
-    (3, 7, FALSE),
-    (3, 8, FALSE),
-    (3, 9, TRUE),
-    (4, 10, FALSE),
-    (4, 11, TRUE),
-    (4, 12, FALSE),
-    (5, 13, TRUE),
-    (5, 14, FALSE),
-    (5, 15, FALSE),
-    (6, 16, TRUE),
-    (6, 17, FALSE),
-    (6, 18, FALSE),
-    (7, 19, FALSE),
-    (7, 20, TRUE),
-    (7, 21, FALSE),
-    (8, 22, FALSE),
-    (8, 23, FALSE),
-    (8, 24, TRUE);
+INSERT INTO photos(ad_id, link, is_main) VALUES
+    (1, 'https://picsum.photos/id/101/200/200', TRUE),
+    (1, 'https://picsum.photos/id/102/200/200', FALSE),
+    (1, 'https://picsum.photos/id/103/200/200', FALSE),
+    (2, 'https://picsum.photos/id/201/200/200', TRUE),
+    (2, 'https://picsum.photos/id/202/200/200', FALSE),
+    (2, 'https://picsum.photos/id/203/200/200', FALSE),
+    (3, 'https://picsum.photos/id/301/200/200', TRUE),
+    (3, 'https://picsum.photos/id/302/200/200', FALSE),
+    (3, 'https://picsum.photos/id/303/200/200', FALSE),
+    (4, 'https://picsum.photos/id/401/200/200', TRUE),
+    (4, 'https://picsum.photos/id/402/200/200', FALSE),
+    (4, 'https://picsum.photos/id/403/200/200', FALSE),
+    (5, 'https://picsum.photos/id/501/200/200', TRUE),
+    (5, 'https://picsum.photos/id/502/200/200', FALSE),
+    (5, 'https://picsum.photos/id/503/200/200', FALSE),
+    (6, 'https://picsum.photos/id/601/200/200', TRUE),
+    (6, 'https://picsum.photos/id/602/200/200', FALSE),
+    (6, 'https://picsum.photos/id/603/200/200', FALSE),
+    (7, 'https://picsum.photos/id/701/200/200', TRUE),
+    (7, 'https://picsum.photos/id/702/200/200', FALSE),
+    (7, 'https://picsum.photos/id/703/200/200', FALSE),
+    (8, 'https://picsum.photos/id/801/200/200', TRUE),
+    (8, 'https://picsum.photos/id/802/200/200', FALSE),
+    (8, 'https://picsum.photos/id/803/200/200', FALSE);
 
 INSERT INTO tags(name) VALUES
     ('ТЕСТ'),
