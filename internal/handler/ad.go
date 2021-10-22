@@ -3,6 +3,7 @@ package handler
 import (
 	"net/http"
 	"strconv"
+	"strings"
 	"unicode/utf8"
 
 	"github.com/gin-gonic/gin"
@@ -11,7 +12,7 @@ import (
 
 func (h *Handler) createAd(c *gin.Context) {
 
-	var input model.Ad
+	var input model.AdRequest
 	if err := c.BindJSON(&input); err != nil {
 		newErrorResponse(c, http.StatusBadRequest, "invalid input body")
 		return
@@ -32,18 +33,18 @@ func (h *Handler) createAd(c *gin.Context) {
 		return
 	}
 
-	if len(*input.OtherPhotos) > 2 {
+	if input.OtherPhotos == nil || len(*input.OtherPhotos) > 2 {
 		newErrorResponse(c, http.StatusBadRequest, "should be no more than 3 photos")
 		return
 	}
 
-	id, err := h.services.Ad.Create(input)
+	id, err := h.services.Ad.CreateAd(input)
 	if err != nil {
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	c.JSON(http.StatusOK, map[string]interface{}{
+	c.JSON(http.StatusCreated, map[string]interface{}{
 		"id": id,
 	})
 }
@@ -53,16 +54,14 @@ func (h *Handler) listAds(c *gin.Context) {
 	var order, sortBy string
 
 	sortBy = c.Query("sort_by")
-	if sortBy == "price" || sortBy == "date" {
+	if strings.ToLower(sortBy) == "price" || strings.ToLower(sortBy) == "date" {
 		order = c.Query("order")
-		if order != "asc" && order != "dsc" {
+		if strings.ToLower(order) != "asc" && order != "dsc" {
 			order = "asc"
 		}
-	} else {
-		sortBy = ""
 	}
 
-	ads, err := h.services.Ad.List(sortBy, order)
+	ads, err := h.services.Ad.ListAds(sortBy, order)
 	if err != nil {
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
@@ -73,7 +72,7 @@ func (h *Handler) listAds(c *gin.Context) {
 
 func (h *Handler) getAd(c *gin.Context) {
 
-	adId, err := strconv.Atoi(c.Param("id"))
+	adID, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
 		newErrorResponse(c, http.StatusBadRequest, "invalid ad id param")
 		return
@@ -81,7 +80,7 @@ func (h *Handler) getAd(c *gin.Context) {
 
 	fields := c.Request.URL.Query()["fields"]
 
-	item, err := h.services.Ad.Get(adId, fields)
+	item, err := h.services.Ad.GetAd(adID, fields)
 	if err != nil {
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return

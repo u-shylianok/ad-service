@@ -35,24 +35,24 @@ func Run() error {
 	srv := new(Server)
 	go func() {
 		if err := srv.Run(os.Getenv("APP_PORT"), handlers.InitRoutes()); err != nil {
-			logrus.Fatalf("error occured while running http server: %s", err.Error())
+			logrus.Fatalf("error occured while running http server: %s", err)
 		}
 	}()
 
-	logrus.Print("Ads service Started")
+	logrus.Info("Ads service Started")
 
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGTERM, syscall.SIGINT)
 	<-quit
 
-	logrus.Print("Ads service Shutting Down")
+	logrus.Info("Ads service Shutting Down")
 
 	if err := srv.Shutdown(context.Background()); err != nil {
-		logrus.Errorf("error occured on server shutting down: %s", err.Error())
+		logrus.Errorf("error occured on server shutting down: %s", err)
 	}
 
 	if err := db.Close(); err != nil {
-		logrus.Errorf("error occured on db connection close: %s", err.Error())
+		logrus.Errorf("error occured on db connection close: %s", err)
 	}
 	return nil
 }
