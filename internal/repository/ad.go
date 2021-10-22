@@ -35,18 +35,11 @@ func (r *AdPostgres) Create(userId int, ad model.AdRequest) (int, error) {
 		return 0, err
 	}
 
-	// (рус) Подготавливаем всё для создания фото (кажется, где-то я перемудрил или ступил)
-	links := make([]string, len(*ad.OtherPhotos)+1)
-	isMains := make([]bool, len(*ad.OtherPhotos)+1)
-	links[0] = ad.MainPhoto.Link
-	isMains[0] = true
-	for i := 0; i < len(*ad.OtherPhotos); i++ {
-		links[i+1] = (*ad.OtherPhotos)[i].Link
-	}
-
-	if err := r.createPhotos(tx, adId, links, isMains); err != nil {
+	if err := r.createPhotos(tx, adId, ad.MainPhoto, *ad.OtherPhotos); err != nil {
 		return 0, err
 	}
+
+	tagIds, err := r.createTags(tx, *ad.Tags)
 
 	for _, tag := range *ad.Tags {
 		if _, err := adTx.createTag(tag, adId); err != nil {

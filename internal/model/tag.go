@@ -2,10 +2,12 @@ package model
 
 import "errors"
 
+// TagRequest - структура, получаемая в запросе
 type TagRequest struct {
 	Name string `json:"name"`
 }
 
+// Validate - валидация структуры
 func (r TagRequest) Validate() error {
 	if r.Name == "" {
 		return errors.New("tag name should not be empty")
@@ -13,50 +15,29 @@ func (r TagRequest) Validate() error {
 	return nil
 }
 
+// TagRequest - структура, возвращаемая в ответе
+type TagResponse struct {
+	Name string `json:"name"`
+}
+
+// Tag - структура, используемая в запросах к БД
 type Tag struct {
 	Id   int    `db:"id"`
 	Name string `db:"name"`
 }
 
-type TagResponse struct {
-	Name string `json:"name"`
+func TagsToListIds(tags []Tag) []int {
+	result := make([]int, len(tags))
+	for i, tag := range tags {
+		result[i] = tag.Id
+	}
+	return result
 }
 
-type Tags []Tag
-
-func (t Tags) ListNames() []string {
-	list := make([]string, len(t))
-	for _, tag := range t {
-		list = append(list, tag.Name)
+func ToListTagNames(tags []TagRequest) []string {
+	result := make([]string, len(tags))
+	for i, tag := range tags {
+		result[i] = tag.Name
 	}
-	return list
-}
-
-func (t Tags) ListIds() []int {
-	list := make([]int, len(t))
-	for _, tag := range t {
-		list = append(list, tag.Id)
-	}
-	return list
-}
-
-func (t Tags) GetUnexistTags(exist Tags) Tags {
-	if len(exist) == 0 {
-		return t
-	}
-	if len(t) == len(exist) {
-		return nil
-	}
-
-	var result Tags
-
-	for _, tag1 := range t {
-		for _, tag2 := range exist {
-			if tag1.Id == tag2.Id && tag1.Name == tag2.Name {
-				result = append(result, Tag{Id: tag1.Id, Name: tag1.Name})
-			}
-		}
-	}
-
 	return result
 }

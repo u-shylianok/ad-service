@@ -6,28 +6,30 @@ import (
 	"strings"
 
 	"github.com/blockloop/scan"
+	"github.com/jmoiron/sqlx"
 	"github.com/sirupsen/logrus"
 	"github.com/u-shylianok/ad-service/internal/model"
 )
 
-func (r *AdPostgres) listTagsInNames(names []string) (model.Tags, error) {
-	var tags model.Tags
+func (r *AdPostgres) listTagsFromRequest(tags []model.TagRequest) ([]model.Tag, error) {
+	var result []model.Tag
+	names := model.TagsWithNames(tags).ToListNames()
 
 	listTagsQuery := fmt.Sprintf("SELECT id, name FROM tags WHERE name IN (%s)", strings.Join(names, ","))
 	r.db.Select(&tags, listTagsQuery)
 
-	return tags, nil
+	return result, nil
 }
 
-func (r *AdPostgres) createTags(tx *sql.Tx, adId int, tags model.Tags) error {
-	existTags, err := r.listTagsInNames(tags.ListNames())
+func (r *AdPostgres) createTags(tx *sqlx.Tx, tags []model.TagRequest) ([]int, error) {
+	existTags, err := r.listTagsFromRequest(tags)
 	if err != nil {
-		logrus.Errorf("[create Ad] find existing tags error: %s", err.Error())
+		logrus.Errorf("[create tag] find existing tags error: %s", err.Error())
 		tx.Rollback()
-		return err
+		return nil, err
 	}
 
-	tagsToCreate := tags.GetUnexistTags(existTags)
+	tagsToCreate := model.GetUnexistTags(tags, existTags)
 
 	values := []string{}
 	args := []interface{}{}
@@ -43,31 +45,30 @@ func (r *AdPostgres) createTags(tx *sql.Tx, adId int, tags model.Tags) error {
 	createTagsQuery := fmt.Sprintf("INSERT INTO tags (name) VALUES %s RETURNING id", strings.Join(values, ","))
 	rows, err := tx.Query(createTagsQuery, args...)
 	if err != nil {
-		logrus.Errorf("[Create Ad] create tags error: %s", err.Error())
+		logrus.Errorf("[create tag] create tags error: %s", err.Error())
 		tx.Rollback()
-		return err
+		return nil, err
 	}
 
 	var createdTagIds []int
 	err = scan.Rows(&createdTagIds, rows)
 	if err != nil {
-		logrus.Errorf("[Create Ad] scanning created tags error: %s", err.Error())
+		logrus.Errorf("[create tag] scanning created tags error: %s", err.Error())
 		tx.Rollback()
-		return err
+		return nil, err
 	}
 
 	tagIds := append(createdTagIds, existTags.ListIds()...)
-	if len(tags) != len(tagIds) {
-		logrus.Error("[Create Ad] created and existed tags should be equal to input tags.")
-		tx.Rollback()
-		return err
-	}
 
-	values = []string{}
-	args = []interface{}{}
+	return tagIds, nil
+}
+
+func (r *AdPostgres) createAdsTags(tx *sql.Tx, adId int, tagIds []int) error {
+	values := []string{}
+	args := []interface{}{}
 
 	args = append(args, adId)
-	argId = 2
+	argId := 2
 	for _, tagId := range tagIds {
 		args = append(args, tagId)
 		values = append(values, fmt.Sprintf("($1, $%d)", argId))
@@ -75,17 +76,31 @@ func (r *AdPostgres) createTags(tx *sql.Tx, adId int, tags model.Tags) error {
 	}
 
 	createAdsTagsQuery := fmt.Sprintf("INSERT INTO ads_tags (ad_id, tag_id) VALUES %s", strings.Join(values, ","))
-	_, err = tx.Exec(createAdsTagsQuery, args...)
+	_, err := tx.Exec(createAdsTagsQuery, args...)
 	if err != nil {
 		logrus.Errorf("[Create Ad] create AdsTags error: %s", err.Error())
 		tx.Rollback()
 		return err
 	}
-
 	return nil
 }
 
-func (r *AdPostgres) createAdsTags(tx *sql.Tx) error {
+func listTagNamesToCreate(alltags []model.TagRequest, exist []model.Tag) []string {
+	if len(exist) == 0 {
+		return alltags
+	}
+	if len(alltags) == len(exist) {
+		return nil
+	}
 
-	return nil
+	var result []model.TagRequest
+
+	for _, tag1 := range alltags {
+		for _, tag2 := range exist {
+			if tag1.Name == tag2.Name {
+				result = append(result, model.TagRequest{Name: tag1.Name})
+			}
+		}
+	}
+	return result
 }

@@ -1,31 +1,27 @@
 package repository
 
 import (
-	"errors"
 	"fmt"
 	"strings"
 
 	"github.com/jmoiron/sqlx"
 	"github.com/sirupsen/logrus"
+	"github.com/u-shylianok/ad-service/internal/model"
 )
 
-func (r *AdPostgres) createPhotos(tx *sqlx.Tx, adId int, links []string, isMains []bool) error {
-	if len(links) != len(isMains) {
-		err := errors.New("(un)expected error")
-		logrus.Errorf("[create photos] error: %s", err.Error())
-		tx.Rollback()
-		return err
-	}
+func (r *AdPostgres) createPhotos(tx *sqlx.Tx, adId int, mainPhoto model.PhotoRequest, otherPhotos []model.PhotoRequest) error {
 
 	values := []string{}
 	args := []interface{}{}
 
-	args = append(args, adId)
-	argId := 2
-	for i := 0; i < len(links); i++ {
-		args = append(args, links[i], isMains[i])
-		values = append(values, fmt.Sprintf("($1, $%d, $%d)", argId, argId+1))
-		argId += 2
+	args = append(args, adId, mainPhoto.Link)
+	values = append(values, fmt.Sprintf("($1, $2, TRUE)"))
+
+	argId := 3
+	for _, photo := range otherPhotos {
+		args = append(args, photo.Link)
+		values = append(values, fmt.Sprintf("($1, $%d, FALSE)", argId))
+		argId++
 	}
 
 	createPhotosQuery := fmt.Sprintf("INSERT INTO photos (ad_id, link, is_main) VALUES %s", strings.Join(values, ","))
