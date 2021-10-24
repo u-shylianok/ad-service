@@ -1,4 +1,4 @@
-package server
+package main
 
 import (
 	"context"
@@ -8,14 +8,18 @@ import (
 	"syscall"
 	"time"
 
+	_ "github.com/jackc/pgx/v4/stdlib"
 	"github.com/sirupsen/logrus"
 	"github.com/u-shylianok/ad-service/internal/handler"
 	"github.com/u-shylianok/ad-service/internal/repository"
 	"github.com/u-shylianok/ad-service/internal/service"
 )
 
-func Run() error {
+type Server struct {
+	httpServer *http.Server
+}
 
+func main() {
 	db, err := repository.NewPostgresDB(repository.Config{
 		Host:     os.Getenv("DB_HOST"),
 		Port:     os.Getenv("DB_PORT"),
@@ -54,11 +58,7 @@ func Run() error {
 	if err := db.Close(); err != nil {
 		logrus.Errorf("error occured on db connection close: %s", err)
 	}
-	return nil
-}
-
-type Server struct {
-	httpServer *http.Server
+	return
 }
 
 func (s *Server) Run(port string, handler http.Handler) error {

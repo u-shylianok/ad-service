@@ -14,7 +14,7 @@ type Auth interface {
 type Ad interface {
 	CreateAd(ad model.AdRequest) (int, error)
 	ListAds(sortBy, order string) ([]model.AdResponse, error)
-	GetAd(adId int, fields []string) (model.AdResponse, error)
+	GetAd(adID int, fields []string) (model.AdResponse, error)
 }
 
 type Service struct {
@@ -25,6 +25,6 @@ type Service struct {
 func NewService(repos *repository.Repository) *Service {
 	return &Service{
 		Auth: NewAuthService(repos.Auth),
-		Ad:   NewAdService(repos.Ad),
+		Ad:   NewAdService(repos.Ad, repos.Photo, repos.Tag),
 	}
 }

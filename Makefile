@@ -1,7 +1,7 @@
 .PHONY: build start up down clean cleanall
 
 build:
-	GOOS=linux GOARCH=amd64 go build -o build/app/ad-service cmd/*.go
+	GOOS=linux GOARCH=amd64 go build -o build/app/ad-service cmd/ad/*.go
 	docker-compose build
 
 start: build

@@ -4,7 +4,6 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
-	"unicode/utf8"
 
 	"github.com/gin-gonic/gin"
 	"github.com/u-shylianok/ad-service/internal/model"
@@ -18,23 +17,8 @@ func (h *Handler) createAd(c *gin.Context) {
 		return
 	}
 
-	if utf8.RuneCountInString(input.Name) > 200 {
-		newErrorResponse(c, http.StatusBadRequest, "name should be no more than 200 symbols")
-		return
-	}
-
-	if input.Description == "" || utf8.RuneCountInString(input.Description) > 1000 {
-		newErrorResponse(c, http.StatusBadRequest, "description should be no more than 1000 symbols")
-		return
-	}
-
-	if input.MainPhoto.Link == "" {
-		newErrorResponse(c, http.StatusBadRequest, "must be at least 1 photo")
-		return
-	}
-
-	if input.OtherPhotos == nil || len(*input.OtherPhotos) > 2 {
-		newErrorResponse(c, http.StatusBadRequest, "should be no more than 3 photos")
+	if err := input.Validate(); err != nil {
+		newErrorResponse(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
@@ -56,7 +40,7 @@ func (h *Handler) listAds(c *gin.Context) {
 	sortBy = c.Query("sort_by")
 	if strings.ToLower(sortBy) == "price" || strings.ToLower(sortBy) == "date" {
 		order = c.Query("order")
-		if strings.ToLower(order) != "asc" && order != "dsc" {
+		if strings.ToLower(order) != "asc" && strings.ToLower(order) != "dsc" {
 			order = "asc"
 		}
 	}

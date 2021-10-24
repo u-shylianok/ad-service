@@ -6,21 +6,45 @@ import (
 )
 
 type AdService struct {
-	repo repository.Ad
+	adRepo    repository.Ad
+	photoRepo repository.Photo
+	tagRepo   repository.Tag
 }
 
-func NewAdService(repo repository.Ad) *AdService {
-	return &AdService{repo: repo}
+func NewAdService(adRepo repository.Ad, photoRepo repository.Photo, tagRepo repository.Tag) *AdService {
+	return &AdService{
+		adRepo:    adRepo,
+		photoRepo: photoRepo,
+		tagRepo:   tagRepo,
+	}
 }
 
 func (s *AdService) CreateAd(ad model.AdRequest) (int, error) {
-	return s.repo.Create(ad)
+	adID, err := s.adRepo.Create(1, ad)
+	if err != nil {
+		// comment
+		return adID, err
+	}
+
+	if ad.OtherPhotos != nil {
+
+		if err := s.photoRepo.CreateList(adID, *ad.OtherPhotos); err != nil {
+			// comment
+			return adID, err
+		}
+	}
+
+	if ad.Tags != nil {
+		// tags logic
+	}
+
+	return adID, err
 }
 
 func (s *AdService) ListAds(sortBy, order string) ([]model.AdResponse, error) {
-	return s.repo.List(sortBy, order)
+	return s.adRepo.List(sortBy, order)
 }
 
-func (s *AdService) GetAd(adId int, fields []string) (model.AdResponse, error) {
-	return s.repo.Get(adId, fields)
+func (s *AdService) GetAd(adID int, fields []string) (model.AdResponse, error) {
+	return s.adRepo.Get(adID, fields)
 }
