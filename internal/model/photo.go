@@ -1,6 +1,7 @@
 package model
 
 type Photo struct {
-	Id   int    `json:"id"`
-	Link string `json:"link"`
+	ID   int    `db:"id"`
+	AdID int    `db:"ad_id"`
+	Link string `db:"link"`
 }

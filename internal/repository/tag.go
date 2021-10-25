@@ -1,35 +1,60 @@
 package repository
 
 import (
+	"github.com/jmoiron/sqlx"
 	"github.com/u-shylianok/ad-service/internal/model"
 )
 
-// AdTx createTag rolls back the transaction if something goes wrong
-func (tx *AdTx) createTag(tag model.Tag, adId int) (int, error) {
-	var tagId int
-	getTagQuery := "SELECT id FROM tags WHERE name=$1"
-	if err := tx.Get(&tagId, getTagQuery, tag.Name); err != nil {
-		tx.Rollback()
-		return 0, err
-	}
-	if tagId == 0 {
-		createTagQuery := "INSERT INTO tags (name) VALUES ($1) RETURNING id"
-		row1 := tx.QueryRow(createTagQuery, tag.Name)
-		err := row1.Scan(&tagId)
-		if err != nil {
-			tx.Rollback()
-			return 0, err
-		}
-	}
+type TagPostgres struct {
+	db *sqlx.DB
+}
 
-	var adsTagsId int
-	createAdsPhotosQuery := "INSERT INTO ads_tags (ad_id, tag_id) VALUES ($1, $2) RETURNING ad_id"
-	row2 := tx.QueryRow(createAdsPhotosQuery, adId, tagId)
-	err := row2.Scan(&adsTagsId)
+func NewTagPostrgres(db *sqlx.DB) *TagPostgres {
+	return &TagPostgres{db: db}
+}
+
+func (r *TagPostgres) Create(name string) (int, error) {
+
+	tx, err := r.db.Beginx()
 	if err != nil {
+		//logrus.Errorf("[create tag]: error: %s", err.Error())
+		return 0, err
+	}
+
+	var tagID int
+	createTagQuery := "INSERT INTO tags (name) VALUES ($1) RETURNING id"
+	row := tx.QueryRow(createTagQuery, name)
+	if err := row.Scan(&tagID); err != nil {
+		//logrus.Errorf("[create tag]: error: %s", err.Error())
 		tx.Rollback()
 		return 0, err
 	}
 
-	return tagId, nil
+	return tagID, tx.Commit()
+}
+
+func (r *TagPostgres) AttachTagToAd(adID int, tagID int) error {
+
+	tx, err := r.db.Beginx()
+	if err != nil {
+		//logrus.Errorf("[create adstag]: error: %s", err.Error())
+		return err
+	}
+
+	createAdsTagQuery := "INSERT INTO ads_tags (ad_id, tag_id) VALUES ($1, $2)"
+	if _, err := tx.Exec(createAdsTagQuery, adID, tagID); err != nil {
+		// logrus.Errorf("[create adstag]: error: %s", err.Error())
+		tx.Rollback()
+		return err
+	}
+	return tx.Commit()
+}
+
+func (r *TagPostgres) FindByName(name string) (model.Tag, error) {
+	var tag model.Tag
+
+	getTagQuery := "SELECT id, name FROM tags WHERE name=$1"
+	r.db.Get(&tag, getTagQuery, name)
+
+	return tag, nil
 }

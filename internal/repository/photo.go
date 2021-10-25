@@ -1,28 +1,62 @@
 package repository
 
 import (
-	"github.com/u-shylianok/ad-service/internal/model"
+	"fmt"
+	"strings"
+
+	"github.com/jmoiron/sqlx"
 )
 
-// AdTx createPhoto rolls back the transaction if something goes wrong
-func (tx AdTx) createPhoto(photo model.Photo, adId int, isMain bool) (int, error) {
-	var photoId int
-	createPhotoQuery := "INSERT INTO photos (link) VALUES ($1) RETURNING id"
-	row1 := tx.QueryRow(createPhotoQuery, photo.Link)
-	err := row1.Scan(&photoId)
+type PhotoPostgres struct {
+	db *sqlx.DB
+}
+
+func NewPhotoPostrgres(db *sqlx.DB) *PhotoPostgres {
+	return &PhotoPostgres{db: db}
+}
+
+func (r *PhotoPostgres) Create(adID int, link string) (int, error) {
+	tx, err := r.db.Beginx()
 	if err != nil {
+		//logrus.Errorf("[create photo]: error: %s", err.Error())
+		return 0, err
+	}
+
+	var photoID int
+	createPhotoQuery := "INSERT INTO photos (ad_id, link) VALUES ($1, $2) RETURNING id"
+	row := tx.QueryRow(createPhotoQuery, adID, link)
+	if err := row.Scan(&photoID); err != nil {
+		//logrus.Errorf("[create photo]: error: %s", err.Error())
 		tx.Rollback()
 		return 0, err
 	}
 
-	var adsPhotosId int
-	createAdsPhotosQuery := "INSERT INTO ads_photos (ad_id, photo_id, is_main) VALUES ($1, $2, $3) RETURNING ad_id"
-	row2 := tx.QueryRow(createAdsPhotosQuery, adId, photoId, isMain)
-	err = row2.Scan(&adsPhotosId)
+	return photoID, tx.Commit()
+}
+
+func (r *PhotoPostgres) CreateList(adID int, photos []string) error {
+	tx, err := r.db.Beginx()
 	if err != nil {
-		tx.Rollback()
-		return 0, err
+		//logrus.Errorf("[create photos]: error: %s", err.Error())
+		return err
 	}
 
-	return photoId, nil
+	values := []string{}
+	args := []interface{}{}
+
+	args = append(args, adID)
+	argID := 2
+	for _, photo := range photos {
+		args = append(args, photo)
+		values = append(values, fmt.Sprintf("($1, $%d, FALSE)", argID))
+		argID++
+	}
+
+	createPhotosQuery := fmt.Sprintf("INSERT INTO photos (ad_id, link) VALUES %s", strings.Join(values, ","))
+	if _, err := tx.Exec(createPhotosQuery, args...); err != nil {
+		//logrus.Errorf("[create photos] error: %s", err.Error())
+		tx.Rollback()
+		return err
+	}
+	return nil
 }

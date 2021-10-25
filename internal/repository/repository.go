@@ -8,6 +8,8 @@ import (
 type Repository struct {
 	Auth
 	Ad
+	Photo
+	Tag
 }
 
 type Auth interface {
@@ -16,16 +18,29 @@ type Auth interface {
 }
 
 type Ad interface {
-	Create(ad model.Ad) (int, error)
-	List(filter model.Ad) ([]model.Ad, error)
-	Get(adId int) (model.Ad, error)
-	Update(ad model.Ad) error
-	Delete(adId int) error
+	Create(userID int, ad model.AdRequest) (int, error)
+	List(sortBy, order string) ([]model.Ad, error)
+	Get(adID int, fields []string) (model.AdResponse, error)
+	Update(ad model.AdRequest) error
+	Delete(adID int) error
+}
+
+type Photo interface {
+	Create(adID int, link string) (int, error)
+	CreateList(adID int, photos []string) error
+}
+
+type Tag interface {
+	Create(name string) (int, error)
+	AttachTagToAd(adID int, tagID int) error
+	FindByName(name string) (model.Tag, error)
 }
 
 func NewRepository(db *sqlx.DB) *Repository {
 	return &Repository{
-		Auth: NewAuthPostgres(db),
-		Ad:   NewAdPostrgres(db),
+		Auth:  NewAuthPostgres(db),
+		Ad:    NewAdPostrgres(db),
+		Photo: NewPhotoPostrgres(db),
+		Tag:   NewTagPostrgres(db),
 	}
 }
