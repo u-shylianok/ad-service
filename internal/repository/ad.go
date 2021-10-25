@@ -1,6 +1,8 @@
 package repository
 
 import (
+	"errors"
+
 	"github.com/jmoiron/sqlx"
 	"github.com/sirupsen/logrus"
 	"github.com/u-shylianok/ad-service/internal/model"
@@ -111,10 +113,10 @@ func (r *AdPostgres) Get(adID int, fields []string) (model.AdResponse, error) {
 	return ad, nil
 }
 
-func (r *AdPostgres) Update(ad model.AdRequest) error {
-	return nil
+func (r *AdPostgres) Update(adID int, ad model.AdRequest) error {
+	return errors.New("function is not available")
 }
 
 func (r *AdPostgres) Delete(adID int) error {
-	return nil
+	return errors.New("function is not available")
 }

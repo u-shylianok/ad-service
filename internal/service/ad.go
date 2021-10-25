@@ -69,3 +69,11 @@ func (s *AdService) ListAds(sortBy, order string) ([]model.AdResponse, error) {
 func (s *AdService) GetAd(adID int, fields []string) (model.AdResponse, error) {
 	return s.adRepo.Get(adID, fields)
 }
+
+func (s *AdService) UpdateAd(adID int, ad model.AdRequest) error {
+	return s.adRepo.Update(adID, ad)
+}
+
+func (s *AdService) DeleteAd(adID int) error {
+	return s.adRepo.Delete(adID)
+}

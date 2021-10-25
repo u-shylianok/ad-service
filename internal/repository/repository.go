@@ -21,7 +21,7 @@ type Ad interface {
 	Create(userID int, ad model.AdRequest) (int, error)
 	List(sortBy, order string) ([]model.Ad, error)
 	Get(adID int, fields []string) (model.AdResponse, error)
-	Update(ad model.AdRequest) error
+	Update(adID int, ad model.AdRequest) error
 	Delete(adID int) error
 }
 

@@ -20,8 +20,8 @@ func (h *Handler) InitRoutes() *gin.Engine {
 
 	auth := router.Group("/auth")
 	{
-		auth.POST("/sign-up", h.signUp)
-		auth.POST("/sign-in", h.signIn)
+		auth.POST("/signup", h.signUp)
+		auth.POST("/signin", h.signIn)
 	}
 
 	//api := router.Group("/api", h.userIdentity)
@@ -32,8 +32,8 @@ func (h *Handler) InitRoutes() *gin.Engine {
 		ads.GET("/", h.listAds)
 		//ads.GET("/find", h.findAds)
 		ads.GET("/:id", h.getAd)
-		//ads.PUT("/:id", h.updateAd)
-		//ads.DELETE("/:id", h.deleteAd)
+		ads.PUT("/:id", h.updateAd)
+		ads.DELETE("/:id", h.deleteAd)
 	}
 	//}
 
