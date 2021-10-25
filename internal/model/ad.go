@@ -7,10 +7,10 @@ import (
 )
 
 type AdRequest struct {
-	Name        string    `json:"name"`
-	Price       int       `json:"price"`
-	Description string    `json:"description"`
-	MainPhoto   string    `json:"main_photo"`
+	Name        string    `json:"name" binding:"required"`
+	Price       int       `json:"price" binding:"required"`
+	Description string    `json:"description" binding:"required"`
+	MainPhoto   string    `json:"main_photo" binding:"required"`
 	OtherPhotos *[]string `json:"other_photos"`
 	Tags        *[]string `json:"tags"`
 }
@@ -42,9 +42,11 @@ func (r AdRequest) Validate() error {
 	if r.Price < 0 {
 		return errors.New("price should not be negative")
 	}
-	for _, photo := range *r.OtherPhotos {
-		if photo == "" {
-			return errors.New("photo link should not be empty")
+	if r.OtherPhotos != nil {
+		for _, photo := range *r.OtherPhotos {
+			if photo == "" {
+				return errors.New("photo link should not be empty")
+			}
 		}
 	}
 	if r.Tags != nil {
@@ -66,6 +68,7 @@ type Ad struct {
 	Date        time.Time `db:"date"`
 	Price       int       `db:"price"`
 	Description string    `db:"description"`
+	MainPhoto   string    `db:"photo"`
 }
 
 type AdResponse struct {
@@ -78,4 +81,27 @@ type AdResponse struct {
 	MainPhoto   string    `json:"main_photo"`
 	OtherPhotos *[]string `json:"other_photos"`
 	Tags        *[]string `json:"tags"`
+}
+
+func ConvertAdsToResponse(ads []Ad) []AdResponse {
+	result := make([]AdResponse, len(ads))
+
+	for i, ad := range ads {
+		result[i] = ad.ToResponse(nil, nil)
+	}
+	return result
+}
+
+func (m *Ad) ToResponse(photos *[]string, tags *[]string) AdResponse {
+	return AdResponse{
+		ID:          m.ID,
+		User:        User{},
+		Name:        m.Name,
+		Date:        m.Date,
+		Price:       m.Price,
+		Description: m.Description,
+		MainPhoto:   m.MainPhoto,
+		OtherPhotos: photos,
+		Tags:        tags,
+	}
 }

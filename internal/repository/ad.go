@@ -2,6 +2,7 @@ package repository
 
 import (
 	"github.com/jmoiron/sqlx"
+	"github.com/sirupsen/logrus"
 	"github.com/u-shylianok/ad-service/internal/model"
 )
 
@@ -32,8 +33,8 @@ func (r *AdPostgres) Create(userID int, ad model.AdRequest) (int, error) {
 	return adID, tx.Commit()
 }
 
-func (r *AdPostgres) List(sortBy, order string) ([]model.AdResponse, error) {
-	var ads []model.AdResponse
+func (r *AdPostgres) List(sortBy, order string) ([]model.Ad, error) {
+	var ads []model.Ad
 
 	// var addQuerySortBy, addQueryOrder string
 	// if sortBy == "price" || sortBy == "date" {
@@ -62,6 +63,12 @@ func (r *AdPostgres) List(sortBy, order string) ([]model.AdResponse, error) {
 	// 	ads[i].MainPhoto = photo
 	// }
 	// logrus.Info("Все ок 3")
+
+	listAdsQuery := "SELECT * FROM ads"
+	if err := r.db.Select(&ads, listAdsQuery); err != nil {
+		logrus.Error(err)
+		return nil, err
+	}
 
 	return ads, nil
 }

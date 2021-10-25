@@ -19,7 +19,7 @@ type Auth interface {
 
 type Ad interface {
 	Create(userID int, ad model.AdRequest) (int, error)
-	List(sortBy, order string) ([]model.AdResponse, error)
+	List(sortBy, order string) ([]model.Ad, error)
 	Get(adID int, fields []string) (model.AdResponse, error)
 	Update(ad model.AdRequest) error
 	Delete(adID int) error
@@ -31,7 +31,8 @@ type Photo interface {
 }
 
 type Tag interface {
-	Create(adID int, name string) (int, error)
+	Create(name string) (int, error)
+	AttachTagToAd(adID int, tagID int) error
 	FindByName(name string) (model.Tag, error)
 }
 
