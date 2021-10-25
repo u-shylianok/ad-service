@@ -1,4 +1,4 @@
-.PHONY: deps build up start down clean cleanall
+.PHONY: deps build up start down clean cleanall tidy
 
 SERVICE_NAME ?= ad-service
 APP_CONTAINER_NAME ?= $(SERVICE_NAME)-app
@@ -33,3 +33,6 @@ clean:
 
 cleanall: clean
 	docker rmi $(APP_CONTAINER_NAME) $(DB_CONTAINER_NAME)
+
+tidy:
+	go mod tidy
