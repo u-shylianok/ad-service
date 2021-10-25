@@ -1,8 +1,6 @@
 package repository
 
 import (
-	"errors"
-
 	"github.com/jmoiron/sqlx"
 	"github.com/sirupsen/logrus"
 	"github.com/u-shylianok/ad-service/internal/model"
@@ -114,9 +112,17 @@ func (r *AdPostgres) Get(adID int, fields []string) (model.AdResponse, error) {
 }
 
 func (r *AdPostgres) Update(adID int, ad model.AdRequest) error {
-	return errors.New("function is not available")
+
+	updateAdQuery := "UPDATE ads SET name = $1, price = $2, description = $3, photo = $4 WHERE id = $5"
+	_, err := r.db.Exec(updateAdQuery, ad.Name, ad.Price, ad.Description, ad.MainPhoto, adID)
+
+	return err
 }
 
 func (r *AdPostgres) Delete(adID int) error {
-	return errors.New("function is not available")
+
+	deleteAdQuery := "DELETE FROM ads WHERE id = $1"
+	_, err := r.db.Exec(deleteAdQuery, adID)
+
+	return err
 }
