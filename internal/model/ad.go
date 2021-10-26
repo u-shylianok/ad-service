@@ -2,6 +2,8 @@ package model
 
 import (
 	"errors"
+	"net/url"
+	"strings"
 	"time"
 	"unicode/utf8"
 )
@@ -77,19 +79,10 @@ type AdResponse struct {
 	Name        string       `json:"name"`
 	Date        time.Time    `json:"date"`
 	Price       int          `json:"price"`
-	Description string       `json:"description"`
+	Description string       `json:"description,omitempty"`
 	MainPhoto   string       `json:"main_photo"`
-	OtherPhotos *[]string    `json:"other_photos"`
-	Tags        *[]string    `json:"tags"`
-}
-
-func ConvertAdsToResponse(ads []Ad) []AdResponse {
-	result := make([]AdResponse, len(ads))
-
-	for i, ad := range ads {
-		result[i] = ad.ToResponse(nil, nil)
-	}
-	return result
+	OtherPhotos *[]string    `json:"other_photos,omitempty"`
+	Tags        *[]string    `json:"tags,omitempty"`
 }
 
 func (m *Ad) ToResponse(photos *[]string, tags *[]string) AdResponse {
@@ -104,4 +97,91 @@ func (m *Ad) ToResponse(photos *[]string, tags *[]string) AdResponse {
 		OtherPhotos: photos,
 		Tags:        tags,
 	}
+}
+
+func ConvertAdsToResponse(ads []Ad) []AdResponse {
+	result := make([]AdResponse, len(ads))
+
+	for i, ad := range ads {
+		result[i] = ad.ToResponse(nil, nil)
+	}
+	return result
+}
+
+type AdsSortingParam struct {
+	Field  string
+	IsDesc bool
+}
+
+// TODO : Change this comment
+// Функция возвращает массив структур AdsSortingParam, которые формируются из запроса.
+// Параметры чувствительны к порядку, в котором они написаны. sort_by[i] соответствует order[i].
+// Если параметр указан неверно (напрмер, "AAA"), то он будет пропущен, как и Order, соответствующий ему.
+func ListAdsSortingParamsFromURL(values url.Values) []AdsSortingParam {
+	if values == nil {
+		return nil
+	}
+	sortParams := values["sortby"]
+	orderParams := values["order"]
+
+	ordersLen := len(orderParams)
+
+	var result []AdsSortingParam
+
+	for i, sortParam := range sortParams {
+		if !IsAdsSortingParamAvailable(sortParam) {
+			continue
+		}
+
+		var isDesc bool
+		if i < ordersLen {
+			isDesc = strings.ToLower(orderParams[i]) == "dsc"
+		}
+		result = append(result, AdsSortingParam{Field: sortParam, IsDesc: isDesc})
+	}
+
+	return result
+}
+
+func IsAdsSortingParamAvailable(param string) bool {
+	switch strings.ToLower(param) {
+	case "name":
+		return true
+	case "date":
+		return true
+	case "price":
+		return true
+	case "description":
+		return true
+	default:
+		return false
+	}
+}
+
+type AdOptionalFieldsParam struct {
+	Description bool
+	Photos      bool
+	Tags        bool
+}
+
+func GetAdOptionalFieldsFromURL(values url.Values) AdOptionalFieldsParam {
+	var result AdOptionalFieldsParam
+
+	if values == nil {
+		return result
+	}
+
+	fields := values["fields"]
+
+	for _, field := range fields {
+		switch strings.ToLower(field) {
+		case "description":
+			result.Description = true
+		case "photos":
+			result.Photos = true
+		case "tags":
+			result.Tags = true
+		}
+	}
+	return result
 }

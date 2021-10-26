@@ -3,7 +3,6 @@ package handler
 import (
 	"net/http"
 	"strconv"
-	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/u-shylianok/ad-service/internal/model"
@@ -35,17 +34,9 @@ func (h *Handler) createAd(c *gin.Context) {
 
 func (h *Handler) listAds(c *gin.Context) {
 
-	var order, sortBy string
+	sortingParams := model.ListAdsSortingParamsFromURL(c.Request.URL.Query())
 
-	sortBy = c.Query("sort_by")
-	if strings.ToLower(sortBy) == "price" || strings.ToLower(sortBy) == "date" {
-		order = c.Query("order")
-		if strings.ToLower(order) != "asc" && strings.ToLower(order) != "dsc" {
-			order = "asc"
-		}
-	}
-
-	ads, err := h.services.Ad.ListAds(sortBy, order)
+	ads, err := h.services.Ad.ListAds(sortingParams)
 	if err != nil {
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
@@ -62,7 +53,7 @@ func (h *Handler) getAd(c *gin.Context) {
 		return
 	}
 
-	fields := c.Request.URL.Query()["fields"]
+	fields := model.GetAdOptionalFieldsFromURL(c.Request.URL.Query())
 
 	item, err := h.services.Ad.GetAd(adID, fields)
 	if err != nil {

@@ -13,8 +13,8 @@ type Auth interface {
 
 type Ad interface {
 	CreateAd(ad model.AdRequest) (int, error)
-	ListAds(sortBy, order string) ([]model.AdResponse, error)
-	GetAd(adID int, fields []string) (model.AdResponse, error)
+	ListAds(params []model.AdsSortingParam) ([]model.AdResponse, error)
+	GetAd(adID int, fields model.AdOptionalFieldsParam) (model.AdResponse, error)
 	UpdateAd(adID int, ad model.AdRequest) error
 	DeleteAd(adID int) error
 }

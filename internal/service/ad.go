@@ -55,8 +55,8 @@ func (s *AdService) CreateAd(ad model.AdRequest) (int, error) {
 	return adID, err
 }
 
-func (s *AdService) ListAds(sortBy, order string) ([]model.AdResponse, error) {
-	ads, err := s.adRepo.List(sortBy, order)
+func (s *AdService) ListAds(params []model.AdsSortingParam) ([]model.AdResponse, error) {
+	ads, err := s.adRepo.List(params)
 	if err != nil {
 		return nil, err
 	}
@@ -66,13 +66,29 @@ func (s *AdService) ListAds(sortBy, order string) ([]model.AdResponse, error) {
 	return adsResponse, nil
 }
 
-func (s *AdService) GetAd(adID int, fields []string) (model.AdResponse, error) {
+func (s *AdService) GetAd(adID int, fields model.AdOptionalFieldsParam) (model.AdResponse, error) {
 	ad, err := s.adRepo.Get(adID, fields)
 	if err != nil {
 		return model.AdResponse{}, err
 	}
 
-	adResponse := ad.ToResponse(nil, nil)
+	var photos *[]string
+	if fields.Photos {
+		photoLinks, err := s.photoRepo.ListPhotoLinks(adID)
+		if err == nil {
+			photos = &photoLinks
+		}
+	}
+
+	var tags *[]string
+	if fields.Tags {
+		tagNames, err := s.tagRepo.ListTagNames(adID)
+		if err == nil {
+			tags = &tagNames
+		}
+	}
+
+	adResponse := ad.ToResponse(photos, tags)
 
 	return adResponse, nil
 }
