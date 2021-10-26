@@ -72,15 +72,15 @@ type Ad struct {
 }
 
 type AdResponse struct {
-	ID          int       `json:"id"`
-	User        User      `json:"user"`
-	Name        string    `json:"name"`
-	Date        time.Time `json:"date"`
-	Price       int       `json:"price"`
-	Description string    `json:"description"`
-	MainPhoto   string    `json:"main_photo"`
-	OtherPhotos *[]string `json:"other_photos"`
-	Tags        *[]string `json:"tags"`
+	ID          int          `json:"id"`
+	User        UserResponse `json:"user"`
+	Name        string       `json:"name"`
+	Date        time.Time    `json:"date"`
+	Price       int          `json:"price"`
+	Description string       `json:"description"`
+	MainPhoto   string       `json:"main_photo"`
+	OtherPhotos *[]string    `json:"other_photos"`
+	Tags        *[]string    `json:"tags"`
 }
 
 func ConvertAdsToResponse(ads []Ad) []AdResponse {
@@ -95,7 +95,7 @@ func ConvertAdsToResponse(ads []Ad) []AdResponse {
 func (m *Ad) ToResponse(photos *[]string, tags *[]string) AdResponse {
 	return AdResponse{
 		ID:          m.ID,
-		User:        User{},
+		User:        UserResponse{},
 		Name:        m.Name,
 		Date:        m.Date,
 		Price:       m.Price,

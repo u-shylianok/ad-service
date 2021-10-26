@@ -73,8 +73,8 @@ func (r *AdPostgres) List(sortBy, order string) ([]model.Ad, error) {
 	return ads, nil
 }
 
-func (r *AdPostgres) Get(adID int, fields []string) (model.AdResponse, error) {
-	var ad model.AdResponse
+func (r *AdPostgres) Get(adID int, fields []string) (model.Ad, error) {
+	var ad model.Ad
 
 	// fieldsToQueries := make(map[string]string)
 	// for _, a := range fields {
@@ -107,6 +107,11 @@ func (r *AdPostgres) Get(adID int, fields []string) (model.AdResponse, error) {
 	// 	}
 	// 	ad.OtherPhotos = &otherPhotos
 	// }
+
+	getAdQuery := "SELECT * FROM ads WHERE id = $1"
+	if err := r.db.Get(&ad, getAdQuery, adID); err != nil {
+		return ad, err
+	}
 
 	return ad, nil
 }

@@ -20,7 +20,7 @@ type Auth interface {
 type Ad interface {
 	Create(userID int, ad model.AdRequest) (int, error)
 	List(sortBy, order string) ([]model.Ad, error)
-	Get(adID int, fields []string) (model.AdResponse, error)
+	Get(adID int, fields []string) (model.Ad, error)
 	Update(adID int, ad model.AdRequest) error
 	Delete(adID int) error
 }
@@ -28,12 +28,17 @@ type Ad interface {
 type Photo interface {
 	Create(adID int, link string) (int, error)
 	CreateList(adID int, photos []string) error
+	ListPhotoLinks(adID int) ([]string, error)
+	DeleteAllAdPhotos(adID int) error
 }
 
 type Tag interface {
 	Create(name string) (int, error)
 	AttachTagToAd(adID int, tagID int) error
+	ListTagNames(adID int) ([]string, error)
 	FindByName(name string) (model.Tag, error)
+	DetachTagFromAd(adID int, tagID int) error
+	DetachAllTagsFromAd(adID int) error
 }
 
 func NewRepository(db *sqlx.DB) *Repository {

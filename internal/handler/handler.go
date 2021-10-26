@@ -34,6 +34,16 @@ func (h *Handler) InitRoutes() *gin.Engine {
 		ads.GET("/:id", h.getAd)
 		ads.PUT("/:id", h.updateAd)
 		ads.DELETE("/:id", h.deleteAd)
+
+		photos := ads.Group(":id/photos")
+		{
+			photos.GET("/", h.listPhotos)
+		}
+
+		tags := ads.Group(":id/tags")
+		{
+			tags.GET("/", h.listTags)
+		}
 	}
 	//}
 

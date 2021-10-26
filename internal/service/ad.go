@@ -63,15 +63,60 @@ func (s *AdService) ListAds(sortBy, order string) ([]model.AdResponse, error) {
 
 	adsResponse := model.ConvertAdsToResponse(ads)
 
-	return adsResponse, err
+	return adsResponse, nil
 }
 
 func (s *AdService) GetAd(adID int, fields []string) (model.AdResponse, error) {
-	return s.adRepo.Get(adID, fields)
+	ad, err := s.adRepo.Get(adID, fields)
+	if err != nil {
+		return model.AdResponse{}, err
+	}
+
+	adResponse := ad.ToResponse(nil, nil)
+
+	return adResponse, nil
 }
 
 func (s *AdService) UpdateAd(adID int, ad model.AdRequest) error {
-	return s.adRepo.Update(adID, ad)
+	if err := s.adRepo.Update(adID, ad); err != nil {
+		return err
+	}
+
+	if ad.OtherPhotos != nil {
+		// NOT OPTIMIZED
+		if err := s.photoRepo.DeleteAllAdPhotos(adID); err != nil {
+			return err
+		}
+
+		if err := s.photoRepo.CreateList(adID, *ad.OtherPhotos); err != nil {
+			return err
+		}
+	}
+
+	if ad.Tags != nil {
+		for _, tagName := range *ad.Tags {
+			// NOT OPTIMIZED
+			if err := s.tagRepo.DetachAllTagsFromAd(adID); err != nil {
+				return err
+			}
+
+			var tagID int
+			tag, err := s.tagRepo.FindByName(tagName)
+			if err != nil && err != pgx.ErrNoRows {
+				continue
+			} else if err != nil && err == pgx.ErrNoRows {
+				tagID, err = s.tagRepo.Create(tagName)
+			} else if err == nil {
+				tagID = tag.ID
+			}
+
+			if err := s.tagRepo.AttachTagToAd(adID, tagID); err != nil {
+				return err
+			}
+		}
+	}
+
+	return nil
 }
 
 func (s *AdService) DeleteAd(adID int) error {

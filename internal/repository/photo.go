@@ -60,3 +60,22 @@ func (r *PhotoPostgres) CreateList(adID int, photos []string) error {
 	}
 	return nil
 }
+
+func (r *PhotoPostgres) ListPhotoLinks(adID int) ([]string, error) {
+	var photoLinks []string
+
+	listAdsQuery := "SELECT link FROM photos WHERE ad_id = $1"
+	if err := r.db.Select(&photoLinks, listAdsQuery, adID); err != nil {
+		//logrus.Error(err)
+		return nil, err
+	}
+
+	return photoLinks, nil
+}
+
+func (r *PhotoPostgres) DeleteAllAdPhotos(adID int) error {
+	deletePhotosQuery := "DELETE FROM photos WHERE ad_id = $1"
+	_, err := r.db.Exec(deletePhotosQuery, adID)
+
+	return err
+}
