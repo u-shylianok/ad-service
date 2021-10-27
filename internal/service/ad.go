@@ -8,13 +8,15 @@ import (
 
 type AdService struct {
 	adRepo    repository.Ad
+	userRepo  repository.User
 	photoRepo repository.Photo
 	tagRepo   repository.Tag
 }
 
-func NewAdService(adRepo repository.Ad, photoRepo repository.Photo, tagRepo repository.Tag) *AdService {
+func NewAdService(adRepo repository.Ad, userRepo repository.User, photoRepo repository.Photo, tagRepo repository.Tag) *AdService {
 	return &AdService{
 		adRepo:    adRepo,
+		userRepo:  userRepo,
 		photoRepo: photoRepo,
 		tagRepo:   tagRepo,
 	}
@@ -61,7 +63,24 @@ func (s *AdService) ListAds(params []model.AdsSortingParam) ([]model.AdResponse,
 		return nil, err
 	}
 
-	adsResponse := model.ConvertAdsToResponse(ads)
+	usersMap := make(map[int]model.User)
+	var usersIDs []int
+	for _, ad := range ads {
+		if _, ok := usersMap[ad.UserID]; !ok {
+			usersMap[ad.UserID] = model.User{}
+			usersIDs = append(usersIDs, ad.UserID)
+		}
+	}
+
+	users, err := s.userRepo.ListInIDs(usersIDs)
+	if err != nil {
+		//logrus.Error() // Просто пока пишем ошибку
+		return model.ConvertAdsToResponse(ads, nil), nil // Даже если пользователи не прогрузились, важно вернуть полученные объявления (мне кажется так)
+	}
+	for _, user := range users {
+		usersMap[user.ID] = user
+	}
+	adsResponse := model.ConvertAdsToResponse(ads, usersMap)
 
 	return adsResponse, nil
 }
@@ -70,6 +89,11 @@ func (s *AdService) GetAd(adID int, fields model.AdOptionalFieldsParam) (model.A
 	ad, err := s.adRepo.Get(adID, fields)
 	if err != nil {
 		return model.AdResponse{}, err
+	}
+
+	var adUser model.User
+	if user, err := s.userRepo.GetByID(ad.UserID); err == nil {
+		adUser = user
 	}
 
 	var photos *[]string
@@ -88,7 +112,7 @@ func (s *AdService) GetAd(adID int, fields model.AdOptionalFieldsParam) (model.A
 		}
 	}
 
-	adResponse := ad.ToResponse(photos, tags)
+	adResponse := ad.ToResponse(adUser, photos, tags)
 
 	return adResponse, nil
 }

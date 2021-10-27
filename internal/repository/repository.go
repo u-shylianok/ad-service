@@ -6,15 +6,17 @@ import (
 )
 
 type Repository struct {
-	Auth
+	User
 	Ad
 	Photo
 	Tag
 }
 
-type Auth interface {
+type User interface {
 	Create(user model.User) (int, error)
 	Get(username, password string) (model.User, error)
+	GetByID(id int) (model.User, error)
+	ListInIDs(ids []int) ([]model.User, error)
 }
 
 type Ad interface {
@@ -43,7 +45,7 @@ type Tag interface {
 
 func NewRepository(db *sqlx.DB) *Repository {
 	return &Repository{
-		Auth:  NewAuthPostgres(db),
+		User:  NewUserPostgres(db),
 		Ad:    NewAdPostrgres(db),
 		Photo: NewPhotoPostrgres(db),
 		Tag:   NewTagPostrgres(db),

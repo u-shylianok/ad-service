@@ -85,10 +85,10 @@ type AdResponse struct {
 	Tags        *[]string    `json:"tags,omitempty"`
 }
 
-func (m *Ad) ToResponse(photos *[]string, tags *[]string) AdResponse {
+func (m *Ad) ToResponse(user User, photos *[]string, tags *[]string) AdResponse {
 	return AdResponse{
 		ID:          m.ID,
-		User:        UserResponse{},
+		User:        user.ToResponse(),
 		Name:        m.Name,
 		Date:        m.Date,
 		Price:       m.Price,
@@ -99,11 +99,11 @@ func (m *Ad) ToResponse(photos *[]string, tags *[]string) AdResponse {
 	}
 }
 
-func ConvertAdsToResponse(ads []Ad) []AdResponse {
+func ConvertAdsToResponse(ads []Ad, usersMap map[int]User) []AdResponse {
 	result := make([]AdResponse, len(ads))
 
 	for i, ad := range ads {
-		result[i] = ad.ToResponse(nil, nil)
+		result[i] = ad.ToResponse(usersMap[ad.UserID], nil, nil)
 	}
 	return result
 }

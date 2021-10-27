@@ -25,6 +25,13 @@ type UserResponse struct {
 	Username string `json:"username" binding:"required"`
 }
 
+func (u *User) ToResponse() UserResponse {
+	return UserResponse{
+		Name:     u.Name,
+		Username: u.Username,
+	}
+}
+
 func HashPassword(password string) (string, error) {
 	bytes, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	return string(bytes), err
