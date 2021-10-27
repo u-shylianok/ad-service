@@ -33,7 +33,43 @@ func (r *TagPostgres) Create(name string) (int, error) {
 	return tagID, tx.Commit()
 }
 
-func (r *TagPostgres) AttachTagToAd(adID int, tagID int) error {
+func (r *TagPostgres) GetByName(name string) (model.Tag, error) {
+	var tag model.Tag
+
+	getTagQuery := "SELECT id, name FROM tags WHERE name = $1"
+	if err := r.db.Get(&tag, getTagQuery, name); err != nil {
+		//logrus.Errorf(err.Error())
+		return tag, err
+	}
+
+	return tag, nil
+}
+
+func (r *TagPostgres) ListNames() ([]string, error) {
+	var tagNames []string
+
+	listTagNamesQuery := "SELECT name FROM tags"
+	if err := r.db.Select(&tagNames, listTagNamesQuery); err != nil {
+		//logrus.Error(err)
+		return nil, err
+	}
+
+	return tagNames, nil
+}
+
+func (r *TagPostgres) ListNamesByAd(adID int) ([]string, error) {
+	var tagNames []string
+
+	listTagNamesQuery := "SELECT tags.name FROM tags INNER JOIN ads_tags ON tags.id = ads_tags.tag_id AND ads_tags.ad_id = $1"
+	if err := r.db.Select(&tagNames, listTagNamesQuery, adID); err != nil {
+		//logrus.Error(err)
+		return nil, err
+	}
+
+	return tagNames, nil
+}
+
+func (r *TagPostgres) AttachToAd(adID int, tagID int) error {
 
 	tx, err := r.db.Beginx()
 	if err != nil {
@@ -50,37 +86,16 @@ func (r *TagPostgres) AttachTagToAd(adID int, tagID int) error {
 	return tx.Commit()
 }
 
-func (r *TagPostgres) DetachTagFromAd(adID int, tagID int) error {
+func (r *TagPostgres) DetachFromAd(adID int, tagID int) error {
 	deleteAdsTagQuery := "DELETE FROM ads_tags WHERE ad_id = $1 AND tag_id = $2"
 	_, err := r.db.Exec(deleteAdsTagQuery, adID, tagID)
 
 	return err
 }
 
-func (r *TagPostgres) DetachAllTagsFromAd(adID int) error {
+func (r *TagPostgres) DetachAllFromAd(adID int) error {
 	deleteAdsTagsQuery := "DELETE FROM ads_tags WHERE ad_id = $1"
 	_, err := r.db.Exec(deleteAdsTagsQuery, adID)
 
 	return err
-}
-
-func (r *TagPostgres) FindByName(name string) (model.Tag, error) {
-	var tag model.Tag
-
-	getTagQuery := "SELECT id, name FROM tags WHERE name = $1"
-	r.db.Get(&tag, getTagQuery, name)
-
-	return tag, nil
-}
-
-func (r *TagPostgres) ListTagNames(adID int) ([]string, error) {
-	var tagNames []string
-
-	listTagNamesQuery := "SELECT tags.name FROM tags INNER JOIN ads_tags ON tags.id = ads_tags.tag_id AND ads_tags.ad_id = $1"
-	if err := r.db.Select(&tagNames, listTagNamesQuery, adID); err != nil {
-		//logrus.Error(err)
-		return nil, err
-	}
-
-	return tagNames, nil
 }

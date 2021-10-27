@@ -12,6 +12,10 @@ func NewTagService(tagRepo repository.Tag) *TagService {
 	}
 }
 
-func (s *TagService) ListTags(adID int) ([]string, error) {
-	return s.tagRepo.ListTagNames(adID)
+func (s *TagService) ListAdTags(adID int) ([]string, error) {
+	return s.tagRepo.ListNamesByAd(adID)
+}
+
+func (s *TagService) ListTags() ([]string, error) {
+	return s.tagRepo.ListNames()
 }

@@ -20,11 +20,13 @@ type Ad interface {
 }
 
 type Photo interface {
-	ListPhotos(adID int) ([]string, error)
+	ListPhotos() ([]string, error)
+	ListAdPhotos(adID int) ([]string, error)
 }
 
 type Tag interface {
-	ListTags(adID int) ([]string, error)
+	ListTags() ([]string, error)
+	ListAdTags(adID int) ([]string, error)
 }
 
 type Service struct {

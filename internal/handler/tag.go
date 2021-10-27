@@ -7,7 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func (h *Handler) listTags(c *gin.Context) {
+func (h *Handler) listAdTags(c *gin.Context) {
 
 	adID, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
@@ -15,7 +15,18 @@ func (h *Handler) listTags(c *gin.Context) {
 		return
 	}
 
-	tags, err := h.services.Tag.ListTags(adID)
+	tags, err := h.services.Tag.ListAdTags(adID)
+	if err != nil {
+		newErrorResponse(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	c.JSON(http.StatusOK, tags)
+}
+
+func (h *Handler) listTags(c *gin.Context) {
+
+	tags, err := h.services.Tag.ListTags()
 	if err != nil {
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return

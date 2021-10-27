@@ -12,6 +12,10 @@ func NewPhotoService(photoRepo repository.Photo) *PhotoService {
 	}
 }
 
-func (s *PhotoService) ListPhotos(adID int) ([]string, error) {
-	return s.photoRepo.ListPhotoLinks(adID)
+func (s *PhotoService) ListAdPhotos(adID int) ([]string, error) {
+	return s.photoRepo.ListLinksByAd(adID)
+}
+
+func (s *PhotoService) ListPhotos() ([]string, error) {
+	return s.photoRepo.ListLinks()
 }

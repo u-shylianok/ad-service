@@ -37,13 +37,23 @@ func (h *Handler) InitRoutes() *gin.Engine {
 
 		photos := ads.Group(":id/photos")
 		{
-			photos.GET("/", h.listPhotos)
+			photos.GET("/", h.listAdPhotos)
 		}
 
 		tags := ads.Group(":id/tags")
 		{
-			tags.GET("/", h.listTags)
+			tags.GET("/", h.listAdTags)
 		}
+	}
+
+	tags := router.Group("/tags")
+	{
+		tags.GET("/", h.listTags)
+	}
+
+	photos := router.Group("/photos")
+	{
+		photos.GET("/", h.listPhotos)
 	}
 	//}
 

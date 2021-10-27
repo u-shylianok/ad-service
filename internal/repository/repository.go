@@ -21,8 +21,8 @@ type User interface {
 
 type Ad interface {
 	Create(userID int, ad model.AdRequest) (int, error)
-	List(params []model.AdsSortingParam) ([]model.Ad, error)
 	Get(adID int, fields model.AdOptionalFieldsParam) (model.Ad, error)
+	List(params []model.AdsSortingParam) ([]model.Ad, error)
 	Update(adID int, ad model.AdRequest) error
 	Delete(adID int) error
 }
@@ -30,17 +30,20 @@ type Ad interface {
 type Photo interface {
 	Create(adID int, link string) (int, error)
 	CreateList(adID int, photos []string) error
-	ListPhotoLinks(adID int) ([]string, error)
-	DeleteAllAdPhotos(adID int) error
+	ListLinks() ([]string, error)
+	ListLinksByAd(adID int) ([]string, error)
+	DeleteAllByAd(adID int) error
 }
 
 type Tag interface {
 	Create(name string) (int, error)
-	AttachTagToAd(adID int, tagID int) error
-	ListTagNames(adID int) ([]string, error)
-	FindByName(name string) (model.Tag, error)
-	DetachTagFromAd(adID int, tagID int) error
-	DetachAllTagsFromAd(adID int) error
+	GetByName(name string) (model.Tag, error)
+	ListNames() ([]string, error)
+	ListNamesByAd(adID int) ([]string, error)
+
+	AttachToAd(adID int, tagID int) error
+	DetachFromAd(adID int, tagID int) error
+	DetachAllFromAd(adID int) error
 }
 
 func NewRepository(db *sqlx.DB) *Repository {

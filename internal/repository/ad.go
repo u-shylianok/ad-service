@@ -35,6 +35,22 @@ func (r *AdPostgres) Create(userID int, ad model.AdRequest) (int, error) {
 	return adID, tx.Commit()
 }
 
+func (r *AdPostgres) Get(adID int, fields model.AdOptionalFieldsParam) (model.Ad, error) {
+	var ad model.Ad
+
+	var fieldsQuery string
+	if fields.Description {
+		fieldsQuery = ", description"
+	}
+
+	getAdQuery := fmt.Sprintf("SELECT id, user_id, name, date, price, photo %s FROM ads WHERE id = $1", fieldsQuery)
+	if err := r.db.Get(&ad, getAdQuery, adID); err != nil {
+		return ad, err
+	}
+
+	return ad, nil
+}
+
 func (r *AdPostgres) List(params []model.AdsSortingParam) ([]model.Ad, error) {
 	var ads []model.Ad
 
@@ -58,22 +74,6 @@ func (r *AdPostgres) List(params []model.AdsSortingParam) ([]model.Ad, error) {
 	}
 
 	return ads, nil
-}
-
-func (r *AdPostgres) Get(adID int, fields model.AdOptionalFieldsParam) (model.Ad, error) {
-	var ad model.Ad
-
-	var fieldsQuery string
-	if fields.Description {
-		fieldsQuery = ", description"
-	}
-
-	getAdQuery := fmt.Sprintf("SELECT id, user_id, name, date, price, photo %s FROM ads WHERE id = $1", fieldsQuery)
-	if err := r.db.Get(&ad, getAdQuery, adID); err != nil {
-		return ad, err
-	}
-
-	return ad, nil
 }
 
 func (r *AdPostgres) Update(adID int, ad model.AdRequest) error {

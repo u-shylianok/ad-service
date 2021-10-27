@@ -1,7 +1,10 @@
 package service
 
 import (
+	"database/sql"
+
 	"github.com/jackc/pgx/v4"
+	"github.com/sirupsen/logrus"
 	"github.com/u-shylianok/ad-service/internal/model"
 	"github.com/u-shylianok/ad-service/internal/repository"
 )
@@ -39,16 +42,19 @@ func (s *AdService) CreateAd(ad model.AdRequest) (int, error) {
 	if ad.Tags != nil {
 		for _, tagName := range *ad.Tags {
 			var tagID int
-			tag, err := s.tagRepo.FindByName(tagName)
-			if err != nil && err != pgx.ErrNoRows {
+			tag, err := s.tagRepo.GetByName(tagName)
+			if err != nil && err != sql.ErrNoRows {
 				continue
-			} else if err != nil && err == pgx.ErrNoRows {
-				tagID, err = s.tagRepo.Create(tagName)
+			} else if err != nil && err == sql.ErrNoRows {
+				if tagID, err = s.tagRepo.Create(tagName); err != nil {
+					continue
+				}
+				logrus.Infof("Tag: %s created with id = %d", tagName, tagID)
 			} else if err == nil {
 				tagID = tag.ID
 			}
 
-			if err := s.tagRepo.AttachTagToAd(adID, tagID); err != nil {
+			if err := s.tagRepo.AttachToAd(adID, tagID); err != nil {
 				return adID, err
 			}
 		}
@@ -98,7 +104,7 @@ func (s *AdService) GetAd(adID int, fields model.AdOptionalFieldsParam) (model.A
 
 	var photos *[]string
 	if fields.Photos {
-		photoLinks, err := s.photoRepo.ListPhotoLinks(adID)
+		photoLinks, err := s.photoRepo.ListLinksByAd(adID)
 		if err == nil {
 			photos = &photoLinks
 		}
@@ -106,7 +112,7 @@ func (s *AdService) GetAd(adID int, fields model.AdOptionalFieldsParam) (model.A
 
 	var tags *[]string
 	if fields.Tags {
-		tagNames, err := s.tagRepo.ListTagNames(adID)
+		tagNames, err := s.tagRepo.ListNamesByAd(adID)
 		if err == nil {
 			tags = &tagNames
 		}
@@ -124,7 +130,7 @@ func (s *AdService) UpdateAd(adID int, ad model.AdRequest) error {
 
 	if ad.OtherPhotos != nil {
 		// NOT OPTIMIZED
-		if err := s.photoRepo.DeleteAllAdPhotos(adID); err != nil {
+		if err := s.photoRepo.DeleteAllByAd(adID); err != nil {
 			return err
 		}
 
@@ -136,12 +142,12 @@ func (s *AdService) UpdateAd(adID int, ad model.AdRequest) error {
 	if ad.Tags != nil {
 		for _, tagName := range *ad.Tags {
 			// NOT OPTIMIZED
-			if err := s.tagRepo.DetachAllTagsFromAd(adID); err != nil {
+			if err := s.tagRepo.DetachAllFromAd(adID); err != nil {
 				return err
 			}
 
 			var tagID int
-			tag, err := s.tagRepo.FindByName(tagName)
+			tag, err := s.tagRepo.GetByName(tagName)
 			if err != nil && err != pgx.ErrNoRows {
 				continue
 			} else if err != nil && err == pgx.ErrNoRows {
@@ -150,7 +156,7 @@ func (s *AdService) UpdateAd(adID int, ad model.AdRequest) error {
 				tagID = tag.ID
 			}
 
-			if err := s.tagRepo.AttachTagToAd(adID, tagID); err != nil {
+			if err := s.tagRepo.AttachToAd(adID, tagID); err != nil {
 				return err
 			}
 		}
