@@ -3,7 +3,6 @@ module github.com/u-shylianok/ad-service
 go 1.17
 
 require (
-	github.com/blockloop/scan v1.3.0
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/gin-gonic/gin v1.7.4
 	github.com/jackc/pgx/v4 v4.13.0
