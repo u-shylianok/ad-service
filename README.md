@@ -5,6 +5,8 @@ ad-service
 ## Описание
 - Тестовый пользователь: u: test, p: test
 
+//// - ошибка level=error msg="sql: no rows in result set" - при GET несуществующего id
+
 ### Структура объявления
 - ID
 - Название объявления
