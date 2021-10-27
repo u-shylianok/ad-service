@@ -61,9 +61,11 @@ func main() {
 	return
 }
 
-const MAX_HEADER_BYTES = 1 << 20 // 1 MB
-const READ_TIMEOUT = 10 * time.Second
-const WRITE_TIMEOUT = 10 * time.Second
+const (
+	MAX_HEADER_BYTES = 1 << 20 // 1 MB
+	READ_TIMEOUT     = 10 * time.Second
+	WRITE_TIMEOUT    = 10 * time.Second
+)
 
 func (s *Server) Run(port string, handler http.Handler) error {
 	s.httpServer = &http.Server{
