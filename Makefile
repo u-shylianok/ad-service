@@ -1,9 +1,10 @@
-.PHONY: deps build up start down clean cleanall tidy
+.PHONY: deps build up start debug-start down clean cleanall tidy
 
 SERVICE_NAME ?= ad-service
+BINDIR ?= build/app
+
 APP_CONTAINER_NAME ?= $(SERVICE_NAME)-app
 DB_CONTAINER_NAME ?= $(SERVICE_NAME)-db-pg
-BINDIR ?= build/app
 
 INFO ?= [MAKE INFO]:
 ERROR ?= [MAKE ERROR]:
@@ -22,6 +23,9 @@ up:
 	docker-compose up
 
 start: build up
+
+debug-start:
+	LOG_LEVEL=debug make start
 
 down:
 	docker-compose down
