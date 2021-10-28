@@ -14,6 +14,10 @@ func NewHandler(services *service.Service) *Handler {
 	return &Handler{services: services}
 }
 
+var handlerLogger = logrus.WithFields(logrus.Fields{
+	"package": "internal-handler",
+})
+
 func (h *Handler) InitRoutes() *gin.Engine {
 	// gin.SetMode(gin.ReleaseMode) // set if release
 	router := gin.New()
