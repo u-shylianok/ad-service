@@ -93,7 +93,7 @@ func setupGlobalLogger() {
 	logLevel := os.Getenv("LOG_LEVEL")
 	if logLevel == DEBUG_LOG_LEVEL {
 		log.SetFormatter(&log.JSONFormatter{PrettyPrint: true})
-		log.SetLevel(log.DebugLevel)
+		log.SetLevel(log.TraceLevel)
 	} else {
 		log.SetFormatter(&log.JSONFormatter{})
 	}

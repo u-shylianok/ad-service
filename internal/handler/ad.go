@@ -5,27 +5,41 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
+	"github.com/sirupsen/logrus"
 	"github.com/u-shylianok/ad-service/internal/model"
 )
 
+var logger = logrus.WithFields(logrus.Fields{
+	"package": "internal-handler",
+})
+
 func (h *Handler) createAd(c *gin.Context) {
+	var log = logger.WithFields(logrus.Fields{
+		"method": "createAd",
+	})
 
 	var input model.AdRequest
 	if err := c.BindJSON(&input); err != nil {
+		log.Errorf("bind JSON to struct:", err)
 		newErrorResponse(c, http.StatusBadRequest, "invalid input body")
 		return
 	}
+	log.Trace("input bound successfully")
 
 	if err := input.Validate(); err != nil {
+		log.Errorf("validate input:", err)
 		newErrorResponse(c, http.StatusBadRequest, err.Error())
 		return
 	}
+	log.Trace("input validated successfully")
 
 	id, err := h.services.Ad.CreateAd(input)
 	if err != nil {
+		log.Errorf("service create ad:", err)
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
+	log.Tracef("service create ad with id = %d", id)
 
 	c.JSON(http.StatusCreated, map[string]interface{}{
 		"id": id,
