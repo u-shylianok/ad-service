@@ -34,7 +34,7 @@ func (h *Handler) InitRoutes() *gin.Engine {
 	{
 		ads.POST("/", h.createAd)
 		ads.GET("/", h.listAds)
-		//ads.GET("/find", h.findAds)
+		ads.GET("/search", h.searchAds)
 		ads.GET("/:id", h.getAd)
 		ads.PUT("/:id", h.updateAd)
 		ads.DELETE("/:id", h.deleteAd)

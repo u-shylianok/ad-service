@@ -23,6 +23,7 @@ type Ad interface {
 	Create(userID int, ad model.AdRequest) (int, error)
 	Get(adID int, fields model.AdOptionalFieldsParam) (model.Ad, error)
 	List(params []model.AdsSortingParam) ([]model.Ad, error)
+	ListWithFilter(filter model.AdFilter) ([]model.Ad, error)
 	Update(adID int, ad model.AdRequest) error
 	Delete(adID int) error
 }

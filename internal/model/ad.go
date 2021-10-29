@@ -6,6 +6,8 @@ import (
 	"strings"
 	"time"
 	"unicode/utf8"
+
+	"github.com/sirupsen/logrus"
 )
 
 type AdRequest struct {
@@ -183,5 +185,40 @@ func GetAdOptionalFieldsFromURL(values url.Values) AdOptionalFieldsParam {
 			result.Tags = true
 		}
 	}
+	return result
+}
+
+type AdFilter struct {
+	Username  string
+	StartDate time.Time
+	EndDate   time.Time
+	Tags      []string
+}
+
+const defaultDateFormat = "2006-01-02"
+
+func GetAdFilterFromURL(values url.Values) AdFilter {
+	var result AdFilter
+
+	if values == nil {
+		return result
+	}
+
+	result.Username = values.Get("username")
+
+	startDate, err := time.Parse(defaultDateFormat, values.Get("startdate"))
+	if err != nil {
+		logrus.WithError(err).Warn("failed to parse startdate param")
+	}
+	result.StartDate = startDate
+
+	endDate, err := time.Parse(defaultDateFormat, values.Get("enddate"))
+	if err != nil {
+		logrus.WithError(err).Warn("failed to parse enddate param")
+	}
+	result.EndDate = endDate
+
+	result.Tags = values["tags"]
+
 	return result
 }

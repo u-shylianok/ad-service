@@ -91,6 +91,34 @@ func (s *AdService) ListAds(params []model.AdsSortingParam) ([]model.AdResponse,
 	return adsResponse, nil
 }
 
+func (s *AdService) SearchAds(filter model.AdFilter) ([]model.AdResponse, error) {
+	ads, err := s.adRepo.ListWithFilter(filter)
+	if err != nil {
+		return nil, err
+	}
+
+	usersMap := make(map[int]model.User)
+	var usersIDs []int
+	for _, ad := range ads {
+		if _, ok := usersMap[ad.UserID]; !ok {
+			usersMap[ad.UserID] = model.User{}
+			usersIDs = append(usersIDs, ad.UserID)
+		}
+	}
+
+	users, err := s.userRepo.ListInIDs(usersIDs)
+	if err != nil {
+		//logrus.Error() // Просто пока пишем ошибку
+		return model.ConvertAdsToResponse(ads, nil), nil // Даже если пользователи не прогрузились, важно вернуть полученные объявления (мне кажется так)
+	}
+	for _, user := range users {
+		usersMap[user.ID] = user
+	}
+	adsResponse := model.ConvertAdsToResponse(ads, usersMap)
+
+	return adsResponse, nil
+}
+
 func (s *AdService) GetAd(adID int, fields model.AdOptionalFieldsParam) (model.AdResponse, error) {
 	ad, err := s.adRepo.Get(adID, fields)
 	if err != nil {

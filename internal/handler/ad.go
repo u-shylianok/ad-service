@@ -61,6 +61,25 @@ func (h *Handler) listAds(c *gin.Context) {
 	c.JSON(http.StatusOK, ads)
 }
 
+func (h *Handler) searchAds(c *gin.Context) {
+	var log = handlerLogger.WithFields(logrus.Fields{
+		"method": "searchAds",
+	})
+
+	filter := model.GetAdFilterFromURL(c.Request.URL.Query())
+	log.WithField("filter", filter).Debug("sorting params was formed")
+
+	ads, err := h.services.Ad.SearchAds(filter)
+	if err != nil {
+		log.WithError(err).Error("failed to get ads")
+		newErrorResponse(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+	log.WithField("ads", ads).Debug("ads read successfully")
+
+	c.JSON(http.StatusOK, ads)
+}
+
 func (h *Handler) getAd(c *gin.Context) {
 	var log = handlerLogger.WithFields(logrus.Fields{
 		"method": "getAd",
