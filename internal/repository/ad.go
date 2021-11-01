@@ -7,6 +7,7 @@ import (
 	"github.com/jmoiron/sqlx"
 	"github.com/sirupsen/logrus"
 	"github.com/u-shylianok/ad-service/internal/model"
+	"github.com/u-shylianok/ad-service/internal/repository/postgres/query"
 )
 
 type AdPostgres struct {
@@ -80,55 +81,21 @@ func (r *AdPostgres) List(params []model.AdsSortingParam) ([]model.Ad, error) {
 func (r *AdPostgres) ListWithFilter(filter model.AdFilter) ([]model.Ad, error) {
 	var ads []model.Ad
 
-	arg := 1
-	// var isWhereExist bool
-	var filterQuery string
-	{
-		var sb strings.Builder
+	listAdsWithFilterQuery, args := query.BuildAdFilterQuery(filter)
+	logrus.Info(listAdsWithFilterQuery)
+	logrus.Info(args)
 
-		if filter.Username != "" {
-			sb.WriteString(fmt.Sprintf("INNER JOIN users ON ads.user_id = users.id AND username = $%d ", arg))
-			arg++
+	if len(args) > 0 {
+		if err := r.db.Select(&ads, listAdsWithFilterQuery, args...); err != nil {
+			//logrus.Error(err)
+			return nil, err
 		}
-		if len(filter.Tags) > 0 {
-			sb.WriteString(fmt.Sprintf("INNER JOIN ads_tags ON ads.id = ads_tags.ad_id INNER JOIN tags ON tags.id = ads_tags.tag_id AND tags.name = $%d", arg))
-			arg++
-		}
-		if !filter.StartDate.IsZero() && !filter.EndDate.IsZero() {
-			sb.WriteString("WHERE ")
-			if !filter.StartDate.IsZero() {
-				sb.WriteString(fmt.Sprintf("ads.date >= $%d", arg))
-				arg++
-			}
-			if !filter.EndDate.IsZero() {
-				sb.WriteString(fmt.Sprintf("ads.date <= $%d", arg))
-				arg++
-			}
-		}
-		filterQuery = sb.String()
-	}
-	// if params != nil {
-	// 	queryPart := make([]string, len(params))
-	// 	for i, param := range params {
-	// 		if param.IsDesc {
-	// 			queryPart[i] = fmt.Sprintf("%s DESC", param.Field)
-	// 		} else {
-	// 			queryPart[i] = fmt.Sprintf("%s ASC", param.Field)
-	// 		}
-	// 	}
-	// }
 
-	// SELECT ads.* FROM ads
-	//INNER JOIN users ON ads.user_id = users.id AND username='test'
-	//INNER JOIN ads_tags ON ads.id = ads_tags.ad_id
-	//INNER JOIN tags ON tags.id = ads_tags.tag_id AND tags.name = 'ВАЖНОЕ'
-	//WHERE ads.date > '2021-10-9' AND ads.date < '2021-10-25'
-	logrus.Info(filterQuery)
-	listAdsWithFilterQuery := fmt.Sprint(filterQuery)
-	if err := r.db.Select(&ads, listAdsWithFilterQuery); err != nil {
-		//logrus.Error(err)
-		return nil, err
-
+	} else {
+		if err := r.db.Select(&ads, listAdsWithFilterQuery); err != nil {
+			//logrus.Error(err)
+			return nil, err
+		}
 	}
 	return ads, nil
 }
