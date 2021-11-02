@@ -1,9 +1,13 @@
 package repository
 
 import (
+	"fmt"
+	"strings"
+
 	"github.com/jmoiron/sqlx"
 	"github.com/sirupsen/logrus"
 	"github.com/u-shylianok/ad-service/internal/model"
+	"github.com/u-shylianok/ad-service/internal/repository/postgres/query"
 )
 
 type AdPostgres struct {
@@ -33,88 +37,82 @@ func (r *AdPostgres) Create(userID int, ad model.AdRequest) (int, error) {
 	return adID, tx.Commit()
 }
 
-func (r *AdPostgres) List(sortBy, order string) ([]model.Ad, error) {
+func (r *AdPostgres) Get(adID int, fields model.AdOptionalFieldsParam) (model.Ad, error) {
+	var ad model.Ad
+
+	var fieldsQuery string
+	if fields.Description {
+		fieldsQuery = ", description"
+	}
+
+	getAdQuery := fmt.Sprintf("SELECT id, user_id, name, date, price, photo %s FROM ads WHERE id = $1", fieldsQuery)
+	if err := r.db.Get(&ad, getAdQuery, adID); err != nil {
+		return ad, err
+	}
+
+	return ad, nil
+}
+
+func (r *AdPostgres) List(params []model.AdsSortingParam) ([]model.Ad, error) {
 	var ads []model.Ad
 
-	// var addQuerySortBy, addQueryOrder string
-	// if sortBy == "price" || sortBy == "date" {
-	// 	addQuerySortBy = " ORDER BY ads." + sortBy
+	var orderbyQuery string
+	if params != nil {
+		queryPart := make([]string, len(params))
+		for i, param := range params {
+			if param.IsDesc {
+				queryPart[i] = fmt.Sprintf("%s DESC", param.Field)
+			} else {
+				queryPart[i] = fmt.Sprintf("%s ASC", param.Field)
+			}
+		}
+		orderbyQuery = fmt.Sprintf("ORDER BY %s", strings.Join(queryPart, ","))
+	}
 
-	// 	if order == "dsc" {
-	// 		addQueryOrder = " DESC"
-	// 	}
-	// }
-
-	// query := fmt.Sprintf("SELECT * FROM ads%s%s", addQuerySortBy, addQueryOrder)
-	// logrus.Info("Все ок 1")
-	// if err := r.db.Select(&ads, query); err != nil {
-	// 	return nil, err
-	// }
-	// logrus.Info("Все ок 2")
-
-	// query2 := "SELECT photos.id, photos.link FROM photos INNER JOIN ads_photos ON ads_photos.photo_id = photos.id AND ads_photos.ad_id = $1 AND ads_photos.is_main"
-	// for i := 0; i < len(ads); i++ {
-
-	// 	var photo model.Photo
-
-	// 	if err := r.db.Get(&photo, query2, ads[i].ID); err != nil {
-	// 		return nil, err
-	// 	}
-	// 	ads[i].MainPhoto = photo
-	// }
-	// logrus.Info("Все ок 3")
-
-	listAdsQuery := "SELECT * FROM ads"
+	listAdsQuery := fmt.Sprintf("SELECT * FROM ads %s", orderbyQuery)
 	if err := r.db.Select(&ads, listAdsQuery); err != nil {
-		logrus.Error(err)
+		//logrus.Error(err)
 		return nil, err
 	}
 
 	return ads, nil
 }
 
-func (r *AdPostgres) Get(adID int, fields []string) (model.AdResponse, error) {
-	var ad model.AdResponse
+func (r *AdPostgres) ListWithFilter(filter model.AdFilter) ([]model.Ad, error) {
+	var ads []model.Ad
 
-	// fieldsToQueries := make(map[string]string)
-	// for _, a := range fields {
-	// 	fieldsToQueries[a] = a
-	// }
+	listAdsWithFilterQuery, args := query.BuildAdFilterQuery(filter)
+	logrus.WithFields(logrus.Fields{
+		"query": listAdsWithFilterQuery,
+		"args":  args}).Debug("building query successfully")
 
-	// if dsc, ok := fieldsToQueries["description"]; ok {
-	// 	fieldsToQueries["description"] = " , " + dsc
-	// }
+	if len(args) > 0 {
+		if err := r.db.Select(&ads, listAdsWithFilterQuery, args...); err != nil {
+			//logrus.Error(err)
+			return nil, err
+		}
 
-	// getAdQuery := fmt.Sprintf("SELECT id, name, date, price%s FROM ads WHERE id = $1", fieldsToQueries["description"])
-	// if err := r.db.Get(&ad, getAdQuery, adID); err != nil {
-	// 	return ad, err
-	// }
-
-	// var mainPhoto model.Photo
-	// getMainPhotoQuery := "SELECT photos.id, photos.link FROM photos INNER JOIN ads_photos ON ads_photos.photo_id = photos.id AND ads_photos.ad_id = $1 AND NOT ads_photos.is_main"
-	// if err := r.db.Get(&mainPhoto, getMainPhotoQuery, adID); err != nil {
-	// 	return ad, err
-	// }
-	// ad.MainPhoto = mainPhoto
-
-	// var query2 string
-	// if _, ok := fieldsToQueries["photos"]; ok {
-	// 	query2 = "SELECT photos.id, photos.link FROM photos INNER JOIN ads_photos ON ads_photos.photo_id = photos.id AND ads_photos.ad_id = $1 AND NOT ads_photos.is_main"
-
-	// 	var otherPhotos []model.Photo
-	// 	if err := r.db.Select(&otherPhotos, query2, ad.ID); err != nil {
-	// 		return ad, err
-	// 	}
-	// 	ad.OtherPhotos = &otherPhotos
-	// }
-
-	return ad, nil
+	} else {
+		if err := r.db.Select(&ads, listAdsWithFilterQuery); err != nil {
+			//logrus.Error(err)
+			return nil, err
+		}
+	}
+	return ads, nil
 }
 
-func (r *AdPostgres) Update(ad model.AdRequest) error {
-	return nil
+func (r *AdPostgres) Update(adID int, ad model.AdRequest) error {
+
+	updateAdQuery := "UPDATE ads SET name = $1, price = $2, description = $3, photo = $4 WHERE id = $5"
+	_, err := r.db.Exec(updateAdQuery, ad.Name, ad.Price, ad.Description, ad.MainPhoto, adID)
+
+	return err
 }
 
 func (r *AdPostgres) Delete(adID int) error {
-	return nil
+
+	deleteAdQuery := "DELETE FROM ads WHERE id = $1"
+	_, err := r.db.Exec(deleteAdQuery, adID)
+
+	return err
 }

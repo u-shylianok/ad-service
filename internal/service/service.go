@@ -13,18 +13,35 @@ type Auth interface {
 
 type Ad interface {
 	CreateAd(ad model.AdRequest) (int, error)
-	ListAds(sortBy, order string) ([]model.AdResponse, error)
-	GetAd(adID int, fields []string) (model.AdResponse, error)
+	ListAds(params []model.AdsSortingParam) ([]model.AdResponse, error)
+	SearchAds(filter model.AdFilter) ([]model.AdResponse, error)
+	GetAd(adID int, fields model.AdOptionalFieldsParam) (model.AdResponse, error)
+	UpdateAd(adID int, ad model.AdRequest) error
+	DeleteAd(adID int) error
+}
+
+type Photo interface {
+	ListPhotos() ([]string, error)
+	ListAdPhotos(adID int) ([]string, error)
+}
+
+type Tag interface {
+	ListTags() ([]string, error)
+	ListAdTags(adID int) ([]string, error)
 }
 
 type Service struct {
 	Auth
 	Ad
+	Photo
+	Tag
 }
 
 func NewService(repos *repository.Repository) *Service {
 	return &Service{
-		Auth: NewAuthService(repos.Auth),
-		Ad:   NewAdService(repos.Ad, repos.Photo, repos.Tag),
+		Auth:  NewAuthService(repos.User),
+		Ad:    NewAdService(repos.Ad, repos.User, repos.Photo, repos.Tag),
+		Photo: NewPhotoService(repos.Photo),
+		Tag:   NewTagService(repos.Tag),
 	}
 }

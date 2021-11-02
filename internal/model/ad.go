@@ -2,8 +2,12 @@ package model
 
 import (
 	"errors"
+	"net/url"
+	"strings"
 	"time"
 	"unicode/utf8"
+
+	"github.com/sirupsen/logrus"
 )
 
 type AdRequest struct {
@@ -72,30 +76,21 @@ type Ad struct {
 }
 
 type AdResponse struct {
-	ID          int       `json:"id"`
-	User        User      `json:"user"`
-	Name        string    `json:"name"`
-	Date        time.Time `json:"date"`
-	Price       int       `json:"price"`
-	Description string    `json:"description"`
-	MainPhoto   string    `json:"main_photo"`
-	OtherPhotos *[]string `json:"other_photos"`
-	Tags        *[]string `json:"tags"`
+	ID          int          `json:"id"`
+	User        UserResponse `json:"user"`
+	Name        string       `json:"name"`
+	Date        time.Time    `json:"date"`
+	Price       int          `json:"price"`
+	Description string       `json:"description,omitempty"`
+	MainPhoto   string       `json:"main_photo"`
+	OtherPhotos *[]string    `json:"other_photos,omitempty"`
+	Tags        *[]string    `json:"tags,omitempty"`
 }
 
-func ConvertAdsToResponse(ads []Ad) []AdResponse {
-	result := make([]AdResponse, len(ads))
-
-	for i, ad := range ads {
-		result[i] = ad.ToResponse(nil, nil)
-	}
-	return result
-}
-
-func (m *Ad) ToResponse(photos *[]string, tags *[]string) AdResponse {
+func (m *Ad) ToResponse(user User, photos *[]string, tags *[]string) AdResponse {
 	return AdResponse{
 		ID:          m.ID,
-		User:        User{},
+		User:        user.ToResponse(),
 		Name:        m.Name,
 		Date:        m.Date,
 		Price:       m.Price,
@@ -104,4 +99,130 @@ func (m *Ad) ToResponse(photos *[]string, tags *[]string) AdResponse {
 		OtherPhotos: photos,
 		Tags:        tags,
 	}
+}
+
+func ConvertAdsToResponse(ads []Ad, usersMap map[int]User) []AdResponse {
+	result := make([]AdResponse, len(ads))
+
+	for i, ad := range ads {
+		result[i] = ad.ToResponse(usersMap[ad.UserID], nil, nil)
+	}
+	return result
+}
+
+type AdsSortingParam struct {
+	Field  string
+	IsDesc bool
+}
+
+// TODO : Change this comment
+// Функция возвращает массив структур AdsSortingParam, которые формируются из запроса.
+// Параметры чувствительны к порядку, в котором они написаны. sort_by[i] соответствует order[i].
+// Если параметр указан неверно (напрмер, "AAA"), то он будет пропущен, как и Order, соответствующий ему.
+func ListAdsSortingParamsFromURL(values url.Values) []AdsSortingParam {
+	if values == nil {
+		return nil
+	}
+	sortParams := values["sortby"]
+	orderParams := values["order"]
+
+	ordersLen := len(orderParams)
+
+	var result []AdsSortingParam
+
+	for i, sortParam := range sortParams {
+		if !IsAdsSortingParamAvailable(sortParam) {
+			continue
+		}
+
+		var isDesc bool
+		if i < ordersLen {
+			isDesc = strings.ToLower(orderParams[i]) == "dsc"
+		}
+		result = append(result, AdsSortingParam{Field: sortParam, IsDesc: isDesc})
+	}
+
+	return result
+}
+
+func IsAdsSortingParamAvailable(param string) bool {
+	switch strings.ToLower(param) {
+	case "name":
+		return true
+	case "date":
+		return true
+	case "price":
+		return true
+	case "description":
+		return true
+	default:
+		return false
+	}
+}
+
+type AdOptionalFieldsParam struct {
+	Description bool
+	Photos      bool
+	Tags        bool
+}
+
+func GetAdOptionalFieldsFromURL(values url.Values) AdOptionalFieldsParam {
+	var result AdOptionalFieldsParam
+
+	if values == nil {
+		return result
+	}
+
+	fields := values["fields"]
+
+	for _, field := range fields {
+		switch strings.ToLower(field) {
+		case "description":
+			result.Description = true
+		case "photos":
+			result.Photos = true
+		case "tags":
+			result.Tags = true
+		}
+	}
+	return result
+}
+
+type AdFilter struct {
+	Username  string
+	StartDate time.Time
+	EndDate   time.Time
+	Tags      []string
+}
+
+const defaultDateFormat = "2006-01-02"
+
+func GetAdFilterFromURL(values url.Values) AdFilter {
+	var result AdFilter
+
+	if values == nil {
+		return result
+	}
+
+	result.Username = values.Get("username")
+
+	if values.Get("startdate") != "" {
+		startDate, err := time.Parse(defaultDateFormat, values.Get("startdate"))
+		if err != nil {
+			logrus.WithError(err).Warn("failed to parse startdate param")
+		}
+		result.StartDate = startDate
+	}
+
+	if values.Get("enddate") != "" {
+		endDate, err := time.Parse(defaultDateFormat, values.Get("enddate"))
+		if err != nil {
+			logrus.WithError(err).Warn("failed to parse enddate param")
+		}
+		result.EndDate = endDate
+	}
+
+	result.Tags = values["tags"]
+
+	return result
 }

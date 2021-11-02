@@ -23,7 +23,7 @@ CREATE TABLE photos
     id      SERIAL PRIMARY KEY,
     ad_id   INTEGER NOT NULL,
     link    TEXT NOT NULL,
-    FOREIGN KEY (ad_id) REFERENCES ads(id)
+    FOREIGN KEY (ad_id) REFERENCES ads(id) ON DELETE CASCADE
 );
 
 CREATE TABLE tags
@@ -37,8 +37,8 @@ CREATE TABLE ads_tags
     ad_id       INTEGER NOT NULL,
     tag_id      INTEGER NOT NULL,
     PRIMARY KEY (ad_id, tag_id),
-    FOREIGN KEY (ad_id) REFERENCES ads(id),
-    FOREIGN KEY (tag_id) REFERENCES tags(id)
+    FOREIGN KEY (ad_id) REFERENCES ads(id) ON DELETE CASCADE,
+    FOREIGN KEY (tag_id) REFERENCES tags(id) ON DELETE CASCADE
 );
 
 INSERT INTO users(name, username, password) VALUES

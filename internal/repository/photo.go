@@ -48,7 +48,7 @@ func (r *PhotoPostgres) CreateList(adID int, photos []string) error {
 	argID := 2
 	for _, photo := range photos {
 		args = append(args, photo)
-		values = append(values, fmt.Sprintf("($1, $%d, FALSE)", argID))
+		values = append(values, fmt.Sprintf("($1, $%d)", argID))
 		argID++
 	}
 
@@ -59,4 +59,35 @@ func (r *PhotoPostgres) CreateList(adID int, photos []string) error {
 		return err
 	}
 	return nil
+}
+
+func (r *PhotoPostgres) ListLinks() ([]string, error) {
+	var photoLinks []string
+
+	listAdsQuery := "SELECT link FROM photos"
+	if err := r.db.Select(&photoLinks, listAdsQuery); err != nil {
+		//logrus.Error(err)
+		return nil, err
+	}
+
+	return photoLinks, nil
+}
+
+func (r *PhotoPostgres) ListLinksByAd(adID int) ([]string, error) {
+	var photoLinks []string
+
+	listAdsQuery := "SELECT link FROM photos WHERE ad_id = $1"
+	if err := r.db.Select(&photoLinks, listAdsQuery, adID); err != nil {
+		//logrus.Error(err)
+		return nil, err
+	}
+
+	return photoLinks, nil
+}
+
+func (r *PhotoPostgres) DeleteAllByAd(adID int) error {
+	deletePhotosQuery := "DELETE FROM photos WHERE ad_id = $1"
+	_, err := r.db.Exec(deletePhotosQuery, adID)
+
+	return err
 }

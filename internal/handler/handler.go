@@ -14,14 +14,18 @@ func NewHandler(services *service.Service) *Handler {
 	return &Handler{services: services}
 }
 
+var handlerLogger = logrus.WithFields(logrus.Fields{
+	"package": "internal-handler",
+})
+
 func (h *Handler) InitRoutes() *gin.Engine {
 	// gin.SetMode(gin.ReleaseMode) // set if release
 	router := gin.New()
 
 	auth := router.Group("/auth")
 	{
-		auth.POST("/sign-up", h.signUp)
-		auth.POST("/sign-in", h.signIn)
+		auth.POST("/signup", h.signUp)
+		auth.POST("/signin", h.signIn)
 	}
 
 	//api := router.Group("/api", h.userIdentity)
@@ -30,10 +34,30 @@ func (h *Handler) InitRoutes() *gin.Engine {
 	{
 		ads.POST("/", h.createAd)
 		ads.GET("/", h.listAds)
-		//ads.GET("/find", h.findAds)
+		ads.GET("/search", h.searchAds)
 		ads.GET("/:id", h.getAd)
-		//ads.PUT("/:id", h.updateAd)
-		//ads.DELETE("/:id", h.deleteAd)
+		ads.PUT("/:id", h.updateAd)
+		ads.DELETE("/:id", h.deleteAd)
+
+		photos := ads.Group(":id/photos")
+		{
+			photos.GET("/", h.listAdPhotos)
+		}
+
+		tags := ads.Group(":id/tags")
+		{
+			tags.GET("/", h.listAdTags)
+		}
+	}
+
+	tags := router.Group("/tags")
+	{
+		tags.GET("/", h.listTags)
+	}
+
+	photos := router.Group("/photos")
+	{
+		photos.GET("/", h.listPhotos)
 	}
 	//}
 
