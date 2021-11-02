@@ -206,17 +206,21 @@ func GetAdFilterFromURL(values url.Values) AdFilter {
 
 	result.Username = values.Get("username")
 
-	startDate, err := time.Parse(defaultDateFormat, values.Get("startdate"))
-	if err != nil {
-		logrus.WithError(err).Warn("failed to parse startdate param")
+	if values.Get("startdate") != "" {
+		startDate, err := time.Parse(defaultDateFormat, values.Get("startdate"))
+		if err != nil {
+			logrus.WithError(err).Warn("failed to parse startdate param")
+		}
+		result.StartDate = startDate
 	}
-	result.StartDate = startDate
 
-	endDate, err := time.Parse(defaultDateFormat, values.Get("enddate"))
-	if err != nil {
-		logrus.WithError(err).Warn("failed to parse enddate param")
+	if values.Get("enddate") != "" {
+		endDate, err := time.Parse(defaultDateFormat, values.Get("enddate"))
+		if err != nil {
+			logrus.WithError(err).Warn("failed to parse enddate param")
+		}
+		result.EndDate = endDate
 	}
-	result.EndDate = endDate
 
 	result.Tags = values["tags"]
 

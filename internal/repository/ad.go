@@ -82,8 +82,9 @@ func (r *AdPostgres) ListWithFilter(filter model.AdFilter) ([]model.Ad, error) {
 	var ads []model.Ad
 
 	listAdsWithFilterQuery, args := query.BuildAdFilterQuery(filter)
-	logrus.Info(listAdsWithFilterQuery)
-	logrus.Info(args)
+	logrus.WithFields(logrus.Fields{
+		"query": listAdsWithFilterQuery,
+		"args":  args}).Debug("building query successfully")
 
 	if len(args) > 0 {
 		if err := r.db.Select(&ads, listAdsWithFilterQuery, args...); err != nil {

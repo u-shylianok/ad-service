@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/sirupsen/logrus"
 	"github.com/u-shylianok/ad-service/internal/model"
 )
 
@@ -38,6 +37,8 @@ func BuildAdFilterQuery(filter model.AdFilter) (string, []interface{}) {
 		subQuery = fmt.Sprintf("SELECT * FROM ads WHERE %s", sb.String())
 	}
 
+	const adsColumns = "ads.id, ads.user_id, ads.name, ads.date, ads.price, ads.description, ads.photo"
+
 	// Фильтрация по остальным критериям
 	var filterQuery string
 	{
@@ -57,7 +58,7 @@ func BuildAdFilterQuery(filter model.AdFilter) (string, []interface{}) {
 			}
 			sb.WriteString(" INNER JOIN ads_tags ON ads.id = ads_tags.ad_id")
 			sb.WriteString(fmt.Sprintf(" INNER JOIN tags ON tags.id = ads_tags.tag_id AND tags.name IN (%s)", strings.Join(values, ",")))
-			sb.WriteString(fmt.Sprintf(" GROUP BY ads.* HAVING COUNT(DISTINCT tags.name) = %d", len(values)))
+			sb.WriteString(fmt.Sprintf(" GROUP BY %s HAVING COUNT(DISTINCT tags.name) = %d", adsColumns, len(values)))
 
 		}
 
@@ -65,12 +66,11 @@ func BuildAdFilterQuery(filter model.AdFilter) (string, []interface{}) {
 	}
 
 	if subQuery != "" {
-		result = fmt.Sprintf("SELECT ads.* FROM (%s) AS ads %s", subQuery, filterQuery)
+		result = fmt.Sprintf("SELECT %s FROM (%s) AS ads %s", adsColumns, subQuery, filterQuery)
 	} else {
-		result = fmt.Sprintf("SELECT ads.* FROM ads %s", filterQuery)
+		result = fmt.Sprintf("SELECT %s FROM ads %s", adsColumns, filterQuery)
 	}
 
-	logrus.Info(result)
 	return result, args
 }
 
