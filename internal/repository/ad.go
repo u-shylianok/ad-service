@@ -86,17 +86,9 @@ func (r *AdPostgres) ListWithFilter(filter model.AdFilter) ([]model.Ad, error) {
 		"query": listAdsWithFilterQuery,
 		"args":  args}).Debug("building query successfully")
 
-	if len(args) > 0 {
-		if err := r.db.Select(&ads, listAdsWithFilterQuery, args...); err != nil {
-			//logrus.Error(err)
-			return nil, err
-		}
-
-	} else {
-		if err := r.db.Select(&ads, listAdsWithFilterQuery); err != nil {
-			//logrus.Error(err)
-			return nil, err
-		}
+	if err := r.db.Select(&ads, listAdsWithFilterQuery, args...); err != nil {
+		//logrus.Error(err)
+		return nil, err
 	}
 	return ads, nil
 }

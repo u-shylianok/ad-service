@@ -14,7 +14,7 @@ type Repository struct {
 
 type User interface {
 	Create(user model.User) (int, error)
-	Get(username, password string) (model.User, error)
+	Get(username string) (model.User, error)
 	GetByID(id int) (model.User, error)
 	ListInIDs(ids []int) ([]model.User, error)
 }

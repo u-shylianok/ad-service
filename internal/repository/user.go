@@ -28,11 +28,11 @@ func (r *UserPostgres) Create(user model.User) (int, error) {
 	return id, nil
 }
 
-func (r *UserPostgres) Get(username, password string) (model.User, error) {
+func (r *UserPostgres) Get(username string) (model.User, error) {
 	var user model.User
-	getUserQuery := "SELECT id, name, username, password FROM users WHERE username = $1 AND password = $2"
+	getUserQuery := "SELECT id, name, username, password FROM users WHERE username = $1"
 
-	err := r.db.Get(&user, getUserQuery, username, password)
+	err := r.db.Get(&user, getUserQuery, username)
 
 	return user, err
 }

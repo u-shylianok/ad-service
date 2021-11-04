@@ -28,16 +28,21 @@ func (h *Handler) InitRoutes() *gin.Engine {
 		auth.POST("/signin", h.signIn)
 	}
 
-	//api := router.Group("/api", h.userIdentity)
-	//{
+	authorized := router.Group("/", h.userIdentity)
+	{
+		ads := authorized.Group("/ads")
+		{
+			ads.POST("/", h.createAd)
+			ads.PUT("/:id", h.updateAd)
+			ads.DELETE("/:id", h.deleteAd)
+		}
+	}
+
 	ads := router.Group("/ads")
 	{
-		ads.POST("/", h.createAd)
 		ads.GET("/", h.listAds)
 		ads.GET("/search", h.searchAds)
 		ads.GET("/:id", h.getAd)
-		ads.PUT("/:id", h.updateAd)
-		ads.DELETE("/:id", h.deleteAd)
 
 		photos := ads.Group(":id/photos")
 		{
@@ -59,7 +64,6 @@ func (h *Handler) InitRoutes() *gin.Engine {
 	{
 		photos.GET("/", h.listPhotos)
 	}
-	//}
 
 	return router
 }

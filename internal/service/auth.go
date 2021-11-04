@@ -1,7 +1,7 @@
 package service
 
 import (
-	"crypto/sha1"
+	"database/sql"
 	"errors"
 	"fmt"
 	"time"
@@ -9,6 +9,7 @@ import (
 	"github.com/dgrijalva/jwt-go"
 	"github.com/u-shylianok/ad-service/internal/model"
 	"github.com/u-shylianok/ad-service/internal/repository"
+	"golang.org/x/crypto/bcrypt"
 )
 
 const (
@@ -31,22 +32,43 @@ func NewAuthService(repo repository.User) *AuthService {
 }
 
 func (s *AuthService) CreateUser(user model.User) (int, error) {
-	user.Password = generatePasswordHash(user.Password)
+	user, err := s.repo.Get(user.Username)
+	if err != nil && err != sql.ErrNoRows {
+		return 0, err
+	} else if err == nil {
+		return 0, fmt.Errorf("username is invalid or already taken")
+	}
+
+	password, err := hashPassword(user.Password)
+	if err != nil {
+		return 0, err
+	}
+	user.Password = password
+
 	return s.repo.Create(user)
 }
 
-func (s *AuthService) GenerateToken(username, password string) (string, error) {
-	user, err := s.repo.Get(username, generatePasswordHash(password))
+func (s *AuthService) CheckUser(username, password string) (int, error) {
+	user, err := s.repo.Get(username)
 	if err != nil {
-		return "", err
+		return 0, err
 	}
+
+	if !checkPasswordHash(password, user.Password) {
+		return 0, fmt.Errorf("incorrect username or password")
+	}
+
+	return user.ID, nil
+}
+
+func (s *AuthService) GenerateToken(userID int) (string, error) {
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, &tokenClaims{
 		jwt.StandardClaims{
 			ExpiresAt: time.Now().Add(tokenTTL).Unix(),
 			IssuedAt:  time.Now().Unix(),
 		},
-		user.ID,
+		userID,
 	})
 
 	return token.SignedString([]byte(signingKey))
@@ -72,9 +94,11 @@ func (s *AuthService) ParseToken(accessToken string) (int, error) {
 	return claims.UserID, nil
 }
 
-func generatePasswordHash(password string) string {
-	hash := sha1.New()
-	hash.Write([]byte(password))
+func hashPassword(password string) (string, error) {
+	bytes, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	return string(bytes), err
+}
 
-	return fmt.Sprintf("%x", hash.Sum([]byte(salt)))
+func checkPasswordHash(password, hash string) bool {
+	return bcrypt.CompareHashAndPassword([]byte(hash), []byte(password)) == nil
 }

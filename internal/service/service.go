@@ -7,7 +7,8 @@ import (
 
 type Auth interface {
 	CreateUser(user model.User) (int, error)
-	GenerateToken(username, password string) (string, error)
+	CheckUser(username, password string) (int, error)
+	GenerateToken(userID int) (string, error)
 	ParseToken(token string) (int, error)
 }
 
