@@ -14,7 +14,7 @@ type Repository struct {
 
 type User interface {
 	Create(user model.User) (int, error)
-	Get(username, password string) (model.User, error)
+	Get(username string) (model.User, error)
 	GetByID(id int) (model.User, error)
 	ListInIDs(ids []int) ([]model.User, error)
 }
@@ -24,8 +24,8 @@ type Ad interface {
 	Get(adID int, fields model.AdOptionalFieldsParam) (model.Ad, error)
 	List(params []model.AdsSortingParam) ([]model.Ad, error)
 	ListWithFilter(filter model.AdFilter) ([]model.Ad, error)
-	Update(adID int, ad model.AdRequest) error
-	Delete(adID int) error
+	Update(userID, adID int, ad model.AdRequest) error
+	Delete(userID, adID int) error
 }
 
 type Photo interface {

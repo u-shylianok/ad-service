@@ -1,19 +1,19 @@
 package service
 
 import (
-	"crypto/sha1"
-	"errors"
+	"database/sql"
 	"fmt"
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
+	"github.com/sirupsen/logrus"
 	"github.com/u-shylianok/ad-service/internal/model"
 	"github.com/u-shylianok/ad-service/internal/repository"
+	"golang.org/x/crypto/bcrypt"
 )
 
 const (
-	salt       = "hjqrhjqw124617ajfhajs"
-	signingKey = "qrkjk#4#%35FSFJlja#4353KSFjH"
+	signingKey = "nn6gzv&xTae8bqO!Rhrd8Po$30_XAk"
 	tokenTTL   = 12 * time.Hour
 )
 
@@ -31,31 +31,55 @@ func NewAuthService(repo repository.User) *AuthService {
 }
 
 func (s *AuthService) CreateUser(user model.User) (int, error) {
-	user.Password = generatePasswordHash(user.Password)
+	user, err := s.repo.Get(user.Username)
+	if err != nil && err != sql.ErrNoRows {
+		return 0, err
+	} else if err == nil {
+		return 0, fmt.Errorf("username is invalid or already taken")
+	}
+
+	password, err := hashPassword(user.Password)
+	if err != nil {
+		return 0, err
+	}
+	user.Password = password
+
 	return s.repo.Create(user)
 }
 
-func (s *AuthService) GenerateToken(username, password string) (string, error) {
-	user, err := s.repo.Get(username, generatePasswordHash(password))
+func (s *AuthService) CheckUser(username, password string) (int, error) {
+	user, err := s.repo.Get(username)
 	if err != nil {
-		return "", err
+		return 0, err
 	}
 
+	if !checkPasswordHash(password, user.Password) {
+		return 0, fmt.Errorf("incorrect username or password")
+	}
+
+	return user.ID, nil
+}
+
+func (s *AuthService) GenerateToken(userID int) (string, int64, error) {
+	expiresAt := time.Now().Add(tokenTTL).Unix()
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, &tokenClaims{
 		jwt.StandardClaims{
-			ExpiresAt: time.Now().Add(tokenTTL).Unix(),
+			ExpiresAt: expiresAt,
 			IssuedAt:  time.Now().Unix(),
 		},
-		user.ID,
+		userID,
 	})
 
-	return token.SignedString([]byte(signingKey))
+	tokenStr, err := token.SignedString([]byte(signingKey))
+	return tokenStr, expiresAt, err
 }
 
 func (s *AuthService) ParseToken(accessToken string) (int, error) {
+
+	logrus.WithField("token", accessToken[1]).Info("token")
 	token, err := jwt.ParseWithClaims(accessToken, &tokenClaims{}, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, errors.New("invalid signing method")
+			return nil, fmt.Errorf("invalid signing method")
 		}
 
 		return []byte(signingKey), nil
@@ -66,15 +90,17 @@ func (s *AuthService) ParseToken(accessToken string) (int, error) {
 
 	claims, ok := token.Claims.(*tokenClaims)
 	if !ok {
-		return 0, errors.New("token claims are not of type *tokenClaims")
+		return 0, fmt.Errorf("token claims are not of type *tokenClaims")
 	}
 
 	return claims.UserID, nil
 }
 
-func generatePasswordHash(password string) string {
-	hash := sha1.New()
-	hash.Write([]byte(password))
+func hashPassword(password string) (string, error) {
+	bytes, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	return string(bytes), err
+}
 
-	return fmt.Sprintf("%x", hash.Sum([]byte(salt)))
+func checkPasswordHash(password, hash string) bool {
+	return bcrypt.CompareHashAndPassword([]byte(hash), []byte(password)) == nil
 }

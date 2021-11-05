@@ -86,33 +86,41 @@ func (r *AdPostgres) ListWithFilter(filter model.AdFilter) ([]model.Ad, error) {
 		"query": listAdsWithFilterQuery,
 		"args":  args}).Debug("building query successfully")
 
-	if len(args) > 0 {
-		if err := r.db.Select(&ads, listAdsWithFilterQuery, args...); err != nil {
-			//logrus.Error(err)
-			return nil, err
-		}
-
-	} else {
-		if err := r.db.Select(&ads, listAdsWithFilterQuery); err != nil {
-			//logrus.Error(err)
-			return nil, err
-		}
+	if err := r.db.Select(&ads, listAdsWithFilterQuery, args...); err != nil {
+		//logrus.Error(err)
+		return nil, err
 	}
 	return ads, nil
 }
 
-func (r *AdPostgres) Update(adID int, ad model.AdRequest) error {
+func (r *AdPostgres) Update(userID, adID int, ad model.AdRequest) error {
 
-	updateAdQuery := "UPDATE ads SET name = $1, price = $2, description = $3, photo = $4 WHERE id = $5"
-	_, err := r.db.Exec(updateAdQuery, ad.Name, ad.Price, ad.Description, ad.MainPhoto, adID)
+	updateAdQuery := "UPDATE ads SET name = $1, price = $2, description = $3, photo = $4 WHERE user_id = $5 AND id = $6"
+	_, err := r.db.Exec(updateAdQuery, ad.Name, ad.Price, ad.Description, ad.MainPhoto, userID, adID)
+
+	return err
+}
+
+func (r *AdPostgres) Delete(userID, adID int) error {
+
+	deleteAdQuery := "DELETE FROM ads WHERE user_id = $1 AND id = $2"
+	_, err := r.db.Exec(deleteAdQuery, userID, adID)
 
 	return err
 }
 
-func (r *AdPostgres) Delete(adID int) error {
+// func (r *AdPostgres) CheckUser(userID, adID int) error {
 
-	deleteAdQuery := "DELETE FROM ads WHERE id = $1"
-	_, err := r.db.Exec(deleteAdQuery, adID)
+// 	checkUserQuery := "SELECT id FROM ads WHERE ads.user_id = $1 AND ads.id = $2"
 
-	return err
-}
+// 	var id int
+// 	if err := r.db.Get(&id, checkUserQuery, userID, adID); err != nil {
+// 		return err
+// 	}
+
+// 	if id != adID { // just for id usage
+// 		return fmt.Errorf("unexpected error")
+// 	}
+
+// 	return nil
+// }

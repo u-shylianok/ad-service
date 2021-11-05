@@ -7,17 +7,18 @@ import (
 
 type Auth interface {
 	CreateUser(user model.User) (int, error)
-	GenerateToken(username, password string) (string, error)
+	CheckUser(username, password string) (int, error)
+	GenerateToken(userID int) (string, int64, error)
 	ParseToken(token string) (int, error)
 }
 
 type Ad interface {
-	CreateAd(ad model.AdRequest) (int, error)
+	CreateAd(userID int, ad model.AdRequest) (int, error)
 	ListAds(params []model.AdsSortingParam) ([]model.AdResponse, error)
 	SearchAds(filter model.AdFilter) ([]model.AdResponse, error)
 	GetAd(adID int, fields model.AdOptionalFieldsParam) (model.AdResponse, error)
-	UpdateAd(adID int, ad model.AdRequest) error
-	DeleteAd(adID int) error
+	UpdateAd(userID, adID int, ad model.AdRequest) error
+	DeleteAd(userID, adID int) error
 }
 
 type Photo interface {

@@ -15,6 +15,13 @@ import (
 	"github.com/u-shylianok/ad-service/internal/service"
 )
 
+const (
+	MAX_HEADER_BYTES = 1 << 20 // 1 MB
+	READ_TIMEOUT     = 10 * time.Second
+	WRITE_TIMEOUT    = 10 * time.Second
+	DEBUG_LOG_LEVEL  = "debug"
+)
+
 type Server struct {
 	httpServer *http.Server
 }
@@ -45,13 +52,13 @@ func main() {
 		}
 	}()
 
-	log.Info("Ads service Started")
+	log.Info("ads service started")
 
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGTERM, syscall.SIGINT)
 	<-quit
 
-	log.Info("Ads service Shutting Down")
+	log.Info("ads service shutting Down")
 
 	if err := srv.Shutdown(context.Background()); err != nil {
 		log.Errorf("error occured on server shutting down: %s", err)
@@ -62,12 +69,6 @@ func main() {
 	}
 	return
 }
-
-const (
-	MAX_HEADER_BYTES = 1 << 20 // 1 MB
-	READ_TIMEOUT     = 10 * time.Second
-	WRITE_TIMEOUT    = 10 * time.Second
-)
 
 func (s *Server) Run(port string, handler http.Handler) error {
 	s.httpServer = &http.Server{
@@ -85,10 +86,6 @@ func (s *Server) Shutdown(ctx context.Context) error {
 	return s.httpServer.Shutdown(ctx)
 }
 
-const (
-	DEBUG_LOG_LEVEL = "debug"
-)
-
 func setupGlobalLogger() {
 	logLevel := os.Getenv("LOG_LEVEL")
 	if logLevel == DEBUG_LOG_LEVEL {
@@ -97,5 +94,5 @@ func setupGlobalLogger() {
 	} else {
 		log.SetFormatter(&log.JSONFormatter{})
 	}
-	log.Infof("Logger started with log_level = %s", logLevel)
+	log.WithField("log_level", logLevel).Info("logger initialised")
 }
