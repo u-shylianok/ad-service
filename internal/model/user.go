@@ -15,9 +15,9 @@ type SignInRequest struct {
 
 type User struct {
 	ID       int    `db:"id"`
-	Name     string `db:"name"`
-	Username string `db:"username"`
-	Password string `db:"password"`
+	Name     string `db:"name" binding:"required"`
+	Username string `db:"username" binding:"required"`
+	Password string `db:"password" binding:"required"`
 }
 
 type UserResponse struct {
