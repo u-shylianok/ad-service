@@ -99,7 +99,7 @@ func TestAdRequest_Validate(t *testing.T) {
 		{
 			name:        "invalid request (empty struct)",
 			in:          AdRequest{},
-			expectError: false,
+			expectError: true,
 			expected:    fmt.Errorf("name should not be empty"),
 		},
 	}
