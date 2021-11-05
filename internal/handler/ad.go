@@ -18,6 +18,7 @@ func (h *Handler) createAd(c *gin.Context) {
 	if err != nil {
 		log.WithError(err).Error("failed to get userID from context")
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
+		return
 	}
 	log.WithField("userID", userID).Debug("userID getted successfully")
 
@@ -123,6 +124,7 @@ func (h *Handler) updateAd(c *gin.Context) {
 	if err != nil {
 		log.WithError(err).Error("failed to get userID from context")
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
+		return
 	}
 	log.WithField("userID", userID).Debug("userID getted successfully")
 
@@ -170,6 +172,7 @@ func (h *Handler) deleteAd(c *gin.Context) {
 	if err != nil {
 		log.WithError(err).Error("failed to get userID from context")
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
+		return
 	}
 	log.WithField("userID", userID).Debug("userID getted successfully")
 
