@@ -2,11 +2,11 @@ package service
 
 import (
 	"database/sql"
-	"errors"
 	"fmt"
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
+	"github.com/sirupsen/logrus"
 	"github.com/u-shylianok/ad-service/internal/model"
 	"github.com/u-shylianok/ad-service/internal/repository"
 	"golang.org/x/crypto/bcrypt"
@@ -75,9 +75,11 @@ func (s *AuthService) GenerateToken(userID int) (string, error) {
 }
 
 func (s *AuthService) ParseToken(accessToken string) (int, error) {
+
+	logrus.WithField("token", accessToken[1]).Info("token")
 	token, err := jwt.ParseWithClaims(accessToken, &tokenClaims{}, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, errors.New("invalid signing method")
+			return nil, fmt.Errorf("invalid signing method")
 		}
 
 		return []byte(signingKey), nil
@@ -88,7 +90,7 @@ func (s *AuthService) ParseToken(accessToken string) (int, error) {
 
 	claims, ok := token.Claims.(*tokenClaims)
 	if !ok {
-		return 0, errors.New("token claims are not of type *tokenClaims")
+		return 0, fmt.Errorf("token claims are not of type *tokenClaims")
 	}
 
 	return claims.UserID, nil
