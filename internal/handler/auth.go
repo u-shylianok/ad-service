@@ -55,7 +55,7 @@ func (h *Handler) signIn(c *gin.Context) {
 	}
 	log.WithField("userID", id).Debug("user verified successfully")
 
-	token, err := h.services.Auth.GenerateToken(id)
+	token, expiresAt, err := h.services.Auth.GenerateToken(id)
 	if err != nil {
 		log.WithError(err).Error("failed to generate token")
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
@@ -64,6 +64,7 @@ func (h *Handler) signIn(c *gin.Context) {
 	log.WithField("token", token).Debug("token generated successfully")
 
 	c.JSON(http.StatusOK, map[string]interface{}{
-		"token": token,
+		"token":      token,
+		"expires_at": expiresAt,
 	})
 }
