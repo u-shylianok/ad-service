@@ -94,5 +94,5 @@ func setupGlobalLogger() {
 	} else {
 		log.SetFormatter(&log.JSONFormatter{})
 	}
-	log.Infof("logger started with log_level = %s", logLevel)
+	log.WithField("log_level", logLevel).Info("logger initialised")
 }
