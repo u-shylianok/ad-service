@@ -10,7 +10,7 @@ import (
 
 const (
 	AUTH_HEADER = "Authorization"
-	USER_CTX    = "userId"
+	USER_CTX    = "userID"
 )
 
 func (h *Handler) userIdentity(c *gin.Context) {
@@ -31,16 +31,16 @@ func (h *Handler) userIdentity(c *gin.Context) {
 		return
 	}
 
-	userId, err := h.services.Auth.ParseToken(headerParts[1])
+	userID, err := h.services.Auth.ParseToken(headerParts[1])
 	if err != nil {
 		newErrorResponse(c, http.StatusUnauthorized, err.Error())
 		return
 	}
 
-	c.Set(USER_CTX, userId)
+	c.Set(USER_CTX, userID)
 }
 
-func getUserId(c *gin.Context) (int, error) {
+func getUserID(c *gin.Context) (int, error) {
 	userCtx, ok := c.Get(USER_CTX)
 	if !ok {
 		return 0, fmt.Errorf("user id not found")

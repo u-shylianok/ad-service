@@ -14,6 +14,13 @@ func (h *Handler) createAd(c *gin.Context) {
 		"method": "createAd",
 	})
 
+	userID, err := getUserID(c)
+	if err != nil {
+		log.WithError(err).Error("failed to get userUD from context")
+		newErrorResponse(c, http.StatusInternalServerError, err.Error())
+	}
+	log.WithField("userID", userID).Debug("userID getted successfully")
+
 	var input model.AdRequest
 	if err := c.BindJSON(&input); err != nil {
 		log.WithError(err).Error("failed to bind request JSON to struct")
@@ -29,7 +36,7 @@ func (h *Handler) createAd(c *gin.Context) {
 	}
 	log.Debug("input validated successfully")
 
-	id, err := h.services.Ad.CreateAd(input)
+	id, err := h.services.Ad.CreateAd(userID, input)
 	if err != nil {
 		log.WithError(err).Error("failed to create ad")
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
@@ -112,6 +119,13 @@ func (h *Handler) updateAd(c *gin.Context) {
 		"method": "updateAd",
 	})
 
+	userID, err := getUserID(c)
+	if err != nil {
+		log.WithError(err).Error("failed to get userUD from context")
+		newErrorResponse(c, http.StatusInternalServerError, err.Error())
+	}
+	log.WithField("userID", userID).Debug("userID getted successfully")
+
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
 		log.WithError(err).Error("failed to read id URL param")
@@ -135,7 +149,7 @@ func (h *Handler) updateAd(c *gin.Context) {
 	}
 	log.Debug("input validated successfully")
 
-	if err := h.services.Ad.UpdateAd(id, input); err != nil {
+	if err := h.services.Ad.UpdateAd(userID, id, input); err != nil {
 		log.WithError(err).Error("failed to update ad")
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
@@ -152,6 +166,13 @@ func (h *Handler) deleteAd(c *gin.Context) {
 		"method": "deleteAd",
 	})
 
+	userID, err := getUserID(c)
+	if err != nil {
+		log.WithError(err).Error("failed to get userUD from context")
+		newErrorResponse(c, http.StatusInternalServerError, err.Error())
+	}
+	log.WithField("userID", userID).Debug("userID getted successfully")
+
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
 		log.WithError(err).Error("failed to read id URL param")
@@ -160,7 +181,7 @@ func (h *Handler) deleteAd(c *gin.Context) {
 	}
 	log.WithField("id", id).Debug("id param read successfully")
 
-	if err := h.services.Ad.DeleteAd(id); err != nil {
+	if err := h.services.Ad.DeleteAd(userID, id); err != nil {
 		log.WithError(err).Error("failed to delete ad")
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return

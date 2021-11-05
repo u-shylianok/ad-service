@@ -25,8 +25,8 @@ func NewAdService(adRepo repository.Ad, userRepo repository.User, photoRepo repo
 	}
 }
 
-func (s *AdService) CreateAd(ad model.AdRequest) (int, error) {
-	adID, err := s.adRepo.Create(1, ad) // TODO : add user id
+func (s *AdService) CreateAd(userID int, ad model.AdRequest) (int, error) {
+	adID, err := s.adRepo.Create(userID, ad) // TODO : add user id
 	if err != nil {
 		// comment
 		return adID, err
@@ -151,8 +151,12 @@ func (s *AdService) GetAd(adID int, fields model.AdOptionalFieldsParam) (model.A
 	return adResponse, nil
 }
 
-func (s *AdService) UpdateAd(adID int, ad model.AdRequest) error {
-	if err := s.adRepo.Update(adID, ad); err != nil {
+func (s *AdService) UpdateAd(userID, adID int, ad model.AdRequest) error {
+	// if err := s.adRepo.CheckUser(userID, adID); err != nil {
+	// 	return err
+	// }
+
+	if err := s.adRepo.Update(userID, adID, ad); err != nil {
 		return err
 	}
 
@@ -193,6 +197,10 @@ func (s *AdService) UpdateAd(adID int, ad model.AdRequest) error {
 	return nil
 }
 
-func (s *AdService) DeleteAd(adID int) error {
-	return s.adRepo.Delete(adID)
+func (s *AdService) DeleteAd(userID, adID int) error {
+	// if err := s.adRepo.CheckUser(userID, adID); err != nil {
+	// 	return err
+	// }
+
+	return s.adRepo.Delete(userID, adID)
 }
