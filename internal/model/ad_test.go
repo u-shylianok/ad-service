@@ -1,117 +1,120 @@
 package model
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/require"
 )
 
 func TestAdRequest_Validate(t *testing.T) {
-	for scenario, fn := range map[string]func(t *testing.T){
-		"valid":                      testValidRequest,
-		"valid with photos":          testValidRequestWithPhotos,
-		"valid with tags":            testValidRequestWithTags,
-		"valid with photos and tags": testValidRequestWithPhotosAndTags,
-	} {
-		t.Run(scenario, func(t *testing.T) {
-			fn(t)
+	cases := []struct {
+		name        string
+		in          AdRequest
+		expectError bool
+		expected    error
+	}{
+		{
+			name: "valid request without additional info",
+			in: AdRequest{
+				Name:        "name",
+				Price:       100,
+				Description: "description",
+				MainPhoto:   "https://picsum.photos/id/101/200/200",
+			},
+			expectError: false,
+		},
+		{
+			name: "valid request with photos info",
+			in: AdRequest{
+				Name:        "name",
+				Price:       100,
+				Description: "description",
+				MainPhoto:   "https://picsum.photos/id/101/200/200",
+				OtherPhotos: &[]string{
+					"https://picsum.photos/id/102/200/200",
+					"https://picsum.photos/id/103/200/200",
+				},
+			},
+			expectError: false,
+		},
+		{
+			name: "valid request with tags info",
+			in: AdRequest{
+				Name:        "name",
+				Price:       100,
+				Description: "description",
+				MainPhoto:   "https://picsum.photos/id/101/200/200",
+				OtherPhotos: &[]string{
+					"https://picsum.photos/id/102/200/200",
+					"https://picsum.photos/id/103/200/200",
+				},
+				Tags: &[]string{
+					"tag 1",
+					"tag 2",
+				},
+			},
+			expectError: false,
+		},
+		{
+			name: "invalid request (field Name is missing)",
+			in: AdRequest{
+				Price:       100,
+				Description: "description",
+				MainPhoto:   "https://picsum.photos/id/101/200/200",
+			},
+			expectError: true,
+			expected:    fmt.Errorf("name should not be empty"),
+		},
+		{
+			name: "invalid request (field Price is missing)",
+			in: AdRequest{
+				Name:        "name",
+				Description: "description",
+				MainPhoto:   "https://picsum.photos/id/101/200/200",
+			},
+			expectError: true,
+			expected:    fmt.Errorf("price must be greater than zero"),
+		},
+		{
+			name: "invalid request (field Description is missing)",
+			in: AdRequest{
+				Name:      "name",
+				Price:     100,
+				MainPhoto: "https://picsum.photos/id/101/200/200",
+			},
+			expectError: true,
+			expected:    fmt.Errorf("description should not be empty"),
+		},
+		{
+			name: "invalid request (field MainPhoto is missing)",
+			in: AdRequest{
+				Name:        "name",
+				Price:       100,
+				Description: "description",
+			},
+			expectError: true,
+			expected:    fmt.Errorf("main photo must exist"),
+		},
+		{
+			name:        "invalid request (empty struct)",
+			in:          AdRequest{},
+			expectError: false,
+			expected:    fmt.Errorf("name should not be empty"),
+		},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+
+			err := tc.in.Validate()
+			if tc.expectError {
+				require.Error(t, err)
+				require.EqualError(t, tc.expected, err.Error())
+				return
+			}
+			require.NoError(t, err)
 		})
 	}
 }
-
-func testValidRequest(t *testing.T) {
-	adRequest := AdRequest{
-		Name:        "ad name",
-		Price:       100,
-		Description: "test ad",
-		MainPhoto:   "https://picsum.photos/id/101/200/200",
-	}
-
-	err := adRequest.Validate()
-	require.NoError(t, err)
-}
-
-func testValidRequestWithPhotos(t *testing.T) {
-	adRequest := AdRequest{
-		Name:        "ad name",
-		Price:       100,
-		Description: "test ad",
-		MainPhoto:   "https://picsum.photos/id/101/200/200",
-		OtherPhotos: &[]string{
-			"https://picsum.photos/id/102/200/200",
-			"https://picsum.photos/id/103/200/200",
-		},
-	}
-
-	err := adRequest.Validate()
-	require.NoError(t, err)
-}
-
-func testValidRequestWithTags(t *testing.T) {
-	adRequest := AdRequest{
-		Name:        "ad name",
-		Price:       100,
-		Description: "test ad",
-		MainPhoto:   "https://picsum.photos/id/101/200/200",
-		Tags: &[]string{
-			"tag 1",
-			"tag 2",
-		},
-	}
-
-	err := adRequest.Validate()
-	require.NoError(t, err)
-}
-
-func testValidRequestWithPhotosAndTags(t *testing.T) {
-	adRequest := AdRequest{
-		Name:        "ad name",
-		Price:       100,
-		Description: "test ad",
-		MainPhoto:   "https://picsum.photos/id/101/200/200",
-		OtherPhotos: &[]string{
-			"https://picsum.photos/id/102/200/200",
-			"https://picsum.photos/id/103/200/200",
-		},
-		Tags: &[]string{
-			"tag 1",
-			"tag 2",
-		},
-	}
-
-	err := adRequest.Validate()
-	require.NoError(t, err)
-}
-
-// func TestAdRequest_Validate(t *testing.T) {
-// 	type fields struct {
-// 		Name        string
-// 		Price       int
-// 		Description string
-// 		MainPhoto   string
-// 		OtherPhotos *[]string
-// 		Tags        *[]string
-// 	}
-// 	tests := []struct {
-// 		name    string
-// 		fields  fields
-// 		wantErr bool
-// 	}{
-// 		// TODO: Add test cases.
-// 	}
-// 	for _, tt := range tests {
-// 		t.Run(tt.name, func(t *testing.T) {
-// 			r := AdRequest{
-// 				Name:        tt.fields.Name,
-// 				Price:       tt.fields.Price,
-// 				Description: tt.fields.Description,
-// 				MainPhoto:   tt.fields.MainPhoto,
-// 				OtherPhotos: tt.fields.OtherPhotos,
-// 				Tags:        tt.fields.Tags,
-// 			}
-// 			if err := r.Validate(); (err != nil) != tt.wantErr {
-// 				t.Errorf("AdRequest.Validate() error = %v, wantErr %v", err, tt.wantErr)
-// 			}
-// 		})
-// 	}
-// }
