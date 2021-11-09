@@ -2,6 +2,8 @@ package model
 
 import (
 	"fmt"
+	"net/url"
+	"reflect"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -115,6 +117,213 @@ func TestAdRequest_Validate(t *testing.T) {
 				return
 			}
 			require.NoError(t, err)
+		})
+	}
+}
+
+func TestListAdsSortingParamsFromURL(t *testing.T) {
+	type args struct {
+		values url.Values
+	}
+	cases := []struct {
+		name string
+		args args
+		want []AdsSortingParam
+	}{
+		{
+			name: "valid url sort parameters",
+			args: args{
+				values: url.Values{
+					"sortby": []string{"name", "date", "price", "description"},
+					"order":  []string{"asc", "dsc", "asc", "dsc"},
+				},
+			},
+			want: []AdsSortingParam{
+				{
+					Field:  "name",
+					IsDesc: false,
+				},
+				{
+					Field:  "date",
+					IsDesc: true,
+				},
+				{
+					Field:  "price",
+					IsDesc: false,
+				},
+				{
+					Field:  "description",
+					IsDesc: true,
+				},
+			},
+		},
+		{
+			name: "valid url sort parameters (some parameters capitalized)",
+			args: args{
+				values: url.Values{
+					"sortby": []string{"nAme", "DATE", "pricE", "Description"},
+					"order":  []string{"asc", "DSC", "Asc", "dsc"},
+				},
+			},
+			want: []AdsSortingParam{
+				{
+					Field:  "name",
+					IsDesc: false,
+				},
+				{
+					Field:  "date",
+					IsDesc: true,
+				},
+				{
+					Field:  "price",
+					IsDesc: false,
+				},
+				{
+					Field:  "description",
+					IsDesc: true,
+				},
+			},
+		},
+		{
+			name: "valid url sort parameter (only price)",
+			args: args{
+				values: url.Values{
+					"sortby": []string{"price"},
+					"order":  []string{"dsc"},
+				},
+			},
+			want: []AdsSortingParam{
+				{
+					Field:  "price",
+					IsDesc: true,
+				},
+			},
+		},
+		{
+			name: "invalid url sort parameters (order skipped)",
+			args: args{
+				values: url.Values{
+					"sortby": []string{"name", "date", "price", "description"},
+				},
+			},
+			want: []AdsSortingParam{
+				{
+					Field:  "name",
+					IsDesc: false,
+				},
+				{
+					Field:  "date",
+					IsDesc: false,
+				},
+				{
+					Field:  "price",
+					IsDesc: false,
+				},
+				{
+					Field:  "description",
+					IsDesc: false,
+				},
+			},
+		},
+		{
+			name: "invalid url sort parameters (sortby skipped)",
+			args: args{
+				values: url.Values{
+					"order": []string{"asc", "dsc", "asc", "dsc"},
+				},
+			},
+			want: nil,
+		},
+		{
+			name: "invalid url sort parameters (some order parameters skipped and setted by default)",
+			args: args{
+				values: url.Values{
+					"sortby": []string{"description", "price", "date", "name"},
+					"order":  []string{"dsc"},
+				},
+			},
+			want: []AdsSortingParam{
+				{
+					Field:  "description",
+					IsDesc: true,
+				},
+				{
+					Field:  "price",
+					IsDesc: false,
+				},
+				{
+					Field:  "date",
+					IsDesc: false,
+				},
+				{
+					Field:  "name",
+					IsDesc: false,
+				},
+			},
+		},
+		{
+			name: "invalid url sort parameters (some parameters are corrupted)",
+			args: args{
+				values: url.Values{
+					"sortby": []string{"nnname", "date", "priice", "description"},
+					"order":  []string{"asc", "dsc", "asc", "dsc"},
+				},
+			},
+			want: []AdsSortingParam{
+				{
+					Field:  "date",
+					IsDesc: true,
+				},
+				{
+					Field:  "description",
+					IsDesc: true,
+				},
+			},
+		},
+		{
+			name: "invalid url sort parameters (unexpected and expected sortby and order parameters)",
+			args: args{
+				values: url.Values{
+					"sortby": []string{"name", "test", "invalid", "description"},
+					"order":  []string{"asc", "test", "asc", "dsc"},
+				},
+			},
+			want: []AdsSortingParam{
+				{
+					Field:  "name",
+					IsDesc: false,
+				},
+				{
+					Field:  "description",
+					IsDesc: true,
+				},
+			},
+		},
+		{
+			name: "invalid url sort parameters (only unexpected sortby and order parameters)",
+			args: args{
+				values: url.Values{
+					"sortby": []string{"joke", "test", "DROP", "false"},
+					"order":  []string{"true", "test", "asc", "dsc"},
+				},
+			},
+			want: nil,
+		},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+
+			got := ListAdsSortingParamsFromURL(tc.args.values)
+			if !reflect.DeepEqual(got, tc.want) {
+				t.Errorf("ListAdsSortingParamsFromURL() = %#v, want %#v", got, tc.want)
+			}
+
+			// // another testcases processing example
+
+			// got := ListAdsSortingParamsFromURL(tc.args.values)
+			// equal := reflect.DeepEqual(got, tc.want)
+			// require.True(t, equal)
 		})
 	}
 }

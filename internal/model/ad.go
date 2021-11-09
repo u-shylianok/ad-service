@@ -86,7 +86,7 @@ type AdResponse struct {
 	Tags        *[]string    `json:"tags,omitempty"`
 }
 
-func (m *Ad) ToResponse(user User, photos *[]string, tags *[]string) AdResponse {
+func (m Ad) ToResponse(user User, photos *[]string, tags *[]string) AdResponse {
 	return AdResponse{
 		ID:          m.ID,
 		User:        user.ToResponse(),
