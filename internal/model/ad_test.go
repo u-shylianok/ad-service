@@ -107,6 +107,7 @@ func TestAdRequest_Validate(t *testing.T) {
 	}
 
 	for _, tc := range cases {
+		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
 
@@ -311,12 +312,13 @@ func TestListAdsSortingParamsFromURL(t *testing.T) {
 		},
 	}
 	for _, tc := range cases {
+		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
 
 			got := ListAdsSortingParamsFromURL(tc.args.values)
 			if !reflect.DeepEqual(got, tc.want) {
-				t.Errorf("ListAdsSortingParamsFromURL() = %#v, want %#v", got, tc.want)
+				t.Errorf("\ngot: %#v,\nwant: %#v", got, tc.want)
 			}
 
 			// // another testcases processing example
