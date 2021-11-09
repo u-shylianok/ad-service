@@ -130,6 +130,8 @@ func ListAdsSortingParamsFromURL(values url.Values) []AdsSortingParam {
 	var result []AdsSortingParam
 
 	for i, sortParam := range sortParams {
+		sortParam := strings.ToLower(sortParam)
+
 		if !IsAdsSortingParamAvailable(sortParam) {
 			continue
 		}
