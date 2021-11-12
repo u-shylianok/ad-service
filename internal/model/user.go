@@ -25,7 +25,7 @@ type UserResponse struct {
 	Username string `json:"username" binding:"required"`
 }
 
-func (u *User) ToResponse() UserResponse {
+func (u User) ToResponse() UserResponse {
 	return UserResponse{
 		Name:     u.Name,
 		Username: u.Username,

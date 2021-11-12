@@ -647,3 +647,210 @@ func TestGetAdFilterFromURL(t *testing.T) {
 		})
 	}
 }
+
+func TestAd_ToResponse(t *testing.T) {
+	type args struct {
+		user   User
+		photos *[]string
+		tags   *[]string
+	}
+	cases := []struct {
+		name string
+		in   Ad
+		args args
+		want AdResponse
+	}{
+		{
+			name: "valid check test",
+			in: Ad{
+				ID:          1,
+				UserID:      1,
+				Name:        "name",
+				Date:        time.Date(2021, 10, 12, 0, 0, 0, 0, time.UTC),
+				Price:       100,
+				Description: "description",
+				MainPhoto:   "https://picsum.photos/id/101/200/200",
+			},
+			args: args{
+				user: User{
+					Name:     "name",
+					Username: "username",
+				},
+				photos: &[]string{
+					"https://picsum.photos/id/102/200/200",
+					"https://picsum.photos/id/103/200/200",
+				},
+				tags: &[]string{
+					"tag 1",
+					"tag 2",
+				},
+			},
+			want: AdResponse{
+				ID: 1,
+				User: UserResponse{
+					Name:     "name",
+					Username: "username",
+				},
+				Name:        "name",
+				Date:        time.Date(2021, 10, 12, 0, 0, 0, 0, time.UTC),
+				Price:       100,
+				Description: "description",
+				MainPhoto:   "https://picsum.photos/id/101/200/200",
+				OtherPhotos: &[]string{
+					"https://picsum.photos/id/102/200/200",
+					"https://picsum.photos/id/103/200/200",
+				},
+				Tags: &[]string{
+					"tag 1",
+					"tag 2",
+				},
+			},
+		},
+	}
+	for _, tc := range cases {
+		tc := tc
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+
+			got := tc.in.ToResponse(tc.args.user, tc.args.photos, tc.args.tags)
+			if !reflect.DeepEqual(got, tc.want) {
+				t.Errorf("\ngot: %#v,\nwant: %#v", got, tc.want)
+			}
+		})
+	}
+}
+
+func TestConvertAdsToResponse(t *testing.T) {
+	type args struct {
+		ads      []Ad
+		usersMap map[int]User
+	}
+	cases := []struct {
+		name string
+		args args
+		want []AdResponse
+	}{
+		{
+			name: "valid ads and users",
+			args: args{
+				ads: []Ad{
+					{
+						ID:          1,
+						UserID:      1,
+						Name:        "name",
+						Date:        time.Date(2021, 10, 12, 0, 0, 0, 0, time.UTC),
+						Price:       100,
+						Description: "description",
+						MainPhoto:   "https://picsum.photos/id/101/200/200",
+					},
+					{
+						ID:          2,
+						UserID:      2,
+						Name:        "name2",
+						Date:        time.Date(2021, 10, 13, 0, 0, 0, 0, time.UTC),
+						Price:       200,
+						Description: "description2",
+						MainPhoto:   "https://picsum.photos/id/201/200/200",
+					},
+				},
+				usersMap: map[int]User{
+					1: {
+						Name:     "name",
+						Username: "username",
+					},
+					2: {
+						Name:     "name2",
+						Username: "username2",
+					},
+				},
+			},
+			want: []AdResponse{
+				{
+
+					ID: 1,
+					User: UserResponse{
+						Name:     "name",
+						Username: "username",
+					},
+					Name:        "name",
+					Date:        time.Date(2021, 10, 12, 0, 0, 0, 0, time.UTC),
+					Price:       100,
+					Description: "description",
+					MainPhoto:   "https://picsum.photos/id/101/200/200",
+				},
+				{
+
+					ID: 2,
+					User: UserResponse{
+						Name:     "name2",
+						Username: "username2",
+					},
+					Name:        "name2",
+					Date:        time.Date(2021, 10, 13, 0, 0, 0, 0, time.UTC),
+					Price:       200,
+					Description: "description2",
+					MainPhoto:   "https://picsum.photos/id/201/200/200",
+				},
+			},
+		},
+		{
+			name: "valid ads and empty users map",
+			args: args{
+				ads: []Ad{
+					{
+						ID:          1,
+						UserID:      1,
+						Name:        "name",
+						Date:        time.Date(2021, 10, 12, 0, 0, 0, 0, time.UTC),
+						Price:       100,
+						Description: "description",
+						MainPhoto:   "https://picsum.photos/id/101/200/200",
+					},
+					{
+						ID:          2,
+						UserID:      2,
+						Name:        "name2",
+						Date:        time.Date(2021, 10, 13, 0, 0, 0, 0, time.UTC),
+						Price:       200,
+						Description: "description2",
+						MainPhoto:   "https://picsum.photos/id/201/200/200",
+					},
+				},
+				usersMap: map[int]User{},
+			},
+			want: []AdResponse{
+				{
+
+					ID:          1,
+					User:        UserResponse{},
+					Name:        "name",
+					Date:        time.Date(2021, 10, 12, 0, 0, 0, 0, time.UTC),
+					Price:       100,
+					Description: "description",
+					MainPhoto:   "https://picsum.photos/id/101/200/200",
+				},
+				{
+
+					ID:          2,
+					User:        UserResponse{},
+					Name:        "name2",
+					Date:        time.Date(2021, 10, 13, 0, 0, 0, 0, time.UTC),
+					Price:       200,
+					Description: "description2",
+					MainPhoto:   "https://picsum.photos/id/201/200/200",
+				},
+			},
+		},
+	}
+	for _, tc := range cases {
+		tc := tc
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+
+			got := ConvertAdsToResponse(tc.args.ads, tc.args.usersMap)
+			if !reflect.DeepEqual(got, tc.want) {
+				t.Errorf("\ngot: %#v,\nwant: %#v", got, tc.want)
+			}
+		})
+	}
+}
