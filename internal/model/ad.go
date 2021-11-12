@@ -119,6 +119,10 @@ type AdsSortingParam struct {
 // Параметры чувствительны к порядку, в котором они написаны. sort_by[i] соответствует order[i].
 // Если параметр указан неверно (напрмер, "AAA"), то он будет пропущен, как и Order, соответствующий ему.
 func ListAdsSortingParamsFromURL(values url.Values) []AdsSortingParam {
+	var log = logrus.WithFields(logrus.Fields{
+		"method": "ListAdsSortingParamsFromURL",
+	})
+
 	if values == nil {
 		return nil
 	}
@@ -133,12 +137,20 @@ func ListAdsSortingParamsFromURL(values url.Values) []AdsSortingParam {
 		sortParam := strings.ToLower(sortParam)
 
 		if !IsAdsSortingParamAvailable(sortParam) {
+			log.WithFields(logrus.Fields{
+				"sortParam": sortParam,
+				"paramNum":  i,
+			}).Info("sort param is not available and will be skipped")
 			continue
 		}
 
 		var isDesc bool
 		if i < ordersLen {
 			isDesc = strings.ToLower(orderParams[i]) == "dsc"
+		} else {
+			log.WithFields(logrus.Fields{
+				"paramNum": i,
+			}).Info("order param is missed and will be set by default (dsc)")
 		}
 		result = append(result, AdsSortingParam{Field: sortParam, IsDesc: isDesc})
 	}
