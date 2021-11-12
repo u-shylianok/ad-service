@@ -1,4 +1,4 @@
-.PHONY: deps build up start debug-start down clean cleanall tidy test-model
+.PHONY: deps build up start debug-start down clean cleanall tidy test
 
 SERVICE_NAME ?= ad-service
 BINDIR ?= build/app
@@ -41,5 +41,5 @@ cleanall: clean
 tidy:
 	go mod tidy
 
-test-model:
-	go test ./internal/model
+test:
+	go test -race ./...
