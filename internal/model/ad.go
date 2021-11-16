@@ -21,30 +21,15 @@ type AdRequest struct {
 
 func (r AdRequest) Validate() error {
 
-	// busines rules START
-	if utf8.RuneCountInString(r.Name) > 200 {
-		return fmt.Errorf("name should be no more than 200 symbols")
-	}
-
-	if utf8.RuneCountInString(r.Description) > 1000 {
-		return fmt.Errorf("description should be no more than 1000 symbols")
-	}
-
-	if r.MainPhoto == "" {
-		return fmt.Errorf("main photo must exist")
-	}
-
-	if r.OtherPhotos != nil && len(*r.OtherPhotos) > 2 {
-		return fmt.Errorf("should be no more than 2 other photos")
-	}
-	// busines rules END
-
 	// my rules START
 	if r.Name == "" {
 		return fmt.Errorf("name should not be empty")
 	}
-	if r.Price < 0 {
-		return fmt.Errorf("price should not be negative")
+	if r.Description == "" {
+		return fmt.Errorf("description should not be empty")
+	}
+	if r.Price <= 0 {
+		return fmt.Errorf("price must be greater than zero")
 	}
 	if r.OtherPhotos != nil {
 		for _, photo := range *r.OtherPhotos {
@@ -62,6 +47,20 @@ func (r AdRequest) Validate() error {
 	}
 	// my rules END
 
+	// busines rules START
+	if utf8.RuneCountInString(r.Name) > 200 {
+		return fmt.Errorf("name should be no more than 200 symbols")
+	}
+	if utf8.RuneCountInString(r.Description) > 1000 {
+		return fmt.Errorf("description should be no more than 1000 symbols")
+	}
+	if r.MainPhoto == "" {
+		return fmt.Errorf("main photo must exist")
+	}
+	if r.OtherPhotos != nil && len(*r.OtherPhotos) > 2 {
+		return fmt.Errorf("should be no more than 2 other photos")
+	}
+	// busines rules END
 	return nil
 }
 
@@ -87,7 +86,7 @@ type AdResponse struct {
 	Tags        *[]string    `json:"tags,omitempty"`
 }
 
-func (m *Ad) ToResponse(user User, photos *[]string, tags *[]string) AdResponse {
+func (m Ad) ToResponse(user User, photos *[]string, tags *[]string) AdResponse {
 	return AdResponse{
 		ID:          m.ID,
 		User:        user.ToResponse(),
@@ -120,6 +119,10 @@ type AdsSortingParam struct {
 // Параметры чувствительны к порядку, в котором они написаны. sort_by[i] соответствует order[i].
 // Если параметр указан неверно (напрмер, "AAA"), то он будет пропущен, как и Order, соответствующий ему.
 func ListAdsSortingParamsFromURL(values url.Values) []AdsSortingParam {
+	var log = logrus.WithFields(logrus.Fields{
+		"method": "ListAdsSortingParamsFromURL",
+	})
+
 	if values == nil {
 		return nil
 	}
@@ -131,13 +134,23 @@ func ListAdsSortingParamsFromURL(values url.Values) []AdsSortingParam {
 	var result []AdsSortingParam
 
 	for i, sortParam := range sortParams {
+		sortParam := strings.ToLower(sortParam)
+
 		if !IsAdsSortingParamAvailable(sortParam) {
+			log.WithFields(logrus.Fields{
+				"sortParam": sortParam,
+				"paramNum":  i,
+			}).Info("sort param is not available and will be skipped")
 			continue
 		}
 
 		var isDesc bool
 		if i < ordersLen {
 			isDesc = strings.ToLower(orderParams[i]) == "dsc"
+		} else {
+			log.WithFields(logrus.Fields{
+				"paramNum": i,
+			}).Info("order param is missed and will be set by default (dsc)")
 		}
 		result = append(result, AdsSortingParam{Field: sortParam, IsDesc: isDesc})
 	}
@@ -206,16 +219,18 @@ func GetAdFilterFromURL(values url.Values) AdFilter {
 
 	result.Username = values.Get("username")
 
-	if values.Get("startdate") != "" {
-		startDate, err := time.Parse(defaultDateFormat, values.Get("startdate"))
+	startDateRaw := values.Get("startdate")
+	if startDateRaw != "" {
+		startDate, err := time.Parse(defaultDateFormat, startDateRaw)
 		if err != nil {
 			logrus.WithError(err).Warn("failed to parse startdate param")
 		}
 		result.StartDate = startDate
 	}
 
-	if values.Get("enddate") != "" {
-		endDate, err := time.Parse(defaultDateFormat, values.Get("enddate"))
+	endDateRaw := values.Get("enddate")
+	if endDateRaw != "" {
+		endDate, err := time.Parse(defaultDateFormat, endDateRaw)
 		if err != nil {
 			logrus.WithError(err).Warn("failed to parse enddate param")
 		}

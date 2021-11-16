@@ -5,7 +5,3 @@ type Photo struct {
 	AdID int    `db:"ad_id"`
 	Link string `db:"link"`
 }
-
-type PhotoFilter struct {
-	AdID int
-}
