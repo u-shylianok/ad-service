@@ -70,6 +70,19 @@ type TagMock struct {
 		result1 model.Tag
 		result2 error
 	}
+	GetIDOrCreateIfNotExistsStub        func(string) (int, error)
+	getIDOrCreateIfNotExistsMutex       sync.RWMutex
+	getIDOrCreateIfNotExistsArgsForCall []struct {
+		arg1 string
+	}
+	getIDOrCreateIfNotExistsReturns struct {
+		result1 int
+		result2 error
+	}
+	getIDOrCreateIfNotExistsReturnsOnCall map[int]struct {
+		result1 int
+		result2 error
+	}
 	ListNamesStub        func() ([]string, error)
 	listNamesMutex       sync.RWMutex
 	listNamesArgsForCall []struct {
@@ -412,6 +425,70 @@ func (fake *TagMock) GetByNameReturnsOnCall(i int, result1 model.Tag, result2 er
 	}{result1, result2}
 }
 
+func (fake *TagMock) GetIDOrCreateIfNotExists(arg1 string) (int, error) {
+	fake.getIDOrCreateIfNotExistsMutex.Lock()
+	ret, specificReturn := fake.getIDOrCreateIfNotExistsReturnsOnCall[len(fake.getIDOrCreateIfNotExistsArgsForCall)]
+	fake.getIDOrCreateIfNotExistsArgsForCall = append(fake.getIDOrCreateIfNotExistsArgsForCall, struct {
+		arg1 string
+	}{arg1})
+	stub := fake.GetIDOrCreateIfNotExistsStub
+	fakeReturns := fake.getIDOrCreateIfNotExistsReturns
+	fake.recordInvocation("GetIDOrCreateIfNotExists", []interface{}{arg1})
+	fake.getIDOrCreateIfNotExistsMutex.Unlock()
+	if stub != nil {
+		return stub(arg1)
+	}
+	if specificReturn {
+		return ret.result1, ret.result2
+	}
+	return fakeReturns.result1, fakeReturns.result2
+}
+
+func (fake *TagMock) GetIDOrCreateIfNotExistsCallCount() int {
+	fake.getIDOrCreateIfNotExistsMutex.RLock()
+	defer fake.getIDOrCreateIfNotExistsMutex.RUnlock()
+	return len(fake.getIDOrCreateIfNotExistsArgsForCall)
+}
+
+func (fake *TagMock) GetIDOrCreateIfNotExistsCalls(stub func(string) (int, error)) {
+	fake.getIDOrCreateIfNotExistsMutex.Lock()
+	defer fake.getIDOrCreateIfNotExistsMutex.Unlock()
+	fake.GetIDOrCreateIfNotExistsStub = stub
+}
+
+func (fake *TagMock) GetIDOrCreateIfNotExistsArgsForCall(i int) string {
+	fake.getIDOrCreateIfNotExistsMutex.RLock()
+	defer fake.getIDOrCreateIfNotExistsMutex.RUnlock()
+	argsForCall := fake.getIDOrCreateIfNotExistsArgsForCall[i]
+	return argsForCall.arg1
+}
+
+func (fake *TagMock) GetIDOrCreateIfNotExistsReturns(result1 int, result2 error) {
+	fake.getIDOrCreateIfNotExistsMutex.Lock()
+	defer fake.getIDOrCreateIfNotExistsMutex.Unlock()
+	fake.GetIDOrCreateIfNotExistsStub = nil
+	fake.getIDOrCreateIfNotExistsReturns = struct {
+		result1 int
+		result2 error
+	}{result1, result2}
+}
+
+func (fake *TagMock) GetIDOrCreateIfNotExistsReturnsOnCall(i int, result1 int, result2 error) {
+	fake.getIDOrCreateIfNotExistsMutex.Lock()
+	defer fake.getIDOrCreateIfNotExistsMutex.Unlock()
+	fake.GetIDOrCreateIfNotExistsStub = nil
+	if fake.getIDOrCreateIfNotExistsReturnsOnCall == nil {
+		fake.getIDOrCreateIfNotExistsReturnsOnCall = make(map[int]struct {
+			result1 int
+			result2 error
+		})
+	}
+	fake.getIDOrCreateIfNotExistsReturnsOnCall[i] = struct {
+		result1 int
+		result2 error
+	}{result1, result2}
+}
+
 func (fake *TagMock) ListNames() ([]string, error) {
 	fake.listNamesMutex.Lock()
 	ret, specificReturn := fake.listNamesReturnsOnCall[len(fake.listNamesArgsForCall)]
@@ -545,6 +622,8 @@ func (fake *TagMock) Invocations() map[string][][]interface{} {
 	defer fake.detachFromAdMutex.RUnlock()
 	fake.getByNameMutex.RLock()
 	defer fake.getByNameMutex.RUnlock()
+	fake.getIDOrCreateIfNotExistsMutex.RLock()
+	defer fake.getIDOrCreateIfNotExistsMutex.RUnlock()
 	fake.listNamesMutex.RLock()
 	defer fake.listNamesMutex.RUnlock()
 	fake.listNamesByAdMutex.RLock()

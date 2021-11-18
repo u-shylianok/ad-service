@@ -5,6 +5,17 @@ import (
 	"github.com/u-shylianok/ad-service/internal/repository"
 )
 
+type Service struct {
+	Auth
+	Ad
+	Photo
+	Tag
+}
+
+// var serviceLogger = logrus.WithFields(logrus.Fields{
+// 	"package": "internal-service",
+// })
+
 type Auth interface {
 	CreateUser(user model.User) (int, error)
 	CheckUser(username, password string) (int, error)
@@ -29,13 +40,6 @@ type Photo interface {
 type Tag interface {
 	ListTags() ([]string, error)
 	ListAdTags(adID int) ([]string, error)
-}
-
-type Service struct {
-	Auth
-	Ad
-	Photo
-	Tag
 }
 
 func NewService(repos *repository.Repository) *Service {

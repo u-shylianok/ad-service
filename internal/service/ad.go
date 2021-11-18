@@ -1,10 +1,7 @@
 package service
 
 import (
-	"database/sql"
-
 	"github.com/jackc/pgx/v4"
-	"github.com/sirupsen/logrus"
 	"github.com/u-shylianok/ad-service/internal/model"
 	"github.com/u-shylianok/ad-service/internal/repository"
 )
@@ -26,32 +23,22 @@ func NewAdService(adRepo repository.Ad, userRepo repository.User, photoRepo repo
 }
 
 func (s *AdService) CreateAd(userID int, ad model.AdRequest) (int, error) {
-	adID, err := s.adRepo.Create(userID, ad) // TODO : add user id
+	adID, err := s.adRepo.Create(userID, ad)
 	if err != nil {
-		// comment
 		return adID, err
 	}
 
 	if ad.OtherPhotos != nil {
 		if err := s.photoRepo.CreateList(adID, *ad.OtherPhotos); err != nil {
-			// comment
 			return adID, err
 		}
 	}
 
 	if ad.Tags != nil {
 		for _, tagName := range *ad.Tags {
-			var tagID int
-			tag, err := s.tagRepo.GetByName(tagName)
-			if err != nil && err != sql.ErrNoRows {
+			tagID, err := s.tagRepo.GetIDOrCreateIfNotExists(tagName)
+			if err != nil {
 				continue
-			} else if err != nil && err == sql.ErrNoRows {
-				if tagID, err = s.tagRepo.Create(tagName); err != nil {
-					continue
-				}
-				logrus.Infof("Tag: %s created with id = %d", tagName, tagID)
-			} else if err == nil {
-				tagID = tag.ID
 			}
 
 			if err := s.tagRepo.AttachToAd(adID, tagID); err != nil {
@@ -184,6 +171,9 @@ func (s *AdService) UpdateAd(userID, adID int, ad model.AdRequest) error {
 				continue
 			} else if err != nil && err == pgx.ErrNoRows {
 				tagID, err = s.tagRepo.Create(tagName)
+				if err != nil {
+					return err
+				}
 			} else if err == nil {
 				tagID = tag.ID
 			}
@@ -198,9 +188,5 @@ func (s *AdService) UpdateAd(userID, adID int, ad model.AdRequest) error {
 }
 
 func (s *AdService) DeleteAd(userID, adID int) error {
-	// if err := s.adRepo.CheckUser(userID, adID); err != nil {
-	// 	return err
-	// }
-
 	return s.adRepo.Delete(userID, adID)
 }

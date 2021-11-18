@@ -51,6 +51,8 @@ type Tag interface {
 	AttachToAd(adID int, tagID int) error
 	DetachFromAd(adID int, tagID int) error
 	DetachAllFromAd(adID int) error
+
+	GetIDOrCreateIfNotExists(tagName string) (int, error)
 }
 
 func NewRepository(db *sqlx.DB) *Repository {
