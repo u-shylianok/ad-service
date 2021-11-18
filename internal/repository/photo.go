@@ -58,7 +58,7 @@ func (r *PhotoPostgres) CreateList(adID int, photos []string) error {
 		tx.Rollback()
 		return err
 	}
-	return nil
+	return tx.Commit()
 }
 
 func (r *PhotoPostgres) ListLinks() ([]string, error) {
