@@ -1,6 +1,7 @@
 package service
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -47,15 +48,6 @@ func TestAdService_CreateAd(t *testing.T) {
 				require.EqualValues(t, 10, adID)
 
 				require.Equal(t, 1, f.adRepo.CreateCallCount())
-
-				actualUserID, actualAdRequest := f.adRepo.CreateArgsForCall(0)
-				require.Equal(t, 3, actualUserID)
-				require.Equal(t, model.AdRequest{
-					Name:        "name",
-					Price:       100,
-					Description: "description",
-					MainPhoto:   "https://picsum.photos/id/101/200/200",
-				}, actualAdRequest)
 			},
 		},
 		{
@@ -98,10 +90,92 @@ func TestAdService_CreateAd(t *testing.T) {
 				require.EqualValues(t, 10, adID)
 
 				require.Equal(t, 1, f.adRepo.CreateCallCount())
+				require.Equal(t, 1, f.photoRepo.CreateListCallCount())
+				require.Equal(t, 2, f.tagRepo.GetIDOrCreateIfNotExistsCallCount())
+				require.Equal(t, 2, f.tagRepo.AttachToAdCallCount())
+			},
+		},
+		{
+			name: "fail - adRepo returns error",
+			setup: func(f *fields) {
+				adRepo := repository.AdMock{}
+				adRepo.CreateReturns(0, fmt.Errorf("some error"))
 
-				actualUserID, actualAdRequest := f.adRepo.CreateArgsForCall(0)
-				require.Equal(t, 3, actualUserID)
-				require.Equal(t, model.AdRequest{
+				f.adRepo = &adRepo
+			},
+			args: args{
+				userID: 3,
+				ad: model.AdRequest{
+					Name:        "name",
+					Price:       100,
+					Description: "description",
+					MainPhoto:   "https://picsum.photos/id/101/200/200",
+				},
+			},
+			assert: func(t *testing.T, f *fields, adID int, err error) {
+				require.Error(t, err)
+				require.EqualError(t, err, "some error")
+				require.EqualValues(t, 0, adID)
+
+				require.Equal(t, 1, f.adRepo.CreateCallCount())
+			},
+		},
+
+		{
+			name: "fail - photoRepo returns error",
+			setup: func(f *fields) {
+				adRepo := repository.AdMock{}
+				adRepo.CreateReturns(10, nil)
+
+				photoRepo := repository.PhotoMock{}
+				photoRepo.CreateListReturns(fmt.Errorf("some error"))
+
+				f.adRepo = &adRepo
+				f.photoRepo = &photoRepo
+			},
+			args: args{
+				userID: 3,
+				ad: model.AdRequest{
+					Name:        "name",
+					Price:       100,
+					Description: "description",
+					MainPhoto:   "https://picsum.photos/id/101/200/200",
+					OtherPhotos: &[]string{
+						"https://picsum.photos/id/102/200/200",
+						"https://picsum.photos/id/103/200/200",
+					},
+				},
+			},
+			assert: func(t *testing.T, f *fields, adID int, err error) {
+				require.Error(t, err)
+				require.EqualError(t, err, "some error")
+				require.EqualValues(t, 10, adID)
+
+				require.Equal(t, 1, f.adRepo.CreateCallCount())
+				require.Equal(t, 1, f.photoRepo.CreateListCallCount())
+			},
+		},
+		{
+			name: "fail - tagRepo returns error and tagID next time, but attach fails",
+			setup: func(f *fields) {
+				adRepo := repository.AdMock{}
+				adRepo.CreateReturns(10, nil)
+
+				photoRepo := repository.PhotoMock{}
+				photoRepo.CreateListReturns(nil)
+
+				tagRepo := repository.TagMock{}
+				tagRepo.GetIDOrCreateIfNotExistsReturnsOnCall(0, 0, fmt.Errorf("some error 1"))
+				tagRepo.GetIDOrCreateIfNotExistsReturnsOnCall(1, 102, nil)
+				tagRepo.AttachToAdReturnsOnCall(0, fmt.Errorf("some error 2"))
+
+				f.adRepo = &adRepo
+				f.photoRepo = &photoRepo
+				f.tagRepo = &tagRepo
+			},
+			args: args{
+				userID: 3,
+				ad: model.AdRequest{
 					Name:        "name",
 					Price:       100,
 					Description: "description",
@@ -114,21 +188,17 @@ func TestAdService_CreateAd(t *testing.T) {
 						"tag 1",
 						"tag 2",
 					},
-				}, actualAdRequest)
+				},
+			},
+			assert: func(t *testing.T, f *fields, adID int, err error) {
+				require.Error(t, err)
+				require.EqualError(t, err, "some error 2")
+				require.EqualValues(t, 10, adID)
 
+				require.Equal(t, 1, f.adRepo.CreateCallCount())
 				require.Equal(t, 1, f.photoRepo.CreateListCallCount())
-
-				// // I guess this part is useless to me. And that's a reason to skip this and just check CallCount()
-				//
-				// photoCreateListArg1, photoCreateListArg2 := f.photoRepo.CreateListArgsForCall(0)
-				// require.Equal(t, 10, photoCreateListArg1)
-				// require.Equal(t, []string{
-				// 	"https://picsum.photos/id/102/200/200",
-				// 	"https://picsum.photos/id/103/200/200",
-				// }, photoCreateListArg2)
-
 				require.Equal(t, 2, f.tagRepo.GetIDOrCreateIfNotExistsCallCount())
-				require.Equal(t, 2, f.tagRepo.AttachToAdCallCount())
+				require.Equal(t, 1, f.tagRepo.AttachToAdCallCount())
 			},
 		},
 	}
