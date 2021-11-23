@@ -1,7 +1,6 @@
 package service
 
 import (
-	"github.com/jackc/pgx/v4"
 	"github.com/u-shylianok/ad-service/internal/model"
 	"github.com/u-shylianok/ad-service/internal/repository"
 )
@@ -159,23 +158,15 @@ func (s *AdService) UpdateAd(userID, adID int, ad model.AdRequest) error {
 	}
 
 	if ad.Tags != nil {
-		for _, tagName := range *ad.Tags {
-			// NOT OPTIMIZED
-			if err := s.tagRepo.DetachAllFromAd(adID); err != nil {
-				return err
-			}
+		// NOT OPTIMIZED
+		if err := s.tagRepo.DetachAllFromAd(adID); err != nil {
+			return err
+		}
 
-			var tagID int
-			tag, err := s.tagRepo.GetByName(tagName)
-			if err != nil && err != pgx.ErrNoRows {
+		for _, tagName := range *ad.Tags {
+			tagID, err := s.tagRepo.GetIDOrCreateIfNotExists(tagName)
+			if err != nil {
 				continue
-			} else if err != nil && err == pgx.ErrNoRows {
-				tagID, err = s.tagRepo.Create(tagName)
-				if err != nil {
-					return err
-				}
-			} else if err == nil {
-				tagID = tag.ID
 			}
 
 			if err := s.tagRepo.AttachToAd(adID, tagID); err != nil {
