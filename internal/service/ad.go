@@ -138,31 +138,23 @@ func (s *AdService) GetAd(adID int, fields model.AdOptionalFieldsParam) (model.A
 }
 
 func (s *AdService) UpdateAd(userID, adID int, ad model.AdRequest) error {
-	// if err := s.adRepo.CheckUser(userID, adID); err != nil {
-	// 	return err
-	// }
-
 	if err := s.adRepo.Update(userID, adID, ad); err != nil {
 		return err
 	}
 
+	if err := s.photoRepo.DeleteAllByAd(adID); err != nil {
+		return err
+	}
 	if ad.OtherPhotos != nil {
-		// NOT OPTIMIZED
-		if err := s.photoRepo.DeleteAllByAd(adID); err != nil {
-			return err
-		}
-
 		if err := s.photoRepo.CreateList(adID, *ad.OtherPhotos); err != nil {
 			return err
 		}
 	}
 
+	if err := s.tagRepo.DetachAllFromAd(adID); err != nil {
+		return err
+	}
 	if ad.Tags != nil {
-		// NOT OPTIMIZED
-		if err := s.tagRepo.DetachAllFromAd(adID); err != nil {
-			return err
-		}
-
 		for _, tagName := range *ad.Tags {
 			tagID, err := s.tagRepo.GetIDOrCreateIfNotExists(tagName)
 			if err != nil {
