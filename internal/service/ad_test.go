@@ -742,3 +742,360 @@ func TestAdService_GetAd(t *testing.T) {
 		})
 	}
 }
+
+func TestAdService_UpdateAd(t *testing.T) {
+	type fields struct {
+		adRepo    *repository.AdMock
+		photoRepo *repository.PhotoMock
+		tagRepo   *repository.TagMock
+	}
+	type args struct {
+		userID int
+		adID   int
+		ad     model.AdRequest
+	}
+	tests := []struct {
+		name   string
+		setup  func(*fields)
+		args   args
+		assert func(*testing.T, *fields, error)
+	}{
+		{
+			name: "success - without errors",
+			setup: func(f *fields) {
+				adRepo := repository.AdMock{}
+				adRepo.UpdateReturns(nil)
+
+				photoRepo := repository.PhotoMock{}
+				photoRepo.DeleteAllByAdReturns(nil)
+				photoRepo.CreateListReturns(nil)
+
+				tagRepo := repository.TagMock{}
+				tagRepo.DetachAllFromAdReturns(nil)
+				tagRepo.GetIDOrCreateIfNotExistsReturnsOnCall(0, 1, nil)
+				tagRepo.GetIDOrCreateIfNotExistsReturnsOnCall(1, 2, nil)
+				tagRepo.AttachToAdReturns(nil)
+
+				f.adRepo = &adRepo
+				f.photoRepo = &photoRepo
+				f.tagRepo = &tagRepo
+			},
+			args: args{
+				userID: 1,
+				adID:   1,
+				ad: model.AdRequest{
+					Name:        "name",
+					Price:       100,
+					Description: "description",
+					MainPhoto:   "https://picsum.photos/id/101/200/200",
+					OtherPhotos: &[]string{
+						"https://picsum.photos/id/102/200/200",
+						"https://picsum.photos/id/103/200/200",
+					},
+					Tags: &[]string{
+						"tag 1",
+						"tag 2",
+					},
+				},
+			},
+			assert: func(t *testing.T, f *fields, err error) {
+				require.NoError(t, err)
+
+				require.Equal(t, 1, f.adRepo.UpdateCallCount())
+				require.Equal(t, 1, f.photoRepo.DeleteAllByAdCallCount())
+				require.Equal(t, 1, f.photoRepo.CreateListCallCount())
+				require.Equal(t, 1, f.tagRepo.DetachAllFromAdCallCount())
+				require.Equal(t, 2, f.tagRepo.GetIDOrCreateIfNotExistsCallCount())
+				require.Equal(t, 2, f.tagRepo.AttachToAdCallCount())
+			},
+		},
+		{
+			name: "fail - adRepo returns error",
+			setup: func(f *fields) {
+				adRepo := repository.AdMock{}
+				adRepo.UpdateReturns(fmt.Errorf("some error"))
+
+				f.adRepo = &adRepo
+			},
+			args: args{
+				userID: 1,
+				adID:   1,
+				ad: model.AdRequest{
+					Name:        "name",
+					Price:       100,
+					Description: "description",
+					MainPhoto:   "https://picsum.photos/id/101/200/200",
+					OtherPhotos: &[]string{
+						"https://picsum.photos/id/102/200/200",
+						"https://picsum.photos/id/103/200/200",
+					},
+					Tags: &[]string{
+						"tag 1",
+						"tag 2",
+					},
+				},
+			},
+			assert: func(t *testing.T, f *fields, err error) {
+				require.Error(t, err)
+				require.EqualError(t, err, "some error")
+
+				require.Equal(t, 1, f.adRepo.UpdateCallCount())
+			},
+		},
+		{
+			name: "fail - photoRepo DeleteAllByAd returns error",
+			setup: func(f *fields) {
+				adRepo := repository.AdMock{}
+				adRepo.UpdateReturns(nil)
+
+				photoRepo := repository.PhotoMock{}
+				photoRepo.DeleteAllByAdReturns(fmt.Errorf("some error"))
+
+				f.adRepo = &adRepo
+				f.photoRepo = &photoRepo
+			},
+			args: args{
+				userID: 1,
+				adID:   1,
+				ad: model.AdRequest{
+					Name:        "name",
+					Price:       100,
+					Description: "description",
+					MainPhoto:   "https://picsum.photos/id/101/200/200",
+					OtherPhotos: &[]string{
+						"https://picsum.photos/id/102/200/200",
+						"https://picsum.photos/id/103/200/200",
+					},
+					Tags: &[]string{
+						"tag 1",
+						"tag 2",
+					},
+				},
+			},
+			assert: func(t *testing.T, f *fields, err error) {
+				require.Error(t, err)
+				require.EqualError(t, err, "some error")
+
+				require.Equal(t, 1, f.adRepo.UpdateCallCount())
+				require.Equal(t, 1, f.photoRepo.DeleteAllByAdCallCount())
+			},
+		},
+		{
+			name: "fail - photoRepo CreateList returns error",
+			setup: func(f *fields) {
+				adRepo := repository.AdMock{}
+				adRepo.UpdateReturns(nil)
+
+				photoRepo := repository.PhotoMock{}
+				photoRepo.DeleteAllByAdReturns(nil)
+				photoRepo.CreateListReturns(fmt.Errorf("some error"))
+
+				f.adRepo = &adRepo
+				f.photoRepo = &photoRepo
+			},
+			args: args{
+				userID: 1,
+				adID:   1,
+				ad: model.AdRequest{
+					Name:        "name",
+					Price:       100,
+					Description: "description",
+					MainPhoto:   "https://picsum.photos/id/101/200/200",
+					OtherPhotos: &[]string{
+						"https://picsum.photos/id/102/200/200",
+						"https://picsum.photos/id/103/200/200",
+					},
+					Tags: &[]string{
+						"tag 1",
+						"tag 2",
+					},
+				},
+			},
+			assert: func(t *testing.T, f *fields, err error) {
+				require.Error(t, err)
+				require.EqualError(t, err, "some error")
+
+				require.Equal(t, 1, f.adRepo.UpdateCallCount())
+				require.Equal(t, 1, f.photoRepo.DeleteAllByAdCallCount())
+				require.Equal(t, 1, f.photoRepo.CreateListCallCount())
+			},
+		},
+		{
+			name: "failt - tagRepo DetachAllFromAd returns error",
+			setup: func(f *fields) {
+				adRepo := repository.AdMock{}
+				adRepo.UpdateReturns(nil)
+
+				photoRepo := repository.PhotoMock{}
+				photoRepo.DeleteAllByAdReturns(nil)
+				photoRepo.CreateListReturns(nil)
+
+				tagRepo := repository.TagMock{}
+				tagRepo.DetachAllFromAdReturns(fmt.Errorf("some error"))
+
+				f.adRepo = &adRepo
+				f.photoRepo = &photoRepo
+				f.tagRepo = &tagRepo
+			},
+			args: args{
+				userID: 1,
+				adID:   1,
+				ad: model.AdRequest{
+					Name:        "name",
+					Price:       100,
+					Description: "description",
+					MainPhoto:   "https://picsum.photos/id/101/200/200",
+					OtherPhotos: &[]string{
+						"https://picsum.photos/id/102/200/200",
+						"https://picsum.photos/id/103/200/200",
+					},
+					Tags: &[]string{
+						"tag 1",
+						"tag 2",
+					},
+				},
+			},
+			assert: func(t *testing.T, f *fields, err error) {
+				require.Error(t, err)
+				require.EqualError(t, err, "some error")
+
+				require.Equal(t, 1, f.adRepo.UpdateCallCount())
+				require.Equal(t, 1, f.photoRepo.DeleteAllByAdCallCount())
+				require.Equal(t, 1, f.photoRepo.CreateListCallCount())
+				require.Equal(t, 1, f.tagRepo.DetachAllFromAdCallCount())
+			},
+		},
+		{
+			name: "fail - tagRepo GetIDOrCreateIfNotExists returns error and one of attach failed",
+			setup: func(f *fields) {
+				adRepo := repository.AdMock{}
+				adRepo.UpdateReturns(nil)
+
+				photoRepo := repository.PhotoMock{}
+				photoRepo.DeleteAllByAdReturns(nil)
+				photoRepo.CreateListReturns(nil)
+
+				tagRepo := repository.TagMock{}
+				tagRepo.DetachAllFromAdReturns(nil)
+				tagRepo.GetIDOrCreateIfNotExistsReturnsOnCall(0, 1, fmt.Errorf("some error"))
+				tagRepo.GetIDOrCreateIfNotExistsReturnsOnCall(1, 2, nil)
+				tagRepo.AttachToAdReturns(fmt.Errorf("some error"))
+
+				f.adRepo = &adRepo
+				f.photoRepo = &photoRepo
+				f.tagRepo = &tagRepo
+			},
+			args: args{
+				userID: 1,
+				adID:   1,
+				ad: model.AdRequest{
+					Name:        "name",
+					Price:       100,
+					Description: "description",
+					MainPhoto:   "https://picsum.photos/id/101/200/200",
+					OtherPhotos: &[]string{
+						"https://picsum.photos/id/102/200/200",
+						"https://picsum.photos/id/103/200/200",
+					},
+					Tags: &[]string{
+						"tag 1",
+						"tag 2",
+					},
+				},
+			},
+			assert: func(t *testing.T, f *fields, err error) {
+				require.Error(t, err)
+				require.EqualError(t, err, "some error")
+
+				require.Equal(t, 1, f.adRepo.UpdateCallCount())
+				require.Equal(t, 1, f.photoRepo.DeleteAllByAdCallCount())
+				require.Equal(t, 1, f.photoRepo.CreateListCallCount())
+				require.Equal(t, 1, f.tagRepo.DetachAllFromAdCallCount())
+				require.Equal(t, 2, f.tagRepo.GetIDOrCreateIfNotExistsCallCount())
+				require.Equal(t, 1, f.tagRepo.AttachToAdCallCount())
+			},
+		},
+	}
+	for _, test := range tests {
+		test := test
+		t.Run(test.name, func(t *testing.T) {
+			t.Parallel()
+
+			var fields fields
+			test.setup(&fields)
+
+			adService := NewAdService(fields.adRepo, nil, fields.photoRepo, fields.tagRepo)
+			err := adService.UpdateAd(test.args.userID, test.args.adID, test.args.ad)
+
+			test.assert(t, &fields, err)
+		})
+	}
+}
+
+func TestAdService_DeleteAd(t *testing.T) {
+	type fields struct {
+		adRepo *repository.AdMock
+	}
+	type args struct {
+		userID int
+		adID   int
+	}
+	tests := []struct {
+		name   string
+		setup  func(*fields)
+		args   args
+		assert func(*testing.T, *fields, error)
+	}{
+		{
+			name: "success - without errors",
+			setup: func(f *fields) {
+				adRepo := repository.AdMock{}
+				adRepo.DeleteReturns(nil)
+
+				f.adRepo = &adRepo
+			},
+			args: args{
+				userID: 1,
+				adID:   1,
+			},
+			assert: func(t *testing.T, f *fields, err error) {
+				require.NoError(t, err)
+
+				require.Equal(t, 1, f.adRepo.DeleteCallCount())
+			},
+		},
+		{
+			name: "success - some errors occurred",
+			setup: func(f *fields) {
+				adRepo := repository.AdMock{}
+				adRepo.DeleteReturns(fmt.Errorf("some error"))
+
+				f.adRepo = &adRepo
+			},
+			args: args{
+				userID: 1,
+				adID:   1,
+			},
+			assert: func(t *testing.T, f *fields, err error) {
+				require.Error(t, err)
+				require.EqualError(t, err, "some error")
+
+				require.Equal(t, 1, f.adRepo.DeleteCallCount())
+			},
+		},
+	}
+	for _, test := range tests {
+		test := test
+		t.Run(test.name, func(t *testing.T) {
+			t.Parallel()
+
+			var fields fields
+			test.setup(&fields)
+
+			adService := NewAdService(fields.adRepo, nil, nil, nil)
+			err := adService.DeleteAd(test.args.userID, test.args.adID)
+
+			test.assert(t, &fields, err)
+		})
+	}
+}
