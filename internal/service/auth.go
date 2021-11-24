@@ -2,6 +2,7 @@ package service
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
 	"time"
 
@@ -31,8 +32,8 @@ func NewAuthService(repo repository.User) *AuthService {
 }
 
 func (s *AuthService) CreateUser(user model.User) (int, error) {
-	user, err := s.repo.Get(user.Username)
-	if err != nil && err != sql.ErrNoRows {
+	_, err := s.repo.Get(user.Username)
+	if err != nil && !errors.Is(err, sql.ErrNoRows) {
 		return 0, err
 	} else if err == nil {
 		return 0, fmt.Errorf("username is invalid or already taken")
@@ -49,8 +50,10 @@ func (s *AuthService) CreateUser(user model.User) (int, error) {
 
 func (s *AuthService) CheckUser(username, password string) (int, error) {
 	user, err := s.repo.Get(username)
-	if err != nil {
+	if err != nil && !errors.Is(err, sql.ErrNoRows) {
 		return 0, err
+	} else if errors.Is(err, sql.ErrNoRows) {
+		return 0, fmt.Errorf("incorrect username or password")
 	}
 
 	if !checkPasswordHash(password, user.Password) {
