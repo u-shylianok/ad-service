@@ -13,10 +13,6 @@ type Service struct {
 	Tag
 }
 
-// var serviceLogger = logrus.WithFields(logrus.Fields{
-// 	"package": "internal-service",
-// })
-
 type Auth interface {
 	CreateUser(user model.User) (int, error)
 	CheckUser(username, password string) (int, error)
