@@ -83,7 +83,7 @@ func (s *AuthService) GenerateToken(userID int) (string, int64, error) {
 
 func (s *AuthService) ParseToken(accessToken string) (int, error) {
 
-	logrus.WithField("token", accessToken[1]).Info("token")
+	logrus.WithField("token", accessToken).Info("token")
 	token, err := jwt.ParseWithClaims(accessToken, &tokenClaims{}, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("invalid signing method")
