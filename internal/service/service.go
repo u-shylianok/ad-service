@@ -3,6 +3,7 @@ package service
 import (
 	"github.com/u-shylianok/ad-service/internal/model"
 	"github.com/u-shylianok/ad-service/internal/repository"
+	"github.com/u-shylianok/ad-service/internal/secure"
 )
 
 type Service struct {
@@ -42,9 +43,9 @@ type Tag interface {
 	ListAdTags(adID int) ([]string, error)
 }
 
-func NewService(repos *repository.Repository) *Service {
+func NewService(repos *repository.Repository, secure *secure.Secure) *Service {
 	return &Service{
-		Auth:  NewAuthService(repos.User),
+		Auth:  NewAuthService(repos.User, secure.Hasher),
 		Ad:    NewAdService(repos.Ad, repos.User, repos.Photo, repos.Tag),
 		Photo: NewPhotoService(repos.Photo),
 		Tag:   NewTagService(repos.Tag),

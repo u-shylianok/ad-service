@@ -10,7 +10,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/u-shylianok/ad-service/internal/model"
 	"github.com/u-shylianok/ad-service/internal/repository"
-	"golang.org/x/crypto/bcrypt"
+	"github.com/u-shylianok/ad-service/internal/secure"
 )
 
 const (
@@ -24,11 +24,15 @@ type tokenClaims struct {
 }
 
 type AuthService struct {
-	repo repository.User
+	repo   repository.User
+	hasher secure.Hasher
 }
 
-func NewAuthService(repo repository.User) *AuthService {
-	return &AuthService{repo: repo}
+func NewAuthService(repo repository.User, hasher secure.Hasher) *AuthService {
+	return &AuthService{
+		repo:   repo,
+		hasher: hasher,
+	}
 }
 
 func (s *AuthService) CreateUser(user model.User) (int, error) {
@@ -39,7 +43,7 @@ func (s *AuthService) CreateUser(user model.User) (int, error) {
 		return 0, fmt.Errorf("username is invalid or already taken")
 	}
 
-	password, err := hashPassword(user.Password)
+	password, err := s.hasher.HashPassword(user.Password)
 	if err != nil {
 		return 0, err
 	}
@@ -56,7 +60,7 @@ func (s *AuthService) CheckUser(username, password string) (int, error) {
 		return 0, fmt.Errorf("incorrect username or password")
 	}
 
-	if !checkPasswordHash(password, user.Password) {
+	if !s.hasher.CheckPasswordHash(password, user.Password) {
 		return 0, fmt.Errorf("incorrect username or password")
 	}
 
@@ -97,13 +101,4 @@ func (s *AuthService) ParseToken(accessToken string) (int, error) {
 	}
 
 	return claims.UserID, nil
-}
-
-func hashPassword(password string) (string, error) {
-	bytes, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
-	return string(bytes), err
-}
-
-func checkPasswordHash(password, hash string) bool {
-	return bcrypt.CompareHashAndPassword([]byte(hash), []byte(password)) == nil
 }

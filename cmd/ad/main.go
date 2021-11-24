@@ -12,6 +12,7 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/u-shylianok/ad-service/internal/handler"
 	"github.com/u-shylianok/ad-service/internal/repository"
+	"github.com/u-shylianok/ad-service/internal/secure"
 	"github.com/u-shylianok/ad-service/internal/service"
 )
 
@@ -42,7 +43,8 @@ func main() {
 	}
 
 	repos := repository.NewRepository(db)
-	services := service.NewService(repos)
+	secure := secure.NewSecure()
+	services := service.NewService(repos, secure)
 	handlers := handler.NewHandler(services)
 
 	srv := new(Server)
@@ -67,7 +69,6 @@ func main() {
 	if err := db.Close(); err != nil {
 		log.Errorf("error occured on db connection close: %s", err)
 	}
-	return
 }
 
 func (s *Server) Run(port string, handler http.Handler) error {
