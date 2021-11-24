@@ -341,3 +341,61 @@ func TestAuthService_GenerateToken(t *testing.T) {
 		})
 	}
 }
+
+func TestAuthService_ParseToken(t *testing.T) {
+	// sample token string
+	validAccessToken := "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2Mzc3OTkyODksImlhdCI6MTYzNzc1NjA4OSwidXNlcl9pZCI6MX0.ut3hLzljtrBpAMYLQ7JExJAbz0e2hK_SBqSek1fpkzI"
+
+	type args struct {
+		accessToken string
+	}
+	tests := []struct {
+		name   string
+		args   args
+		assert func(*testing.T, int, error)
+	}{
+		{
+			name: "success",
+			args: args{
+				accessToken: validAccessToken,
+			},
+			assert: func(t *testing.T, userID int, err error) {
+				require.NoError(t, err)
+				require.Equal(t, 1, userID)
+			},
+		},
+		{
+			name: "fail - empty token",
+			args: args{
+				accessToken: "",
+			},
+			assert: func(t *testing.T, userID int, err error) {
+				require.Error(t, err)
+				require.EqualError(t, err, "token contains an invalid number of segments")
+				require.Equal(t, 0, userID)
+			},
+		},
+		{
+			name: "fail - signature is invalid",
+			args: args{
+				accessToken: validAccessToken + "test",
+			},
+			assert: func(t *testing.T, userID int, err error) {
+				require.Error(t, err)
+				require.EqualError(t, err, "signature is invalid")
+				require.Equal(t, 0, userID)
+			},
+		},
+	}
+	for _, test := range tests {
+		test := test
+		t.Run(test.name, func(t *testing.T) {
+			t.Parallel()
+
+			authService := NewAuthService(nil, nil)
+			userID, err := authService.ParseToken(test.args.accessToken)
+
+			test.assert(t, userID, err)
+		})
+	}
+}
