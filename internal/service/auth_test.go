@@ -343,8 +343,7 @@ func TestAuthService_GenerateToken(t *testing.T) {
 }
 
 func TestAuthService_ParseToken(t *testing.T) {
-	// sample token string
-	validAccessToken := "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2Mzc3OTkyODksImlhdCI6MTYzNzc1NjA4OSwidXNlcl9pZCI6MX0.ut3hLzljtrBpAMYLQ7JExJAbz0e2hK_SBqSek1fpkzI"
+	validAccessToken, _, _ := NewAuthService(nil, nil).GenerateToken(1)
 
 	type args struct {
 		accessToken string
