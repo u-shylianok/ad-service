@@ -17,10 +17,10 @@ import (
 )
 
 const (
-	MAX_HEADER_BYTES = 1 << 20 // 1 MB
-	READ_TIMEOUT     = 10 * time.Second
-	WRITE_TIMEOUT    = 10 * time.Second
-	DEBUG_LOG_LEVEL  = "debug"
+	MaxHeaderBytes = 1 << 20 // 1 MB
+	ReadTimeout    = 10 * time.Second
+	WriteTimeout   = 10 * time.Second
+	DebugLogLevel  = "debug"
 )
 
 type Server struct {
@@ -75,9 +75,9 @@ func (s *Server) Run(port string, handler http.Handler) error {
 	s.httpServer = &http.Server{
 		Addr:           ":" + port,
 		Handler:        handler,
-		MaxHeaderBytes: MAX_HEADER_BYTES,
-		ReadTimeout:    READ_TIMEOUT,
-		WriteTimeout:   WRITE_TIMEOUT,
+		MaxHeaderBytes: MaxHeaderBytes,
+		ReadTimeout:    ReadTimeout,
+		WriteTimeout:   WriteTimeout,
 	}
 
 	return s.httpServer.ListenAndServe()
@@ -89,7 +89,7 @@ func (s *Server) Shutdown(ctx context.Context) error {
 
 func setupGlobalLogger() {
 	logLevel := os.Getenv("LOG_LEVEL")
-	if logLevel == DEBUG_LOG_LEVEL {
+	if logLevel == DebugLogLevel {
 		log.SetFormatter(&log.JSONFormatter{PrettyPrint: true})
 		log.SetLevel(log.DebugLevel)
 	} else {
