@@ -30,7 +30,9 @@ func (r *AdPostgres) Create(userID int, ad model.AdRequest) (int, error) {
 	row := tx.QueryRow(createAdQuery, userID, ad.Name, ad.Price, ad.MainPhoto, ad.Description)
 	if err := row.Scan(&adID); err != nil {
 		//logrus.Errorf("[create ad]: error: %s", err.Error())
-		tx.Rollback()
+		if err := tx.Rollback(); err != nil {
+			logrus.WithError(err).Error("rollback error")
+		}
 		return 0, err
 	}
 

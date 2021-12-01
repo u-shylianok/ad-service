@@ -30,7 +30,9 @@ func (r *TagPostgres) Create(name string) (int, error) {
 	row := tx.QueryRow(createTagQuery, name)
 	if err := row.Scan(&tagID); err != nil {
 		//logrus.Errorf("[create tag]: error: %s", err.Error())
-		tx.Rollback()
+		if err := tx.Rollback(); err != nil {
+			logrus.WithError(err).Error("rollback error")
+		}
 		return 0, err
 	}
 
@@ -84,7 +86,9 @@ func (r *TagPostgres) AttachToAd(adID int, tagID int) error {
 	createAdsTagQuery := "INSERT INTO ads_tags (ad_id, tag_id) VALUES ($1, $2)"
 	if _, err := tx.Exec(createAdsTagQuery, adID, tagID); err != nil {
 		// logrus.Errorf("[create adstag]: error: %s", err.Error())
-		tx.Rollback()
+		if err := tx.Rollback(); err != nil {
+			logrus.WithError(err).Error("rollback error")
+		}
 		return err
 	}
 	return tx.Commit()
