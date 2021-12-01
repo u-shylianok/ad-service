@@ -1,4 +1,4 @@
-.PHONY: deps build up start debug-start down clean cleanall tidy test $(TOOLS) tools mocks
+.PHONY: deps build up start debug-start down clean cleanall tidy test $(TOOLS) tools mocks lint
 
 SERVICE_NAME ?= ad-service
 BINDIR ?= build/app
@@ -53,3 +53,6 @@ tools: deps $(TOOLS)
 
 mocks:
 	@go generate ./...
+
+lint:
+	golangci-lint run ./...
