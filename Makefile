@@ -1,7 +1,9 @@
-.PHONY: deps build up start debug-start down clean cleanall tidy test
+.PHONY: deps build up start debug-start down clean cleanall tidy test $(TOOLS) tools mocks
 
 SERVICE_NAME ?= ad-service
 BINDIR ?= build/app
+
+TOOLS += github.com/maxbrunsfeld/counterfeiter/v6
 
 APP_CONTAINER_NAME ?= $(SERVICE_NAME)-app
 DB_CONTAINER_NAME ?= $(SERVICE_NAME)-db-pg
@@ -43,3 +45,11 @@ tidy:
 
 test:
 	go test -race ./...
+
+$(TOOLS): %:
+	GOBIN=$(GOBIN) go install $*
+
+tools: deps $(TOOLS)
+
+mocks:
+	@go generate ./...

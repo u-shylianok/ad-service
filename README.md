@@ -27,3 +27,8 @@ ad-service
 - - SELECT ... FROM ... INNER JOIN ... AND (date statement) INNER JOIN ... INNER JOIN ...
 - - *в примере выше (date statement) будет в первом доступном JOIN. Если JOIN нет, то WHERE в конце запроса*
 - - SELECT ... FROM (SELECT WHERE date statement) INNER JOIN ... INNER JOIN ... INNER JOIN ...
+
+### Процесс написания тестов
+
+- [x] model
+- [x] service
