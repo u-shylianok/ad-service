@@ -1,11 +1,7 @@
 package repository
 
 import (
-	"database/sql"
-	"errors"
-
 	"github.com/jmoiron/sqlx"
-	"github.com/sirupsen/logrus"
 	"github.com/u-shylianok/ad-service/internal/model"
 )
 
@@ -102,21 +98,4 @@ func (r *TagPostgres) DetachAllFromAd(adID int) error {
 	_, err := r.db.Exec(deleteAdsTagsQuery, adID)
 
 	return err
-}
-
-func (r *TagPostgres) GetIDOrCreateIfNotExists(tagName string) (int, error) {
-	var tagID int
-
-	tag, err := r.GetByName(tagName)
-	if err != nil && !errors.Is(err, sql.ErrNoRows) {
-		return 0, err
-	} else if err != nil && errors.Is(err, sql.ErrNoRows) {
-		if tagID, err = r.Create(tagName); err != nil {
-			return 0, err
-		}
-		logrus.Infof("Tag: %s created with id = %d", tagName, tagID)
-	} else if err == nil {
-		tagID = tag.ID
-	}
-	return tagID, nil
 }
