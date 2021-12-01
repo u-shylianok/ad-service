@@ -1,4 +1,4 @@
-package service
+package service_test
 
 import (
 	"fmt"
@@ -7,6 +7,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 	"github.com/u-shylianok/ad-service/internal/model"
+	"github.com/u-shylianok/ad-service/internal/service"
 	"github.com/u-shylianok/ad-service/internal/testing/mocks/repository"
 )
 
@@ -211,7 +212,7 @@ func TestAdService_CreateAd(t *testing.T) {
 			var fields fields
 			test.setup(&fields)
 
-			adService := NewAdService(fields.adRepo, fields.userRepo, fields.photoRepo, fields.tagRepo)
+			adService := service.NewAdService(fields.adRepo, fields.userRepo, fields.photoRepo, fields.tagRepo)
 			adID, err := adService.CreateAd(test.args.userID, test.args.ad)
 
 			test.assert(t, &fields, adID, err)
@@ -390,7 +391,7 @@ func TestAdService_ListAds(t *testing.T) {
 			var fields fields
 			test.setup(&fields)
 
-			adService := NewAdService(fields.adRepo, fields.userRepo, nil, nil)
+			adService := service.NewAdService(fields.adRepo, fields.userRepo, nil, nil)
 			response, err := adService.ListAds(test.args.params)
 
 			test.assert(t, &fields, response, err)
@@ -569,7 +570,7 @@ func TestAdService_SearchAds(t *testing.T) {
 			var fields fields
 			test.setup(&fields)
 
-			adService := NewAdService(fields.adRepo, fields.userRepo, nil, nil)
+			adService := service.NewAdService(fields.adRepo, fields.userRepo, nil, nil)
 			response, err := adService.SearchAds(test.args.params)
 
 			test.assert(t, &fields, response, err)
@@ -735,7 +736,7 @@ func TestAdService_GetAd(t *testing.T) {
 			var fields fields
 			test.setup(&fields)
 
-			adService := NewAdService(fields.adRepo, fields.userRepo, fields.photoRepo, fields.tagRepo)
+			adService := service.NewAdService(fields.adRepo, fields.userRepo, fields.photoRepo, fields.tagRepo)
 			response, err := adService.GetAd(test.args.adID, test.args.fields)
 
 			test.assert(t, &fields, response, err)
@@ -1024,7 +1025,7 @@ func TestAdService_UpdateAd(t *testing.T) {
 			var fields fields
 			test.setup(&fields)
 
-			adService := NewAdService(fields.adRepo, nil, fields.photoRepo, fields.tagRepo)
+			adService := service.NewAdService(fields.adRepo, nil, fields.photoRepo, fields.tagRepo)
 			err := adService.UpdateAd(test.args.userID, test.args.adID, test.args.ad)
 
 			test.assert(t, &fields, err)
@@ -1092,7 +1093,7 @@ func TestAdService_DeleteAd(t *testing.T) {
 			var fields fields
 			test.setup(&fields)
 
-			adService := NewAdService(fields.adRepo, nil, nil, nil)
+			adService := service.NewAdService(fields.adRepo, nil, nil, nil)
 			err := adService.DeleteAd(test.args.userID, test.args.adID)
 
 			test.assert(t, &fields, err)

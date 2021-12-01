@@ -57,8 +57,10 @@ func BuildAdFilterQuery(filter model.AdFilter) (string, []interface{}) {
 				argID++
 			}
 			sb.WriteString(" INNER JOIN ads_tags ON ads.id = ads_tags.ad_id")
-			sb.WriteString(fmt.Sprintf(" INNER JOIN tags ON tags.id = ads_tags.tag_id AND tags.name IN (%s)", strings.Join(values, ",")))
-			sb.WriteString(fmt.Sprintf(" GROUP BY %s HAVING COUNT(DISTINCT tags.name) = %d", adsColumns, len(values)))
+			sb.WriteString(fmt.Sprintf(" INNER JOIN tags ON tags.id = ads_tags.tag_id AND tags.name IN (%s)",
+				strings.Join(values, ",")))
+			sb.WriteString(fmt.Sprintf(" GROUP BY %s HAVING COUNT(DISTINCT tags.name) = %d",
+				adsColumns, len(values)))
 
 		}
 

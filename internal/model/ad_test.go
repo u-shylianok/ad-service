@@ -1,4 +1,4 @@
-package model
+package model_test
 
 import (
 	"fmt"
@@ -8,18 +8,19 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/require"
+	"github.com/u-shylianok/ad-service/internal/model"
 )
 
 func TestAdRequest_Validate(t *testing.T) {
 	cases := []struct {
 		name        string
-		in          AdRequest
+		in          model.AdRequest
 		expectError bool
 		expected    error
 	}{
 		{
 			name: "valid request without additional info",
-			in: AdRequest{
+			in: model.AdRequest{
 				Name:        "name",
 				Price:       100,
 				Description: "description",
@@ -29,7 +30,7 @@ func TestAdRequest_Validate(t *testing.T) {
 		},
 		{
 			name: "valid request with photos info",
-			in: AdRequest{
+			in: model.AdRequest{
 				Name:        "name",
 				Price:       100,
 				Description: "description",
@@ -43,7 +44,7 @@ func TestAdRequest_Validate(t *testing.T) {
 		},
 		{
 			name: "valid request with tags info",
-			in: AdRequest{
+			in: model.AdRequest{
 				Name:        "name",
 				Price:       100,
 				Description: "description",
@@ -61,7 +62,7 @@ func TestAdRequest_Validate(t *testing.T) {
 		},
 		{
 			name: "invalid request (field Name is missing)",
-			in: AdRequest{
+			in: model.AdRequest{
 				Price:       100,
 				Description: "description",
 				MainPhoto:   "https://picsum.photos/id/101/200/200",
@@ -71,7 +72,7 @@ func TestAdRequest_Validate(t *testing.T) {
 		},
 		{
 			name: "invalid request (field Price is missing)",
-			in: AdRequest{
+			in: model.AdRequest{
 				Name:        "name",
 				Description: "description",
 				MainPhoto:   "https://picsum.photos/id/101/200/200",
@@ -81,7 +82,7 @@ func TestAdRequest_Validate(t *testing.T) {
 		},
 		{
 			name: "invalid request (field Description is missing)",
-			in: AdRequest{
+			in: model.AdRequest{
 				Name:      "name",
 				Price:     100,
 				MainPhoto: "https://picsum.photos/id/101/200/200",
@@ -91,7 +92,7 @@ func TestAdRequest_Validate(t *testing.T) {
 		},
 		{
 			name: "invalid request (field MainPhoto is missing)",
-			in: AdRequest{
+			in: model.AdRequest{
 				Name:        "name",
 				Price:       100,
 				Description: "description",
@@ -101,7 +102,7 @@ func TestAdRequest_Validate(t *testing.T) {
 		},
 		{
 			name: "invalid request (got empty OtherPhoto)",
-			in: AdRequest{
+			in: model.AdRequest{
 				Name:        "name",
 				Price:       100,
 				Description: "description",
@@ -112,7 +113,7 @@ func TestAdRequest_Validate(t *testing.T) {
 		},
 		{
 			name: "invalid request (got empty Tag)",
-			in: AdRequest{
+			in: model.AdRequest{
 				Name:        "name",
 				Price:       100,
 				Description: "description",
@@ -123,7 +124,7 @@ func TestAdRequest_Validate(t *testing.T) {
 		},
 		{
 			name: "invalid request (more than 200 symbols name)",
-			in: AdRequest{
+			in: model.AdRequest{
 				Name:        "012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890",
 				Price:       100,
 				Description: "description",
@@ -134,7 +135,7 @@ func TestAdRequest_Validate(t *testing.T) {
 		},
 		{
 			name: "invalid request (more than 1000 symbols description)",
-			in: AdRequest{
+			in: model.AdRequest{
 				Name:        "name",
 				Price:       100,
 				Description: "01234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890",
@@ -145,7 +146,7 @@ func TestAdRequest_Validate(t *testing.T) {
 		},
 		{
 			name: "invalid request (more than 3 photos)",
-			in: AdRequest{
+			in: model.AdRequest{
 				Name:        "name",
 				Price:       100,
 				Description: "description",
@@ -161,7 +162,7 @@ func TestAdRequest_Validate(t *testing.T) {
 		},
 		{
 			name:        "invalid request (empty struct)",
-			in:          AdRequest{},
+			in:          model.AdRequest{},
 			expectError: true,
 			expected:    fmt.Errorf("name should not be empty"),
 		},
@@ -190,7 +191,7 @@ func TestListAdsSortingParamsFromURL(t *testing.T) {
 	cases := []struct {
 		name string
 		args args
-		want []AdsSortingParam
+		want []model.AdsSortingParam
 	}{
 		{
 			name: "valid url sort parameters",
@@ -200,7 +201,7 @@ func TestListAdsSortingParamsFromURL(t *testing.T) {
 					"order":  []string{"asc", "dsc", "asc", "dsc"},
 				},
 			},
-			want: []AdsSortingParam{
+			want: []model.AdsSortingParam{
 				{
 					Field:  "name",
 					IsDesc: false,
@@ -227,7 +228,7 @@ func TestListAdsSortingParamsFromURL(t *testing.T) {
 					"order":  []string{"asc", "DSC", "Asc", "dsc"},
 				},
 			},
-			want: []AdsSortingParam{
+			want: []model.AdsSortingParam{
 				{
 					Field:  "name",
 					IsDesc: false,
@@ -254,7 +255,7 @@ func TestListAdsSortingParamsFromURL(t *testing.T) {
 					"order":  []string{"dsc"},
 				},
 			},
-			want: []AdsSortingParam{
+			want: []model.AdsSortingParam{
 				{
 					Field:  "price",
 					IsDesc: true,
@@ -282,7 +283,7 @@ func TestListAdsSortingParamsFromURL(t *testing.T) {
 					"sortby": []string{"name", "date", "price", "description"},
 				},
 			},
-			want: []AdsSortingParam{
+			want: []model.AdsSortingParam{
 				{
 					Field:  "name",
 					IsDesc: false,
@@ -318,7 +319,7 @@ func TestListAdsSortingParamsFromURL(t *testing.T) {
 					"order":  []string{"dsc"},
 				},
 			},
-			want: []AdsSortingParam{
+			want: []model.AdsSortingParam{
 				{
 					Field:  "description",
 					IsDesc: true,
@@ -345,7 +346,7 @@ func TestListAdsSortingParamsFromURL(t *testing.T) {
 					"order":  []string{"asc", "dsc", "asc", "dsc"},
 				},
 			},
-			want: []AdsSortingParam{
+			want: []model.AdsSortingParam{
 				{
 					Field:  "date",
 					IsDesc: true,
@@ -364,7 +365,7 @@ func TestListAdsSortingParamsFromURL(t *testing.T) {
 					"order":  []string{"asc", "test", "asc", "dsc"},
 				},
 			},
-			want: []AdsSortingParam{
+			want: []model.AdsSortingParam{
 				{
 					Field:  "name",
 					IsDesc: false,
@@ -391,7 +392,7 @@ func TestListAdsSortingParamsFromURL(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
 
-			got := ListAdsSortingParamsFromURL(tc.args.values)
+			got := model.ListAdsSortingParamsFromURL(tc.args.values)
 			if !reflect.DeepEqual(got, tc.want) {
 				t.Errorf("\ngot: %#v,\nwant: %#v", got, tc.want)
 			}
@@ -406,7 +407,7 @@ func TestGetAdOptionalFieldsFromURL(t *testing.T) {
 	cases := []struct {
 		name string
 		args args
-		want AdOptionalFieldsParam
+		want model.AdOptionalFieldsParam
 	}{
 		{
 			name: "valid all optional fields",
@@ -415,7 +416,7 @@ func TestGetAdOptionalFieldsFromURL(t *testing.T) {
 					"fields": []string{"description", "photos", "tags"},
 				},
 			},
-			want: AdOptionalFieldsParam{
+			want: model.AdOptionalFieldsParam{
 				Description: true,
 				Photos:      true,
 				Tags:        true,
@@ -428,7 +429,7 @@ func TestGetAdOptionalFieldsFromURL(t *testing.T) {
 					"fields": []string{"Description", "phOtOs", "TAGS"},
 				},
 			},
-			want: AdOptionalFieldsParam{
+			want: model.AdOptionalFieldsParam{
 				Description: true,
 				Photos:      true,
 				Tags:        true,
@@ -441,7 +442,7 @@ func TestGetAdOptionalFieldsFromURL(t *testing.T) {
 					"fields": []string{"description"},
 				},
 			},
-			want: AdOptionalFieldsParam{
+			want: model.AdOptionalFieldsParam{
 				Description: true,
 			},
 		},
@@ -452,7 +453,7 @@ func TestGetAdOptionalFieldsFromURL(t *testing.T) {
 					"fields": []string{"photos"},
 				},
 			},
-			want: AdOptionalFieldsParam{
+			want: model.AdOptionalFieldsParam{
 				Photos: true,
 			},
 		},
@@ -463,7 +464,7 @@ func TestGetAdOptionalFieldsFromURL(t *testing.T) {
 					"fields": []string{"tags"},
 				},
 			},
-			want: AdOptionalFieldsParam{
+			want: model.AdOptionalFieldsParam{
 				Tags: true,
 			},
 		},
@@ -472,14 +473,14 @@ func TestGetAdOptionalFieldsFromURL(t *testing.T) {
 			args: args{
 				values: url.Values{},
 			},
-			want: AdOptionalFieldsParam{},
+			want: model.AdOptionalFieldsParam{},
 		},
 		{
 			name: "valid optional fields (nil values)",
 			args: args{
 				values: nil,
 			},
-			want: AdOptionalFieldsParam{},
+			want: model.AdOptionalFieldsParam{},
 		},
 		{
 			name: "invalid optional fields (some parameters are corrupted)",
@@ -488,7 +489,7 @@ func TestGetAdOptionalFieldsFromURL(t *testing.T) {
 					"fields": []string{"tags", "joke", "test", "description", "pphotooss"},
 				},
 			},
-			want: AdOptionalFieldsParam{
+			want: model.AdOptionalFieldsParam{
 				Description: true,
 				Tags:        true,
 			},
@@ -500,7 +501,7 @@ func TestGetAdOptionalFieldsFromURL(t *testing.T) {
 					"fields": []string{"name", "price", "test", "frog"},
 				},
 			},
-			want: AdOptionalFieldsParam{},
+			want: model.AdOptionalFieldsParam{},
 		},
 	}
 	for _, tc := range cases {
@@ -508,7 +509,7 @@ func TestGetAdOptionalFieldsFromURL(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
 
-			got := GetAdOptionalFieldsFromURL(tc.args.values)
+			got := model.GetAdOptionalFieldsFromURL(tc.args.values)
 			if !reflect.DeepEqual(got, tc.want) {
 				t.Errorf("\ngot: %#v,\nwant: %#v", got, tc.want)
 			}
@@ -523,7 +524,7 @@ func TestGetAdFilterFromURL(t *testing.T) {
 	cases := []struct {
 		name string
 		args args
-		want AdFilter
+		want model.AdFilter
 	}{
 		{
 			name: "valid filter params",
@@ -535,7 +536,7 @@ func TestGetAdFilterFromURL(t *testing.T) {
 					"tags":      []string{"ТЕСТ", "КРАСНЫЙ"},
 				},
 			},
-			want: AdFilter{
+			want: model.AdFilter{
 				Username:  "test",
 				StartDate: time.Date(2021, 10, 12, 0, 0, 0, 0, time.UTC),
 				EndDate:   time.Date(2021, 10, 15, 0, 0, 0, 0, time.UTC),
@@ -551,7 +552,7 @@ func TestGetAdFilterFromURL(t *testing.T) {
 					"tags":     []string{"ТЕСТ", "КРАСНЫЙ"},
 				},
 			},
-			want: AdFilter{
+			want: model.AdFilter{
 				Username: "test",
 				EndDate:  time.Date(2021, 10, 15, 0, 0, 0, 0, time.UTC),
 				Tags:     []string{"ТЕСТ", "КРАСНЫЙ"},
@@ -566,7 +567,7 @@ func TestGetAdFilterFromURL(t *testing.T) {
 					"tags":      []string{"ТЕСТ", "КРАСНЫЙ"},
 				},
 			},
-			want: AdFilter{
+			want: model.AdFilter{
 				Username:  "test",
 				StartDate: time.Date(2021, 10, 12, 0, 0, 0, 0, time.UTC),
 				Tags:      []string{"ТЕСТ", "КРАСНЫЙ"},
@@ -579,7 +580,7 @@ func TestGetAdFilterFromURL(t *testing.T) {
 					"username": []string{"test"},
 				},
 			},
-			want: AdFilter{
+			want: model.AdFilter{
 				Username: "test",
 			},
 		},
@@ -590,7 +591,7 @@ func TestGetAdFilterFromURL(t *testing.T) {
 					"tags": []string{"ТЕСТ", "КРАСНЫЙ"},
 				},
 			},
-			want: AdFilter{
+			want: model.AdFilter{
 				Tags: []string{"ТЕСТ", "КРАСНЫЙ"},
 			},
 		},
@@ -599,14 +600,14 @@ func TestGetAdFilterFromURL(t *testing.T) {
 			args: args{
 				values: url.Values{},
 			},
-			want: AdFilter{},
+			want: model.AdFilter{},
 		},
 		{
 			name: "valid optional fields (nil values)",
 			args: args{
 				values: nil,
 			},
-			want: AdFilter{},
+			want: model.AdFilter{},
 		},
 		{
 			name: "invalid filter params (dates format is corrupted)",
@@ -618,7 +619,7 @@ func TestGetAdFilterFromURL(t *testing.T) {
 					"tags":      []string{"ТЕСТ", "КРАСНЫЙ"},
 				},
 			},
-			want: AdFilter{
+			want: model.AdFilter{
 				Username: "test",
 				Tags:     []string{"ТЕСТ", "КРАСНЫЙ"},
 			},
@@ -632,7 +633,7 @@ func TestGetAdFilterFromURL(t *testing.T) {
 					"tag":  []string{"ТЕСТ"},
 				},
 			},
-			want: AdFilter{},
+			want: model.AdFilter{},
 		},
 	}
 	for _, tc := range cases {
@@ -640,7 +641,7 @@ func TestGetAdFilterFromURL(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
 
-			got := GetAdFilterFromURL(tc.args.values)
+			got := model.GetAdFilterFromURL(tc.args.values)
 			if !reflect.DeepEqual(got, tc.want) {
 				t.Errorf("\ngot: %#v,\nwant: %#v", got, tc.want)
 			}
@@ -650,19 +651,19 @@ func TestGetAdFilterFromURL(t *testing.T) {
 
 func TestAd_ToResponse(t *testing.T) {
 	type args struct {
-		user   User
+		user   model.User
 		photos *[]string
 		tags   *[]string
 	}
 	cases := []struct {
 		name string
-		in   Ad
+		in   model.Ad
 		args args
-		want AdResponse
+		want model.AdResponse
 	}{
 		{
 			name: "valid check test",
-			in: Ad{
+			in: model.Ad{
 				ID:          1,
 				UserID:      1,
 				Name:        "name",
@@ -672,7 +673,7 @@ func TestAd_ToResponse(t *testing.T) {
 				MainPhoto:   "https://picsum.photos/id/101/200/200",
 			},
 			args: args{
-				user: User{
+				user: model.User{
 					Name:     "name",
 					Username: "username",
 				},
@@ -685,9 +686,9 @@ func TestAd_ToResponse(t *testing.T) {
 					"tag 2",
 				},
 			},
-			want: AdResponse{
+			want: model.AdResponse{
 				ID: 1,
-				User: UserResponse{
+				User: model.UserResponse{
 					Name:     "name",
 					Username: "username",
 				},
@@ -722,18 +723,18 @@ func TestAd_ToResponse(t *testing.T) {
 
 func TestConvertAdsToResponse(t *testing.T) {
 	type args struct {
-		ads      []Ad
-		usersMap map[int]User
+		ads      []model.Ad
+		usersMap map[int]model.User
 	}
 	cases := []struct {
 		name string
 		args args
-		want []AdResponse
+		want []model.AdResponse
 	}{
 		{
 			name: "valid ads and users",
 			args: args{
-				ads: []Ad{
+				ads: []model.Ad{
 					{
 						ID:          1,
 						UserID:      1,
@@ -753,7 +754,7 @@ func TestConvertAdsToResponse(t *testing.T) {
 						MainPhoto:   "https://picsum.photos/id/201/200/200",
 					},
 				},
-				usersMap: map[int]User{
+				usersMap: map[int]model.User{
 					1: {
 						Name:     "name",
 						Username: "username",
@@ -764,11 +765,11 @@ func TestConvertAdsToResponse(t *testing.T) {
 					},
 				},
 			},
-			want: []AdResponse{
+			want: []model.AdResponse{
 				{
 
 					ID: 1,
-					User: UserResponse{
+					User: model.UserResponse{
 						Name:     "name",
 						Username: "username",
 					},
@@ -781,7 +782,7 @@ func TestConvertAdsToResponse(t *testing.T) {
 				{
 
 					ID: 2,
-					User: UserResponse{
+					User: model.UserResponse{
 						Name:     "name2",
 						Username: "username2",
 					},
@@ -796,7 +797,7 @@ func TestConvertAdsToResponse(t *testing.T) {
 		{
 			name: "valid ads and empty users map",
 			args: args{
-				ads: []Ad{
+				ads: []model.Ad{
 					{
 						ID:          1,
 						UserID:      1,
@@ -816,13 +817,13 @@ func TestConvertAdsToResponse(t *testing.T) {
 						MainPhoto:   "https://picsum.photos/id/201/200/200",
 					},
 				},
-				usersMap: map[int]User{},
+				usersMap: map[int]model.User{},
 			},
-			want: []AdResponse{
+			want: []model.AdResponse{
 				{
 
 					ID:          1,
-					User:        UserResponse{},
+					User:        model.UserResponse{},
 					Name:        "name",
 					Date:        time.Date(2021, 10, 12, 0, 0, 0, 0, time.UTC),
 					Price:       100,
@@ -832,7 +833,7 @@ func TestConvertAdsToResponse(t *testing.T) {
 				{
 
 					ID:          2,
-					User:        UserResponse{},
+					User:        model.UserResponse{},
 					Name:        "name2",
 					Date:        time.Date(2021, 10, 13, 0, 0, 0, 0, time.UTC),
 					Price:       200,
@@ -847,7 +848,7 @@ func TestConvertAdsToResponse(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
 
-			got := ConvertAdsToResponse(tc.args.ads, tc.args.usersMap)
+			got := model.ConvertAdsToResponse(tc.args.ads, tc.args.usersMap)
 			if !reflect.DeepEqual(got, tc.want) {
 				t.Errorf("\ngot: %#v,\nwant: %#v", got, tc.want)
 			}

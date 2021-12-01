@@ -66,7 +66,11 @@ func (r *TagPostgres) ListNames() ([]string, error) {
 func (r *TagPostgres) ListNamesByAd(adID int) ([]string, error) {
 	var tagNames []string
 
-	listTagNamesQuery := "SELECT tags.name FROM tags INNER JOIN ads_tags ON tags.id = ads_tags.tag_id AND ads_tags.ad_id = $1"
+	listTagNamesQuery := `
+		SELECT tags.name FROM tags
+		INNER JOIN ads_tags
+		ON tags.id = ads_tags.tag_id AND ads_tags.ad_id = $1`
+
 	if err := r.db.Select(&tagNames, listTagNamesQuery, adID); err != nil {
 		//logrus.Error(err)
 		return nil, err

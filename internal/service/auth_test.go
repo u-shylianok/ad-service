@@ -1,4 +1,4 @@
-package service
+package service_test
 
 import (
 	"database/sql"
@@ -8,6 +8,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 	"github.com/u-shylianok/ad-service/internal/model"
+	"github.com/u-shylianok/ad-service/internal/service"
 	"github.com/u-shylianok/ad-service/internal/testing/mocks/repository"
 	"github.com/u-shylianok/ad-service/internal/testing/mocks/secure"
 )
@@ -159,7 +160,7 @@ func TestAuthService_CreateUser(t *testing.T) {
 			var fields fields
 			test.setup(&fields)
 
-			authService := NewAuthService(fields.repo, fields.hasher)
+			authService := service.NewAuthService(fields.repo, fields.hasher)
 			userID, err := authService.CreateUser(test.args.user)
 
 			test.assert(t, &fields, userID, err)
@@ -286,7 +287,7 @@ func TestAuthService_CheckUser(t *testing.T) {
 			var fields fields
 			test.setup(&fields)
 
-			authService := NewAuthService(fields.repo, fields.hasher)
+			authService := service.NewAuthService(fields.repo, fields.hasher)
 			userID, err := authService.CheckUser(test.args.username, test.args.password)
 
 			test.assert(t, &fields, userID, err)
@@ -295,6 +296,8 @@ func TestAuthService_CheckUser(t *testing.T) {
 }
 
 func TestAuthService_GenerateToken(t *testing.T) {
+	const defaultTokenTTL = 12 * time.Hour
+
 	type fields struct {
 		time int64
 	}
@@ -305,17 +308,17 @@ func TestAuthService_GenerateToken(t *testing.T) {
 		name   string
 		setup  func(*fields)
 		args   args
-		assert func(*testing.T, *fields, *AuthService, string, int64, error)
+		assert func(*testing.T, *fields, *service.AuthService, string, int64, error)
 	}{
 		{
 			name: "success",
 			setup: func(f *fields) {
-				f.time = time.Now().Add(tokenTTL).Unix()
+				f.time = time.Now().Add(defaultTokenTTL).Unix()
 			},
 			args: args{
 				userID: 1,
 			},
-			assert: func(t *testing.T, f *fields, service *AuthService, tokenStr string, expiresAt int64, err error) {
+			assert: func(t *testing.T, f *fields, service *service.AuthService, tokenStr string, expiresAt int64, err error) {
 				require.NoError(t, err)
 				require.GreaterOrEqual(t, expiresAt, f.time)
 
@@ -334,7 +337,7 @@ func TestAuthService_GenerateToken(t *testing.T) {
 			var fields fields
 			test.setup(&fields)
 
-			authService := NewAuthService(nil, nil)
+			authService := service.NewAuthService(nil, nil)
 			tokenStr, expiresAt, err := authService.GenerateToken(test.args.userID)
 
 			test.assert(t, &fields, authService, tokenStr, expiresAt, err)
@@ -343,7 +346,7 @@ func TestAuthService_GenerateToken(t *testing.T) {
 }
 
 func TestAuthService_ParseToken(t *testing.T) {
-	validAccessToken, _, _ := NewAuthService(nil, nil).GenerateToken(1)
+	validAccessToken, _, _ := service.NewAuthService(nil, nil).GenerateToken(1)
 
 	type args struct {
 		accessToken string
@@ -391,7 +394,7 @@ func TestAuthService_ParseToken(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			t.Parallel()
 
-			authService := NewAuthService(nil, nil)
+			authService := service.NewAuthService(nil, nil)
 			userID, err := authService.ParseToken(test.args.accessToken)
 
 			test.assert(t, userID, err)

@@ -1,4 +1,4 @@
-package service
+package service_test
 
 import (
 	"testing"
@@ -6,6 +6,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/u-shylianok/ad-service/internal/repository"
 	"github.com/u-shylianok/ad-service/internal/secure"
+	"github.com/u-shylianok/ad-service/internal/service"
 	repoMock "github.com/u-shylianok/ad-service/internal/testing/mocks/repository"
 	secureMock "github.com/u-shylianok/ad-service/internal/testing/mocks/secure"
 )
@@ -18,7 +19,7 @@ func TestNewService(t *testing.T) {
 	tests := []struct {
 		name string
 		args args
-		want *Service
+		want *service.Service
 	}{
 		{
 			name: "success",
@@ -33,11 +34,11 @@ func TestNewService(t *testing.T) {
 					Hasher: &secureMock.HasherMock{},
 				},
 			},
-			want: &Service{
-				Auth:  NewAuthService(&repoMock.UserMock{}, &secureMock.HasherMock{}),
-				Ad:    NewAdService(&repoMock.AdMock{}, &repoMock.UserMock{}, &repoMock.PhotoMock{}, &repoMock.TagMock{}),
-				Photo: NewPhotoService(&repoMock.PhotoMock{}),
-				Tag:   NewTagService(&repoMock.TagMock{}),
+			want: &service.Service{
+				Auth:  service.NewAuthService(&repoMock.UserMock{}, &secureMock.HasherMock{}),
+				Ad:    service.NewAdService(&repoMock.AdMock{}, &repoMock.UserMock{}, &repoMock.PhotoMock{}, &repoMock.TagMock{}),
+				Photo: service.NewPhotoService(&repoMock.PhotoMock{}),
+				Tag:   service.NewTagService(&repoMock.TagMock{}),
 			},
 		},
 	}
@@ -46,7 +47,7 @@ func TestNewService(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			t.Parallel()
 
-			service := NewService(test.args.repos, test.args.secure)
+			service := service.NewService(test.args.repos, test.args.secure)
 			require.Equal(t, test.want, service)
 		})
 	}

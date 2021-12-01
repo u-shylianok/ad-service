@@ -12,7 +12,9 @@ type AdService struct {
 	tagRepo   repository.Tag
 }
 
-func NewAdService(adRepo repository.Ad, userRepo repository.User, photoRepo repository.Photo, tagRepo repository.Tag) *AdService {
+func NewAdService(adRepo repository.Ad, userRepo repository.User, photoRepo repository.Photo,
+	tagRepo repository.Tag) *AdService {
+
 	return &AdService{
 		adRepo:    adRepo,
 		userRepo:  userRepo,
@@ -67,7 +69,7 @@ func (s *AdService) ListAds(params []model.AdsSortingParam) ([]model.AdResponse,
 	users, err := s.userRepo.ListInIDs(usersIDs)
 	if err != nil {
 		//logrus.Error() // Просто пока пишем ошибку
-		return model.ConvertAdsToResponse(ads, nil), nil // Даже если пользователи не прогрузились, важно вернуть полученные объявления (мне кажется так)
+		return model.ConvertAdsToResponse(ads, nil), nil
 	}
 	for _, user := range users {
 		usersMap[user.ID] = user
@@ -95,7 +97,7 @@ func (s *AdService) SearchAds(filter model.AdFilter) ([]model.AdResponse, error)
 	users, err := s.userRepo.ListInIDs(usersIDs)
 	if err != nil {
 		//logrus.Error() // Просто пока пишем ошибку
-		return model.ConvertAdsToResponse(ads, nil), nil // Даже если пользователи не прогрузились, важно вернуть полученные объявления (мне кажется так)
+		return model.ConvertAdsToResponse(ads, nil), nil
 	}
 	for _, user := range users {
 		usersMap[user.ID] = user

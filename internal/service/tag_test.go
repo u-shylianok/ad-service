@@ -1,10 +1,11 @@
-package service
+package service_test
 
 import (
 	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/require"
+	"github.com/u-shylianok/ad-service/internal/service"
 	"github.com/u-shylianok/ad-service/internal/testing/mocks/repository"
 )
 
@@ -63,7 +64,7 @@ func TestTagService_ListAdTags(t *testing.T) {
 			var fields fields
 			test.setup(&fields)
 
-			tagService := NewTagService(fields.tagRepo)
+			tagService := service.NewTagService(fields.tagRepo)
 			tags, err := tagService.ListAdTags(test.args.adID)
 
 			test.assert(t, &fields, tags, err)
@@ -116,7 +117,7 @@ func TestTagService_ListTags(t *testing.T) {
 			var fields fields
 			test.setup(&fields)
 
-			tagService := NewTagService(fields.tagRepo)
+			tagService := service.NewTagService(fields.tagRepo)
 			tags, err := tagService.ListTags()
 
 			test.assert(t, &fields, tags, err)
