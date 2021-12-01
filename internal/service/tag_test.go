@@ -90,7 +90,7 @@ func TestTagService_ListTags(t *testing.T) {
 			},
 			assert: func(t *testing.T, f *fields, tags []string, err error) {
 				require.NoError(t, err)
-				require.Equal(t, []string{"tag 1", "tag 2", "tag 3", "tag 3"}, tags)
+				require.Equal(t, []string{"tag 1", "tag 2", "tag 3", "tag 4"}, tags)
 			},
 		},
 		{
