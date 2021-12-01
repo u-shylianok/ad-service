@@ -1,11 +1,11 @@
 # ad-service
 ad-service
 
+![testing workflow](https://github.com/u-shylianok/ad-service/actions/workflows/go.yml/badge.svg)
+
 
 ## Описание
 - Тестовый пользователь: u: test, p: test
-
-//// - ошибка level=error msg="sql: no rows in result set" - при GET несуществующего id
 
 ### Структура объявления
 - ID
