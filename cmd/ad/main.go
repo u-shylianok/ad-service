@@ -20,7 +20,6 @@ const (
 	MaxHeaderBytes = 1 << 20 // 1 MB
 	ReadTimeout    = 10 * time.Second
 	WriteTimeout   = 10 * time.Second
-	DebugLogLevel  = "debug"
 )
 
 type Server struct {
@@ -89,11 +88,14 @@ func (s *Server) Shutdown(ctx context.Context) error {
 
 func setupGlobalLogger() {
 	logLevel := os.Getenv("LOG_LEVEL")
-	if logLevel == DebugLogLevel {
-		log.SetFormatter(&log.JSONFormatter{PrettyPrint: true})
-		log.SetLevel(log.DebugLevel)
-	} else {
-		log.SetFormatter(&log.JSONFormatter{})
+	if logLevel != "" {
+		level, err := log.ParseLevel(logLevel)
+		if err != nil {
+			log.WithError(err).Error("failed to parse log level from env")
+		} else {
+			log.SetLevel(level)
+		}
 	}
+	log.SetFormatter(&log.JSONFormatter{})
 	log.WithField("log_level", logLevel).Info("logger initialised")
 }
