@@ -1,10 +1,11 @@
-package service
+package service_test
 
 import (
 	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/require"
+	"github.com/u-shylianok/ad-service/internal/service"
 	"github.com/u-shylianok/ad-service/internal/testing/mocks/repository"
 )
 
@@ -63,7 +64,7 @@ func TestPhotoService_ListAdPhotos(t *testing.T) {
 			var fields fields
 			test.setup(&fields)
 
-			photoService := NewPhotoService(fields.photoRepo)
+			photoService := service.NewPhotoService(fields.photoRepo)
 			photos, err := photoService.ListAdPhotos(test.args.adID)
 
 			test.assert(t, &fields, photos, err)
@@ -116,7 +117,7 @@ func TestPhotoService_ListPhotos(t *testing.T) {
 			var fields fields
 			test.setup(&fields)
 
-			photoService := NewPhotoService(fields.photoRepo)
+			photoService := service.NewPhotoService(fields.photoRepo)
 			photos, err := photoService.ListPhotos()
 
 			test.assert(t, &fields, photos, err)

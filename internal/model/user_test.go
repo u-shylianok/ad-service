@@ -1,44 +1,46 @@
-package model
+package model_test
 
 import (
 	"reflect"
 	"testing"
+
+	"github.com/u-shylianok/ad-service/internal/model"
 )
 
 func TestUser_ToResponse(t *testing.T) {
 	cases := []struct {
 		name string
-		in   User
-		want UserResponse
+		in   model.User
+		want model.UserResponse
 	}{
 		{
 			name: "valid response from user with all fields",
-			in: User{
+			in: model.User{
 				ID:       1,
 				Name:     "name",
 				Username: "username",
 				Password: "password",
 			},
-			want: UserResponse{
+			want: model.UserResponse{
 				Name:     "name",
 				Username: "username",
 			},
 		},
 		{
 			name: "valid response from user with only required fields",
-			in: User{
+			in: model.User{
 				Name:     "name",
 				Username: "username",
 			},
-			want: UserResponse{
+			want: model.UserResponse{
 				Name:     "name",
 				Username: "username",
 			},
 		},
 		{
 			name: "valid response from empty user",
-			in:   User{},
-			want: UserResponse{},
+			in:   model.User{},
+			want: model.UserResponse{},
 		},
 	}
 	for _, tc := range cases {

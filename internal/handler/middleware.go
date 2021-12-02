@@ -10,8 +10,8 @@ import (
 )
 
 const (
-	AUTH_HEADER = "Authorization"
-	USER_CTX    = "userID"
+	AuthHeader   = "Authorization"
+	UserIDCtxKey = "userID"
 )
 
 func (h *Handler) userIdentity(c *gin.Context) {
@@ -19,7 +19,7 @@ func (h *Handler) userIdentity(c *gin.Context) {
 		"method": "userIdentity",
 	})
 
-	header := c.GetHeader(AUTH_HEADER)
+	header := c.GetHeader(AuthHeader)
 	if header == "" {
 		log.Error("empty auth header")
 		newErrorResponse(c, http.StatusUnauthorized, "empty auth header")
@@ -46,7 +46,7 @@ func (h *Handler) userIdentity(c *gin.Context) {
 		return
 	}
 
-	c.Set(USER_CTX, userID)
+	c.Set(UserIDCtxKey, userID)
 }
 
 func getUserID(c *gin.Context) (int, error) {
@@ -54,7 +54,7 @@ func getUserID(c *gin.Context) (int, error) {
 		"method": "getUserID",
 	})
 
-	userCtx, ok := c.Get(USER_CTX)
+	userCtx, ok := c.Get(UserIDCtxKey)
 	if !ok {
 		log.Error("failed to parse token")
 		return 0, fmt.Errorf("user id not found")

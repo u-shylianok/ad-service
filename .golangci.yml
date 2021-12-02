@@ -1,0 +1,49 @@
+run:
+  tests: true
+  timeout: 5m
+  modules-download-mode: readonly
+  build-tags:
+    - acceptance_test
+linters:
+  disable-all: true
+  enable:
+    - deadcode
+    - errcheck
+    - gosimple
+    - govet
+    - ineffassign
+    - staticcheck
+    - structcheck
+    - typecheck
+    - unused
+    - varcheck
+    - depguard
+    - gofmt
+    - lll
+    - nestif
+    - stylecheck
+    - testpackage
+issues:
+  exclude-rules:
+  - linters:
+    - staticcheck
+    text: "SA1019:"
+  - path: _test\.go
+    linters:
+      - varcheck
+      - lll
+  - linters:
+    - lll
+    source: "^//go:generate "
+  - linters:
+    - lll
+    source: '`env:'
+linters-settings:
+  depguard:
+    list-type: blacklist
+    packages:
+      - github.com/davecgh/go-spew/spew
+      - github.com/satori/go.uuid
+  lll:
+    line-length: 120
+    tab-width: 1

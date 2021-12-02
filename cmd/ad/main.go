@@ -17,10 +17,9 @@ import (
 )
 
 const (
-	MAX_HEADER_BYTES = 1 << 20 // 1 MB
-	READ_TIMEOUT     = 10 * time.Second
-	WRITE_TIMEOUT    = 10 * time.Second
-	DEBUG_LOG_LEVEL  = "debug"
+	MaxHeaderBytes = 1 << 20 // 1 MB
+	ReadTimeout    = 10 * time.Second
+	WriteTimeout   = 10 * time.Second
 )
 
 type Server struct {
@@ -75,9 +74,9 @@ func (s *Server) Run(port string, handler http.Handler) error {
 	s.httpServer = &http.Server{
 		Addr:           ":" + port,
 		Handler:        handler,
-		MaxHeaderBytes: MAX_HEADER_BYTES,
-		ReadTimeout:    READ_TIMEOUT,
-		WriteTimeout:   WRITE_TIMEOUT,
+		MaxHeaderBytes: MaxHeaderBytes,
+		ReadTimeout:    ReadTimeout,
+		WriteTimeout:   WriteTimeout,
 	}
 
 	return s.httpServer.ListenAndServe()
@@ -89,11 +88,14 @@ func (s *Server) Shutdown(ctx context.Context) error {
 
 func setupGlobalLogger() {
 	logLevel := os.Getenv("LOG_LEVEL")
-	if logLevel == DEBUG_LOG_LEVEL {
-		log.SetFormatter(&log.JSONFormatter{PrettyPrint: true})
-		log.SetLevel(log.DebugLevel)
-	} else {
-		log.SetFormatter(&log.JSONFormatter{})
+	if logLevel != "" {
+		level, err := log.ParseLevel(logLevel)
+		if err != nil {
+			log.WithError(err).Error("failed to parse log level from env")
+		} else {
+			log.SetLevel(level)
+		}
 	}
+	log.SetFormatter(&log.JSONFormatter{})
 	log.WithField("log_level", logLevel).Info("logger initialised")
 }

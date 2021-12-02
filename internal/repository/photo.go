@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/jmoiron/sqlx"
+	"github.com/sirupsen/logrus"
 )
 
 type PhotoPostgres struct {
@@ -27,7 +28,9 @@ func (r *PhotoPostgres) Create(adID int, link string) (int, error) {
 	row := tx.QueryRow(createPhotoQuery, adID, link)
 	if err := row.Scan(&photoID); err != nil {
 		//logrus.Errorf("[create photo]: error: %s", err.Error())
-		tx.Rollback()
+		if err := tx.Rollback(); err != nil {
+			logrus.WithError(err).Error("rollback error")
+		}
 		return 0, err
 	}
 
@@ -55,7 +58,9 @@ func (r *PhotoPostgres) CreateList(adID int, photos []string) error {
 	createPhotosQuery := fmt.Sprintf("INSERT INTO photos (ad_id, link) VALUES %s", strings.Join(values, ","))
 	if _, err := tx.Exec(createPhotosQuery, args...); err != nil {
 		//logrus.Errorf("[create photos] error: %s", err.Error())
-		tx.Rollback()
+		if err := tx.Rollback(); err != nil {
+			logrus.WithError(err).Error("rollback error")
+		}
 		return err
 	}
 	return tx.Commit()

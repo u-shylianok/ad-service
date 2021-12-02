@@ -30,7 +30,9 @@ func (r *TagPostgres) Create(name string) (int, error) {
 	row := tx.QueryRow(createTagQuery, name)
 	if err := row.Scan(&tagID); err != nil {
 		//logrus.Errorf("[create tag]: error: %s", err.Error())
-		tx.Rollback()
+		if err := tx.Rollback(); err != nil {
+			logrus.WithError(err).Error("rollback error")
+		}
 		return 0, err
 	}
 
@@ -64,7 +66,11 @@ func (r *TagPostgres) ListNames() ([]string, error) {
 func (r *TagPostgres) ListNamesByAd(adID int) ([]string, error) {
 	var tagNames []string
 
-	listTagNamesQuery := "SELECT tags.name FROM tags INNER JOIN ads_tags ON tags.id = ads_tags.tag_id AND ads_tags.ad_id = $1"
+	listTagNamesQuery := `
+		SELECT tags.name FROM tags
+		INNER JOIN ads_tags
+		ON tags.id = ads_tags.tag_id AND ads_tags.ad_id = $1`
+
 	if err := r.db.Select(&tagNames, listTagNamesQuery, adID); err != nil {
 		//logrus.Error(err)
 		return nil, err
@@ -84,7 +90,9 @@ func (r *TagPostgres) AttachToAd(adID int, tagID int) error {
 	createAdsTagQuery := "INSERT INTO ads_tags (ad_id, tag_id) VALUES ($1, $2)"
 	if _, err := tx.Exec(createAdsTagQuery, adID, tagID); err != nil {
 		// logrus.Errorf("[create adstag]: error: %s", err.Error())
-		tx.Rollback()
+		if err := tx.Rollback(); err != nil {
+			logrus.WithError(err).Error("rollback error")
+		}
 		return err
 	}
 	return tx.Commit()
