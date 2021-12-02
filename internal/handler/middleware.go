@@ -10,8 +10,8 @@ import (
 )
 
 const (
-	AuthHeader = "Authorization"
-	UserCtx    = "userID"
+	AuthHeader   = "Authorization"
+	UserIDCtxKey = "userID"
 )
 
 func (h *Handler) userIdentity(c *gin.Context) {
@@ -46,7 +46,7 @@ func (h *Handler) userIdentity(c *gin.Context) {
 		return
 	}
 
-	c.Set(UserCtx, userID)
+	c.Set(UserIDCtxKey, userID)
 }
 
 func getUserID(c *gin.Context) (int, error) {
@@ -54,7 +54,7 @@ func getUserID(c *gin.Context) (int, error) {
 		"method": "getUserID",
 	})
 
-	userCtx, ok := c.Get(UserCtx)
+	userCtx, ok := c.Get(UserIDCtxKey)
 	if !ok {
 		log.Error("failed to parse token")
 		return 0, fmt.Errorf("user id not found")
