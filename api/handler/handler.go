@@ -48,7 +48,6 @@ func (h *Handler) InitRoutes() *gin.Engine {
 		{
 			photos.GET("/", h.listAdPhotos)
 		}
-
 		tags := ads.Group(":id/tags")
 		{
 			tags.GET("/", h.listAdTags)
@@ -59,7 +58,6 @@ func (h *Handler) InitRoutes() *gin.Engine {
 	{
 		tags.GET("/", h.listTags)
 	}
-
 	photos := router.Group("/photos")
 	{
 		photos.GET("/", h.listPhotos)

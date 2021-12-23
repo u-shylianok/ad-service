@@ -10,7 +10,7 @@ import (
 
 	_ "github.com/jackc/pgx/v4/stdlib"
 	log "github.com/sirupsen/logrus"
-	"github.com/u-shylianok/ad-service/internal/handler"
+	"github.com/u-shylianok/ad-service/api/handler"
 	"github.com/u-shylianok/ad-service/internal/repository"
 	"github.com/u-shylianok/ad-service/internal/secure"
 	"github.com/u-shylianok/ad-service/internal/service"
