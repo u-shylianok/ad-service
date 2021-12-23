@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/require"
-	"github.com/u-shylianok/ad-service/internal/model"
+	"github.com/u-shylianok/ad-service/domain/model"
 )
 
 func TestAdRequest_Validate(t *testing.T) {

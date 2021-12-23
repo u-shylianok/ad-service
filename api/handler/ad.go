@@ -6,7 +6,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
-	"github.com/u-shylianok/ad-service/internal/model"
+	"github.com/u-shylianok/ad-service/domain/model"
 )
 
 func (h *Handler) createAd(c *gin.Context) {

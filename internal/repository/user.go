@@ -5,7 +5,7 @@ import (
 	"strings"
 
 	"github.com/jmoiron/sqlx"
-	"github.com/u-shylianok/ad-service/internal/model"
+	"github.com/u-shylianok/ad-service/domain/model"
 )
 
 type UserPostgres struct {

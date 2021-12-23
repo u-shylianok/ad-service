@@ -4,7 +4,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/u-shylianok/ad-service/internal/model"
+	"github.com/u-shylianok/ad-service/domain/model"
 )
 
 func TestUser_ToResponse(t *testing.T) {

@@ -1,7 +1,7 @@
 package service
 
 import (
-	"github.com/u-shylianok/ad-service/internal/model"
+	"github.com/u-shylianok/ad-service/domain/model"
 	"github.com/u-shylianok/ad-service/internal/repository"
 	"github.com/u-shylianok/ad-service/internal/secure"
 )

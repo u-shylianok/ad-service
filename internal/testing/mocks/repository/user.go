@@ -4,7 +4,7 @@ package repository
 import (
 	"sync"
 
-	"github.com/u-shylianok/ad-service/internal/model"
+	"github.com/u-shylianok/ad-service/domain/model"
 	"github.com/u-shylianok/ad-service/internal/repository"
 )
 
