@@ -1,0 +1,102 @@
+syntax = "proto3";
+
+package ad;
+
+import "google/protobuf/empty.proto";
+import "google/protobuf/timestamp.proto";
+
+option go_package = "github.com/u-shylianok/ad-service/proto";
+
+service AdService {
+    rpc ListAds(ListAdsRequest) returns (ListAdsResponse) {}
+    rpc SearchAds(SearchAdsRequest) returns (SearchAdsResponse) {}
+    rpc GetAd(GetAdRequest) returns (Ad) {}
+    rpc CreateAd(CreateAdRequest) returns (Ad) {}
+    rpc UpdateAd(UpdateAdRequest) returns (Ad) {}
+    rpc DeleteAd(DeleteAdRequest) returns (google.protobuf.Empty) {}
+
+    rpc ListPhotos(ListPhotosRequest) returns (ListPhotosResponse) {}
+    rpc ListTags(ListTagsRequest) returns (ListTagsResponse) {}
+}
+
+message ListPhotosRequest {
+    uint32 ad_id = 1;
+}
+
+message ListPhotosResponse {
+    repeated string photos = 1;
+}
+
+message ListTagsRequest {
+    uint32 ad_id = 1;
+}
+
+message ListTagsResponse {
+    repeated string tags = 1;
+}
+
+message ListAdsRequest {
+    repeated string sortby = 1;
+    repeated string order = 2;
+}
+
+message ListAdsResponse {
+    repeated Ad ads = 1;
+}
+
+message SearchAdsRequest {
+    string username = 1;
+    google.protobuf.Timestamp start_date = 2;
+    google.protobuf.Timestamp end_date = 3;
+    repeated string tags = 4;
+}
+
+message SearchAdsResponse {
+    repeated Ad ads = 1;
+}
+
+message GetAdRequest {
+    uint32 id = 1;
+}
+
+message CreateAdRequest {
+    string name = 1;
+    int32 price = 2;
+    string description = 3;
+    string photo = 4;
+    repeated string photos = 5;
+    repeated string tags = 6;
+}
+
+message UpdateAdRequest {
+    uint32 id = 1;
+    string name = 2;
+    int32 price = 3;
+    string description = 4;
+    string photo = 5;
+    repeated string photos = 6;
+    repeated string tags = 7;
+}
+
+message DeleteAdRequest {
+    uint32 id = 1;
+}
+
+message User {
+    uint32 id = 1;
+    string name = 2;
+    string username = 3;
+    string password = 4;
+}
+
+message Ad {
+    uint32 id = 1;
+    User user = 2;
+    string name = 3;
+    google.protobuf.Timestamp date = 4;
+    int32 price = 5;
+    string description = 6;
+    string photo = 7;
+    repeated string photos = 8;
+    repeated string tags = 9;
+}

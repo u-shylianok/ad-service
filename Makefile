@@ -1,4 +1,4 @@
-.PHONY: deps build up start debug-start down clean cleanall tidy test $(TOOLS) tools mocks lint
+.PHONY: deps build up start debug-start down clean cleanall tidy test $(TOOLS) tools mocks lint gen-proto
 
 SERVICE_NAME ?= ad-service
 BINDIR ?= build/app
@@ -56,3 +56,8 @@ mocks:
 
 lint:
 	golangci-lint run ./...
+
+gen-proto:
+	protoc --go_out=. --go_opt=paths=source_relative \
+    --go-grpc_out=. --go-grpc_opt=paths=source_relative \
+    proto/ad.proto
