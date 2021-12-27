@@ -1,9 +1,13 @@
-package svc_auth
+package main
 
-import pbAds "github.com/u-shylianok/ad-service/svc-ads/client/ad"
+import (
+	"log"
 
-func MyFunc() {
+	pbAds "github.com/u-shylianok/ad-service/svc-ads/client/ad"
+)
+
+func main() {
 	adsClient := pbAds.NewAdServiceClient(nil)
 
-	adsClient.ListAds()
+	log.Println(adsClient)
 }

@@ -2,10 +2,16 @@ module github.com/u-shylianok/ad-service/svc-auth
 
 go 1.17
 
-require (
-	github.com/u-shylianok/ad-service/svc-ads/client v0.0.1
-)
+require github.com/u-shylianok/ad-service/svc-ads/client v0.0.1
 
-replace (
-	github.com/u-shylianok/ad-service/svc-ads/client v0.0.1 => /Users/xedinaska/dev/go/src/github.com/u-shylianok/ad-service/svc-ads/client
+replace github.com/u-shylianok/ad-service/svc-ads/client v0.0.1 => ../svc-ads/client
+
+require (
+	github.com/golang/protobuf v1.5.0 // indirect
+	golang.org/x/net v0.0.0-20200822124328-c89045814202 // indirect
+	golang.org/x/sys v0.0.0-20200323222414-85ca7c5b95cd // indirect
+	golang.org/x/text v0.3.0 // indirect
+	google.golang.org/genproto v0.0.0-20200526211855-cb27e3aa2013 // indirect
+	google.golang.org/grpc v1.43.0 // indirect
+	google.golang.org/protobuf v1.27.1 // indirect
 )
