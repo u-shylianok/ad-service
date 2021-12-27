@@ -58,6 +58,7 @@ lint:
 	golangci-lint run ./...
 
 gen-proto:
-	protoc --go_out=. --go_opt=paths=source_relative \
-    --go-grpc_out=. --go-grpc_opt=paths=source_relative \
-    proto/ad.proto
+	protoc --proto_path=proto \
+	--go_out=svc-ads \
+	--go-grpc_out=. \
+	svc_ads.proto

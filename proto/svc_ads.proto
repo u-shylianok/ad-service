@@ -1,11 +1,11 @@
 syntax = "proto3";
 
-package ad;
+package svc_ads;
 
 import "google/protobuf/empty.proto";
 import "google/protobuf/timestamp.proto";
 
-option go_package = "github.com/u-shylianok/ad-service/svc/ads";
+option go_package = "svc-ads/proto;api-gateway/proto";
 
 service AdService {
     rpc ListAds(ListAdsRequest) returns (ListAdsResponse) {}

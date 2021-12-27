@@ -13,6 +13,14 @@ type Service struct {
 	Tag
 }
 
+// ListAds(context.Context, *ListAdsRequest) (*ListAdsResponse, error)
+// SearchAds(context.Context, *SearchAdsRequest) (*SearchAdsResponse, error)
+// GetAd(context.Context, *GetAdRequest) (*Ad, error)
+// CreateAd(context.Context, *CreateAdRequest) (*Ad, error)
+// UpdateAd(context.Context, *UpdateAdRequest) (*Ad, error)
+// DeleteAd(context.Context, *DeleteAdRequest) (*empty.Empty, error)
+// ListPhotos(context.Context, *ListPhotosRequest) (*ListPhotosResponse, error)
+// ListTags(context.Context, *ListTagsRequest) (*ListTagsResponse, error)
 type Auth interface {
 	CreateUser(user model.User) (int, error)
 	CheckUser(username, password string) (int, error)
@@ -21,10 +29,10 @@ type Auth interface {
 }
 
 type Ad interface {
-	CreateAd(userID int, ad model.AdRequest) (int, error)
 	ListAds(params []model.AdsSortingParam) ([]model.AdResponse, error)
 	SearchAds(filter model.AdFilter) ([]model.AdResponse, error)
 	GetAd(adID int, fields model.AdOptionalFieldsParam) (model.AdResponse, error)
+	CreateAd(userID int, ad model.AdRequest) (int, error)
 	UpdateAd(userID, adID int, ad model.AdRequest) error
 	DeleteAd(userID, adID int) error
 }
