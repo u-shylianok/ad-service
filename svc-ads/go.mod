@@ -10,7 +10,9 @@ require (
 	golang.org/x/crypto v0.0.0-20211215153901-e495a2d5b3d3
 	github.com/jackc/pgx/v4 v4.14.1
 	google.golang.org/grpc v1.43.0
+	github.com/u-shylianok/ad-service/svc-ads/client v0.0.1
 )
+
 
 require (
 	github.com/jackc/chunkreader/v2 v2.0.1 // indirect
