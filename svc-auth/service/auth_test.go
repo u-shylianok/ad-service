@@ -7,10 +7,10 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/require"
-	"github.com/u-shylianok/ad-service/domain/model"
-	"github.com/u-shylianok/ad-service/internal/service"
-	"github.com/u-shylianok/ad-service/internal/testing/mocks/repository"
-	"github.com/u-shylianok/ad-service/internal/testing/mocks/secure"
+	"github.com/u-shylianok/ad-service/svc-auth/model"
+	"github.com/u-shylianok/ad-service/svc-auth/service"
+	"github.com/u-shylianok/ad-service/svc-auth/testing/mocks/repository"
+	"github.com/u-shylianok/ad-service/svc-auth/testing/mocks/secure"
 )
 
 func TestAuthService_CreateUser(t *testing.T) {

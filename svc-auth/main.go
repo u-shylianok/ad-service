@@ -3,11 +3,11 @@ package main
 import (
 	"log"
 
-	pbAds "github.com/u-shylianok/ad-service/svc-ads/client/ad"
+	pbAuth "github.com/u-shylianok/ad-service/svc-auth/client/auth"
 )
 
 func main() {
-	adsClient := pbAds.NewAdServiceClient(nil)
+	adsClient := pbAuth.NewAuthServiceClient(nil)
 
 	log.Println(adsClient)
 }

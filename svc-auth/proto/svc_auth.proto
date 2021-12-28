@@ -1,0 +1,52 @@
+syntax = "proto3";
+
+package svc_auth;
+
+option go_package = "../client/auth";
+
+service AuthService {
+    rpc SignUp(SignUpRequest) returns (User) {}
+    rpc SignIn(SignInRequest) returns (SignInResponse) {}
+
+    rpc Identify(IdentifyRequest) returns (IdentifyResponse) {}
+    rpc GetUserID(GetUserIDRequest) returns (GetUserIDResponse) {}
+}
+
+message User {
+    uint32 id = 1;
+    string name = 2;
+    string username = 3;
+    string password = 4;
+}
+
+message SignUpRequest {
+    string name = 1;
+    string username = 2;
+    string password = 3;
+}
+
+message SignInRequest {
+    string username = 1;
+    string password = 2;
+}
+
+message SignInResponse {
+    string token = 1;
+    int64 expires_at = 2;
+}
+
+message IdentifyRequest {
+    string token = 1;
+}
+
+message IdentifyResponse {
+    string token = 1;
+}
+
+message GetUserIDRequest {
+    string token = 1;
+}
+
+message GetUserIDResponse {
+    uint32 id = 1;
+}

@@ -8,9 +8,9 @@ import (
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/sirupsen/logrus"
-	"github.com/u-shylianok/ad-service/domain/model"
-	"github.com/u-shylianok/ad-service/internal/repository"
-	"github.com/u-shylianok/ad-service/internal/secure"
+	"github.com/u-shylianok/ad-service/svc-auth/internal/secure"
+	"github.com/u-shylianok/ad-service/svc-auth/model"
+	"github.com/u-shylianok/ad-service/svc-auth/repository"
 )
 
 const (

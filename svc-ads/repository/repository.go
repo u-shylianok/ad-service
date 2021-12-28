@@ -8,18 +8,9 @@ import (
 )
 
 type Repository struct {
-	User
 	Ad
 	Photo
 	Tag
-}
-
-//counterfeiter:generate --fake-name UserMock -o ../testing/mocks/repository/user.go . User
-type User interface {
-	Create(user model.User) (int, error)
-	Get(username string) (model.User, error)
-	GetByID(id int) (model.User, error)
-	ListInIDs(ids []int) ([]model.User, error)
 }
 
 //counterfeiter:generate --fake-name AdMock -o ../testing/mocks/repository/ad.go . Ad
@@ -57,7 +48,6 @@ type Tag interface {
 
 func NewRepository(db *sqlx.DB) *Repository {
 	return &Repository{
-		User:  NewUserPostgres(db),
 		Ad:    NewAdPostrgres(db),
 		Photo: NewPhotoPostrgres(db),
 		Tag:   NewTagPostrgres(db),
