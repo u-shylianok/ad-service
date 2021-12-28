@@ -1,23 +1,21 @@
 package service
 
 import (
-	"github.com/u-shylianok/ad-service/svc-ads/domain/model"
+	"github.com/u-shylianok/ad-service/svc-ads/model"
 	"github.com/u-shylianok/ad-service/svc-ads/repository"
 )
 
 type AdService struct {
 	adRepo    repository.Ad
-	userRepo  repository.User
 	photoRepo repository.Photo
 	tagRepo   repository.Tag
 }
 
-func NewAdService(adRepo repository.Ad, userRepo repository.User, photoRepo repository.Photo,
+func NewAdService(adRepo repository.Ad, photoRepo repository.Photo,
 	tagRepo repository.Tag) *AdService {
 
 	return &AdService{
 		adRepo:    adRepo,
-		userRepo:  userRepo,
 		photoRepo: photoRepo,
 		tagRepo:   tagRepo,
 	}

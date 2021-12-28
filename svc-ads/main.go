@@ -8,7 +8,7 @@ import (
 	_ "github.com/jackc/pgx/v4/stdlib"
 	"google.golang.org/grpc"
 
-	pb "github.com/u-shylianok/ad-service/svc-ads/proto"
+	pb "github.com/u-shylianok/ad-service/svc-ads/client/ad"
 )
 
 func main() {

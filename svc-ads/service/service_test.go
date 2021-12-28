@@ -4,17 +4,14 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	repoMock "github.com/u-shylianok/ad-service/internal/testing/mocks/repository"
-	secureMock "github.com/u-shylianok/ad-service/internal/testing/mocks/secure"
-	"github.com/u-shylianok/ad-service/svc-ads/internal/secure"
 	"github.com/u-shylianok/ad-service/svc-ads/repository"
 	"github.com/u-shylianok/ad-service/svc-ads/service"
+	repoMock "github.com/u-shylianok/ad-service/svc-ads/testing/mocks/repository"
 )
 
 func TestNewService(t *testing.T) {
 	type args struct {
-		repos  *repository.Repository
-		secure *secure.Secure
+		repos *repository.Repository
 	}
 	tests := []struct {
 		name string
@@ -25,17 +22,12 @@ func TestNewService(t *testing.T) {
 			name: "success",
 			args: args{
 				repos: &repository.Repository{
-					User:  &repoMock.UserMock{},
 					Ad:    &repoMock.AdMock{},
 					Photo: &repoMock.PhotoMock{},
 					Tag:   &repoMock.TagMock{},
 				},
-				secure: &secure.Secure{
-					Hasher: &secureMock.HasherMock{},
-				},
 			},
 			want: &service.Service{
-				Auth:  service.NewAuthService(&repoMock.UserMock{}, &secureMock.HasherMock{}),
 				Ad:    service.NewAdService(&repoMock.AdMock{}, &repoMock.UserMock{}, &repoMock.PhotoMock{}, &repoMock.TagMock{}),
 				Photo: service.NewPhotoService(&repoMock.PhotoMock{}),
 				Tag:   service.NewTagService(&repoMock.TagMock{}),
@@ -47,7 +39,7 @@ func TestNewService(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			t.Parallel()
 
-			service := service.NewService(test.args.repos, test.args.secure)
+			service := service.NewService(test.args.repos)
 			require.Equal(t, test.want, service)
 		})
 	}

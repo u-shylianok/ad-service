@@ -6,9 +6,9 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/require"
-	"github.com/u-shylianok/ad-service/internal/testing/mocks/repository"
-	"github.com/u-shylianok/ad-service/svc-ads/domain/model"
+	"github.com/u-shylianok/ad-service/svc-ads/model"
 	"github.com/u-shylianok/ad-service/svc-ads/service"
+	"github.com/u-shylianok/ad-service/svc-ads/testing/mocks/repository"
 )
 
 func TestAdService_CreateAd(t *testing.T) {
@@ -18,7 +18,6 @@ func TestAdService_CreateAd(t *testing.T) {
 	}
 	type fields struct {
 		adRepo    *repository.AdMock
-		userRepo  *repository.UserMock
 		photoRepo *repository.PhotoMock
 		tagRepo   *repository.TagMock
 	}

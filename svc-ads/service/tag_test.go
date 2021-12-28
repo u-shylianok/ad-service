@@ -5,8 +5,8 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	"github.com/u-shylianok/ad-service/internal/testing/mocks/repository"
 	"github.com/u-shylianok/ad-service/svc-ads/service"
+	"github.com/u-shylianok/ad-service/svc-ads/testing/mocks/repository"
 )
 
 func TestTagService_ListAdTags(t *testing.T) {
