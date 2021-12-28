@@ -2,9 +2,13 @@ module github.com/u-shylianok/ad-service/svc-ads
 
 go 1.17
 
-require github.com/u-shylianok/ad-service/svc-ads/client v0.0.1
+require (
+	github.com/u-shylianok/ad-service/svc-ads/client v0.0.1
+	github.com/u-shylianok/ad-service/svc-auth/client v0.0.1
+)
 
 require (
+	github.com/golang/protobuf v1.5.0
 	github.com/jackc/pgx/v4 v4.14.1
 	github.com/jmoiron/sqlx v1.3.4
 	github.com/maxbrunsfeld/counterfeiter/v6 v6.4.1
@@ -13,11 +17,13 @@ require (
 	google.golang.org/grpc v1.43.0
 )
 
-replace github.com/u-shylianok/ad-service/svc-ads/client v0.0.1 => ../svc-ads/client
+replace (
+	github.com/u-shylianok/ad-service/svc-ads/client v0.0.1 => ../svc-ads/client
+	github.com/u-shylianok/ad-service/svc-auth/client v0.0.1 => ../svc-auth/client
+)
 
 require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
-	github.com/golang/protobuf v1.5.0 // indirect
 	github.com/jackc/chunkreader/v2 v2.0.1 // indirect
 	github.com/jackc/pgconn v1.10.1 // indirect
 	github.com/jackc/pgio v1.0.0 // indirect
