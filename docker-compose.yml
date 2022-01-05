@@ -1,42 +1,98 @@
 version: "3.7"
 
 services:
-  ad-service-db-pg:
+  api-gateway:
     build:
-      context: ./build/db
-      target: ad-service-db-pg
-    image: ad-service-db-pg:latest
-    restart: always
-    environment:
-      - POSTGRES_PASSWORD=postgres
-      - POSTGRES_USER=postgres
-    ports:
-      - 5432:5432
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
-      interval: 5s
-      timeout: 5s
-      retries: 20
-    container_name: ad-service-db-pg
-
-  ad-service-app:
-    build:
-      context: ./build/app
-      target: ad-service-app
-    image: ad-service-app:latest
+      context: ./${API_GATEWAY}/build
+      target: ${API_GATEWAY}
+    image: ${API_GATEWAY}:latest
     restart: on-failure
     ports:
-      - 8000:8000
+      - ${API_GATEWAY_PORT}:${API_GATEWAY_PORT}
     environment:
-      - APP_PORT=8000
-      - DB_HOST=ad-service-db-pg
-      - DB_PORT=5432
+      - PORT=${API_GATEWAY_PORT}
+      - SVC_ADS_ADDRESS=${SVC_ADS}:${SVC_ADS_PORT}
+      - SVC_AUTH_ADDRESS=${SVC_AUTH}:${SVC_AUTH_PORT}
+    depends_on:
+      - ${SVC_ADS}
+      - ${SVC_AUTH}
+    container_name: ${API_GATEWAY}
+
+  svc-ads:
+    build:
+      context: ./${SVC_ADS}/build
+      target: ${SVC_ADS}
+    image: ${SVC_ADS}:latest
+    restart: on-failure
+    ports:
+      - ${SVC_ADS_PORT}:${SVC_ADS_PORT}
+    environment:
+      - PORT=${SVC_ADS_PORT}
+      - DB_HOST=${DB_ADS}
+      - DB_PORT=${DB_ADS_PORT}
       - DB_USER=postgres
       - DB_PASSWORD=postgres
       - DB_DBNAME=postgres
       - DB_SSL=disable
       - LOG_LEVEL=${LOG_LEVEL:-default}
     depends_on:
-      - ad-service-db-pg
+      - ${DB_ADS}
+    container_name: ${SVC_ADS}
 
-    container_name: ad-service-app
+  svc-auth:
+    build:
+      context: ./${SVC_AUTH}/build
+      target: ${SVC_AUTH}
+    image: ${SVC_AUTH}:latest
+    restart: on-failure
+    ports:
+      - ${SVC_AUTH_PORT}:${SVC_AUTH_PORT}
+    environment:
+      - PORT=${SVC_AUTH_PORT}
+      - DB_HOST=${DB_AUTH}
+      - DB_PORT=${DB_AUTH_PORT}
+      - DB_USER=postgres
+      - DB_PASSWORD=postgres
+      - DB_DBNAME=postgres
+      - DB_SSL=disable
+      - LOG_LEVEL=${LOG_LEVEL:-default}
+    depends_on:
+      - ${DB_AUTH}
+    container_name: ${SVC_AUTH}
+
+  db-ads:
+    build:
+      context: ./${DB_ADS}/build
+      target: ${DB_ADS}
+    image: ${DB_ADS}:latest
+    restart: always
+    environment:
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_USER=postgres
+    ports:
+      - ${DB_ADS_PORT}:5432
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    container_name: ${DB_ADS}
+
+  db-auth:
+    build:
+      context: ./${DB_AUTH}/build
+      target: ${DB_AUTH}
+    image: ${DB_AUTH}:latest
+    restart: always
+    environment:
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_USER=postgres
+    ports:
+      - ${DB_AUTH_PORT}:5432
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    container_name: ${DB_AUTH}
+

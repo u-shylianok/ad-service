@@ -16,7 +16,7 @@ type Repository struct {
 //counterfeiter:generate --fake-name AdMock -o ../testing/mocks/repository/ad.go . Ad
 type Ad interface {
 	Create(userID int, ad model.AdRequest) (int, error)
-	Get(adID int, fields model.AdOptionalFieldsParam) (model.Ad, error)
+	Get(adID uint32, fields model.AdOptionalFieldsParam) (model.Ad, error)
 	List(params []model.AdsSortingParam) ([]model.Ad, error)
 	ListWithFilter(filter model.AdFilter) ([]model.Ad, error)
 	Update(userID, adID int, ad model.AdRequest) error

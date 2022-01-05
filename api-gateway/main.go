@@ -1,14 +1,88 @@
 package main
 
 import (
-	"log"
+	"context"
+	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
+	"time"
 
-	pbAds "github.com/u-shylianok/ad-service/svc-ads/client/ad"
+	log "github.com/sirupsen/logrus"
+	"github.com/u-shylianok/ad-service/api-gateway/grpc/client"
+	"github.com/u-shylianok/ad-service/api-gateway/handler"
 )
 
+const (
+	MaxHeaderBytes = 1 << 20 // 1 MB
+	ReadTimeout    = 10 * time.Second
+	WriteTimeout   = 10 * time.Second
+)
+
+type Server struct {
+	httpServer *http.Server
+}
+
 func main() {
+	setupGlobalLogger()
 
-	adsClient := pbAds.NewAdServiceClient(nil)
+	log.Info("start connection")
+	conn, err := client.OpenConnection(os.Getenv("SVC_ADS_ADDRESS"), os.Getenv("SVC_AUTH_ADDRESS"))
+	if err != nil {
+		log.Fatalf("did not connect: %v", err)
+	}
+	defer conn.Close()
+	log.Info("connection started")
 
-	log.Println(adsClient)
+	clients := client.NewClient(conn)
+	handlers := handler.NewHandler(clients)
+
+	srv := new(Server)
+	go func() {
+		if err := srv.Run(os.Getenv("PORT"), handlers.InitRoutes()); err != nil {
+			log.Fatalf("error occured while running http server: %s", err)
+		}
+	}()
+
+	log.Info("ads service started")
+
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, syscall.SIGTERM, syscall.SIGINT)
+	<-quit
+
+	log.Info("ads service shutting Down")
+
+	if err := srv.Shutdown(context.Background()); err != nil {
+		log.Errorf("error occured on server shutting down: %s", err)
+	}
+}
+
+func (s *Server) Run(port string, handler http.Handler) error {
+	s.httpServer = &http.Server{
+		Addr:           ":" + port,
+		Handler:        handler,
+		MaxHeaderBytes: MaxHeaderBytes,
+		ReadTimeout:    ReadTimeout,
+		WriteTimeout:   WriteTimeout,
+	}
+	log.Println(s)
+	return s.httpServer.ListenAndServe()
+}
+
+func (s *Server) Shutdown(ctx context.Context) error {
+	return s.httpServer.Shutdown(ctx)
+}
+
+func setupGlobalLogger() {
+	logLevel := os.Getenv("LOG_LEVEL")
+	if logLevel != "" {
+		level, err := log.ParseLevel(logLevel)
+		if err != nil {
+			log.WithError(err).Error("failed to parse log level from env")
+		} else {
+			log.SetLevel(level)
+		}
+	}
+	log.SetFormatter(&log.JSONFormatter{})
+	log.WithField("log_level", logLevel).Info("logger initialised")
 }

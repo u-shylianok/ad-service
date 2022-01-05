@@ -39,7 +39,7 @@ func (r *AdPostgres) Create(userID int, ad model.AdRequest) (int, error) {
 	return adID, tx.Commit()
 }
 
-func (r *AdPostgres) Get(adID int, fields model.AdOptionalFieldsParam) (model.Ad, error) {
+func (r *AdPostgres) Get(adID uint32, fields model.AdOptionalFieldsParam) (model.Ad, error) {
 	var ad model.Ad
 
 	var fieldsQuery string

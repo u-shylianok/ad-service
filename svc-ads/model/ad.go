@@ -65,8 +65,8 @@ func (r AdRequest) Validate() error {
 }
 
 type Ad struct {
-	ID          int       `db:"id"`
-	UserID      int       `db:"user_id"`
+	ID          uint32    `db:"id"`
+	UserID      uint32    `db:"user_id"`
 	Name        string    `db:"name"`
 	Date        time.Time `db:"date"`
 	Price       int       `db:"price"`
@@ -75,7 +75,7 @@ type Ad struct {
 }
 
 type AdResponse struct {
-	ID          int          `json:"id"`
+	ID          uint32       `json:"id"`
 	User        UserResponse `json:"user"`
 	Name        string       `json:"name"`
 	Date        time.Time    `json:"date"`
@@ -100,7 +100,7 @@ func (m Ad) ToResponse(user User, photos *[]string, tags *[]string) AdResponse {
 	}
 }
 
-func ConvertAdsToResponse(ads []Ad, usersMap map[int]User) []AdResponse {
+func ConvertAdsToResponse(ads []Ad, usersMap map[uint32]User) []AdResponse {
 	result := make([]AdResponse, len(ads))
 
 	for i, ad := range ads {

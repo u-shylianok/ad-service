@@ -1,64 +1,67 @@
-.PHONY: deps build up start debug-start down clean cleanall tidy test $(TOOLS) tools mocks lint gen-proto
-
-SERVICE_NAME ?= ad-service
-BINDIR ?= build/app
+.PHONY: build up start debug-start down clean cleanall tidy test $(TOOLS) tools gen_mocks gen_proto lint
 
 TOOLS += github.com/maxbrunsfeld/counterfeiter/v6
 
-APP_CONTAINER_NAME ?= $(SERVICE_NAME)-app
-DB_CONTAINER_NAME ?= $(SERVICE_NAME)-db-pg
+API_GATEWAY ?= api-gateway
+SVC_ADS ?= svc-ads
+SVC_AUTH ?= svc-auth
+DB_ADS ?= db-ads
+DB_AUTH ?= db-auth
+
+CONTAINERS ?= $(API_GATEWAY) $(SVC_ADS) $(SVC_AUTH) $(DB_ADS) $(DB_AUTH)
 
 INFO ?= [MAKE INFO]:
 ERROR ?= [MAKE ERROR]:
 
-deps:
-	$(info $(INFO) download dependency packages)
-	GO111MODULE=on go mod download
-
-build: deps
-	$(info $(INFO) build binary file and docker containers)
-	GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -o $(BINDIR)/$(SERVICE_NAME) cmd/ad/*.go
+build:
+	cd $(API_GATEWAY) && $(MAKE) --silent build
+	cd $(SVC_ADS) && $(MAKE) --silent build
+	cd $(SVC_AUTH) && $(MAKE) --silent build
 	docker-compose build
 
 up:
-	$(info $(INFO) starting application...)
 	docker-compose up
 
 start: build up
 
 debug-start:
-	LOG_LEVEL=debug make start
+	LOG_LEVEL=debug $(MAKE) start
 
 down:
 	docker-compose down
 
 clean:
-	rm $(BINDIR)/$(SERVICE_NAME)
-	docker stop $(APP_CONTAINER_NAME) $(DB_CONTAINER_NAME)
-	docker rm $(APP_CONTAINER_NAME) $(DB_CONTAINER_NAME)
+	cd $(API_GATEWAY) && $(MAKE) --silent clean
+	cd $(SVC_ADS) && $(MAKE) --silent clean
+	cd $(SVC_AUTH) && $(MAKE) --silent clean
+	docker stop $(CONTAINERS)
+	docker rm $(CONTAINERS)
 
 cleanall: clean
-	docker rmi $(APP_CONTAINER_NAME) $(DB_CONTAINER_NAME)
+	docker rmi $(CONTAINERS)
 
 tidy:
-	go mod tidy
+	cd $(API_GATEWAY) && $(MAKE) --silent tidy
+	cd $(SVC_ADS) && $(MAKE) --silent tidy
+	cd $(SVC_AUTH) && $(MAKE) --silent tidy
 
 test:
-	go test -race ./...
+	cd $(API_GATEWAY) && $(MAKE) --silent test
+	cd $(SVC_ADS) && $(MAKE) --silent test
+	cd $(SVC_AUTH) && $(MAKE) --silent test
 
 $(TOOLS): %:
 	GOBIN=$(GOBIN) go install $*
 
 tools: deps $(TOOLS)
 
-mocks:
-	@go generate ./...
+gen_mocks:
+	cd $(SVC_ADS) && $(MAKE) --silent gen_mocks
+	cd $(SVC_AUTH) && $(MAKE) --silent gen_mocks
+
+gen_proto:
+	cd $(SVC_ADS) && $(MAKE) --silent gen_proto
+	cd $(SVC_AUTH) && $(MAKE) --silent gen_proto
 
 lint:
-	golangci-lint run ./...
-
-gen-proto:
-	protoc --proto_path=proto \
-	--go_out=svc-ads \
-	--go-grpc_out=. \
-	svc_ads.proto
+	golangci-lint run ./$(SVC_ADS)/...

@@ -17,7 +17,6 @@ coverage.xml
 .ropeproject
 .*rc
 .env/*
-.env
 env/*
 actions-runner/
 .elasticbeanstalk

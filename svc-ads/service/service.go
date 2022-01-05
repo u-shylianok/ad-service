@@ -12,12 +12,12 @@ type Service struct {
 }
 
 type Ad interface {
-	ListAds(params []model.AdsSortingParam) ([]model.AdResponse, error)
-	SearchAds(filter model.AdFilter) ([]model.AdResponse, error)
-	GetAd(adID int, fields model.AdOptionalFieldsParam) (model.AdResponse, error)
-	CreateAd(userID int, ad model.AdRequest) (int, error)
-	UpdateAd(userID, adID int, ad model.AdRequest) error
-	DeleteAd(userID, adID int) error
+	// ListAds(params []model.AdsSortingParam) ([]model.AdResponse, error)
+	// SearchAds(filter model.AdFilter) ([]model.AdResponse, error)
+	GetAd(adID uint32, fields model.AdOptionalFieldsParam) (model.AdResponse, error)
+	// CreateAd(userID int, ad model.AdRequest) (int, error)
+	// UpdateAd(userID, adID int, ad model.AdRequest) error
+	// DeleteAd(userID, adID int) error
 }
 
 type Photo interface {
@@ -32,7 +32,7 @@ type Tag interface {
 
 func NewService(repos *repository.Repository) *Service {
 	return &Service{
-		Ad:    NewAdService(repos.Ad, repos.User, repos.Photo, repos.Tag),
+		Ad:    NewAdService(repos.Ad, repos.Photo, repos.Tag),
 		Photo: NewPhotoService(repos.Photo),
 		Tag:   NewTagService(repos.Tag),
 	}
