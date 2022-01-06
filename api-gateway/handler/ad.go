@@ -96,7 +96,7 @@ func (h *Handler) getAd(c *gin.Context) {
 
 	log.Println("GetAd")
 
-	id, err := strconv.ParseUint(c.Param("id"), 10, 0)
+	id, err := strconv.ParseUint(c.Param("id"), 10, 32)
 	if err != nil {
 		log.WithError(err).Error("failed to read id URL param")
 		newErrorResponse(c, http.StatusBadRequest, "invalid ad id param")
@@ -104,7 +104,7 @@ func (h *Handler) getAd(c *gin.Context) {
 	}
 	log.WithField("id", id).Debug("id param read successfully")
 
-	ad, err := h.clients.Ad.GetAd(context.Background(), &pbAds.GetAdRequest{Id: uint32(id)})
+	ad, err := h.clients.AdsService.GetAd(context.Background(), &pbAds.GetAdRequest{Id: uint32(id)})
 	if err != nil {
 		log.WithError(err).Error("failed to get ad")
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())

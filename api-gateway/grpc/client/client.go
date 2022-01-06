@@ -13,8 +13,8 @@ type Connection struct {
 }
 
 type Client struct {
-	Ad   pbAds.AdServiceClient
-	Auth pbAuth.AuthServiceClient
+	AdsService  pbAds.AdServiceClient
+	AuthService pbAuth.AuthServiceClient
 }
 
 func OpenConnection(adsAddress, authAddress string) (*Connection, error) {
@@ -43,7 +43,7 @@ func (c *Connection) Close() {
 
 func NewClient(conn *Connection) *Client {
 	return &Client{
-		Ad:   pbAds.NewAdServiceClient(conn.Ads),
-		Auth: pbAuth.NewAuthServiceClient(conn.Auth),
+		AdsService:  pbAds.NewAdServiceClient(conn.Ads),
+		AuthService: pbAuth.NewAuthServiceClient(conn.Auth),
 	}
 }

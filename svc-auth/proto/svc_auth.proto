@@ -10,6 +10,7 @@ service AuthService {
 
     rpc Identify(IdentifyRequest) returns (IdentifyResponse) {}
     rpc GetUserID(GetUserIDRequest) returns (GetUserIDResponse) {}
+    rpc GetUser(GetUserRequest) returns (GetUserResponse) {}
 }
 
 message User {
@@ -49,4 +50,12 @@ message GetUserIDRequest {
 
 message GetUserIDResponse {
     uint32 id = 1;
+}
+
+message GetUserRequest {
+    uint32 id = 1;
+}
+
+message GetUserResponse {
+    User user = 1;
 }

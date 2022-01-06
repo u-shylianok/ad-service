@@ -4,6 +4,7 @@ import (
 	"context"
 
 	pb "github.com/u-shylianok/ad-service/svc-ads/client/ads"
+	"github.com/u-shylianok/ad-service/svc-ads/grpc/client"
 	"github.com/u-shylianok/ad-service/svc-ads/model"
 	"github.com/u-shylianok/ad-service/svc-ads/service"
 	"google.golang.org/protobuf/types/known/timestamppb"
@@ -13,10 +14,14 @@ type Server struct {
 	pb.UnimplementedAdServiceServer
 
 	Service *service.Service
+	clients *client.Client
 }
 
-func NewServer(service *service.Service) *Server {
-	return &Server{Service: service}
+func NewServer(service *service.Service, clients *client.Client) *Server {
+	return &Server{
+		Service: service,
+		clients: clients,
+	}
 }
 
 // func (s *Server) ListAds(ctx context.Context, req *pb.ListAdsRequest) (*pb.ListAdsResponse, error) {
