@@ -22,46 +22,46 @@ func (h *Handler) InitRoutes() *gin.Engine {
 	// gin.SetMode(gin.ReleaseMode) // set if release
 	router := gin.New()
 
-	// auth := router.Group("/auth")
-	// {
-	// 	auth.POST("/signup", h.signUp)
-	// 	auth.POST("/signin", h.signIn)
-	// }
+	auth := router.Group("/auth")
+	{
+		auth.POST("/signup", h.signUp)
+		auth.POST("/signin", h.signIn)
+	}
 
-	// authorized := router.Group("/", h.userIdentity)
-	// {
-	// 	ads := authorized.Group("/ads")
-	// 	{
-	// 		ads.POST("/", h.createAd)
-	// 		ads.PUT("/:id", h.updateAd)
-	// 		ads.DELETE("/:id", h.deleteAd)
-	// 	}
-	// }
+	authorized := router.Group("/", h.userIdentity)
+	{
+		ads := authorized.Group("/ads")
+		{
+			ads.POST("/", h.createAd)
+			ads.PUT("/:id", h.updateAd)
+			ads.DELETE("/:id", h.deleteAd)
+		}
+	}
 
 	ads := router.Group("/ads")
 	{
-		// ads.GET("/", h.listAds)
-		// ads.GET("/search", h.searchAds)
+		ads.GET("/", h.listAds)
+		ads.GET("/search", h.searchAds)
 		ads.GET("/:id", h.getAd)
 
-		// photos := ads.Group(":id/photos")
-		// {
-		// 	photos.GET("/", h.listAdPhotos)
-		// }
-		// tags := ads.Group(":id/tags")
-		// {
-		// 	tags.GET("/", h.listAdTags)
-		// }
+		photos := ads.Group(":id/photos")
+		{
+			photos.GET("/", h.listAdPhotos)
+		}
+		tags := ads.Group(":id/tags")
+		{
+			tags.GET("/", h.listAdTags)
+		}
 	}
 
-	// tags := router.Group("/tags")
-	// {
-	// 	tags.GET("/", h.listTags)
-	// }
-	// photos := router.Group("/photos")
-	// {
-	// 	photos.GET("/", h.listPhotos)
-	// }
+	tags := router.Group("/tags")
+	{
+		tags.GET("/", h.listTags)
+	}
+	photos := router.Group("/photos")
+	{
+		photos.GET("/", h.listPhotos)
+	}
 
 	return router
 }

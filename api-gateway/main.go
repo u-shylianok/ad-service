@@ -26,16 +26,15 @@ type Server struct {
 func main() {
 	setupGlobalLogger()
 
-	log.Info("start connection")
-	conn, err := client.OpenConnection(os.Getenv("SVC_ADS_ADDRESS"), os.Getenv("SVC_AUTH_ADDRESS"))
+	log.Info("start gRPC clients connection")
+	grpcClients, err := client.New(os.Getenv("SVC_ADS_ADDRESS"), os.Getenv("SVC_AUTH_ADDRESS"))
 	if err != nil {
 		log.Fatalf("did not connect: %v", err)
 	}
-	defer conn.Close()
+	defer grpcClients.Close()
 	log.Info("connection started")
 
-	clients := client.NewClient(conn)
-	handlers := handler.NewHandler(clients)
+	handlers := handler.NewHandler(grpcClients)
 
 	srv := new(Server)
 	go func() {
@@ -44,13 +43,13 @@ func main() {
 		}
 	}()
 
-	log.Info("ads service started")
+	log.Info("api-gateway started")
 
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGTERM, syscall.SIGINT)
 	<-quit
 
-	log.Info("ads service shutting Down")
+	log.Info("api-gateway shutting Down")
 
 	if err := srv.Shutdown(context.Background()); err != nil {
 		log.Errorf("error occured on server shutting down: %s", err)

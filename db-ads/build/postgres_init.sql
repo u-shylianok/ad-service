@@ -1,11 +1,3 @@
-CREATE TABLE users
-(
-    id          SERIAL PRIMARY KEY,
-    name        TEXT NOT NULL,
-    username    TEXT NOT NULL,
-    password    TEXT NOT NULL
-);
-
 CREATE TABLE ads
 (
     id          SERIAL PRIMARY KEY,
@@ -14,8 +6,7 @@ CREATE TABLE ads
     date        TIMESTAMP DEFAULT NOW(),
     price       INTEGER NOT NULL,
     photo       TEXT NOT NULL,
-    description VARCHAR(1000),
-    FOREIGN KEY (user_id) REFERENCES users(id)
+    description VARCHAR(1000)
 );
 
 CREATE TABLE photos
@@ -40,9 +31,6 @@ CREATE TABLE ads_tags
     FOREIGN KEY (ad_id) REFERENCES ads(id) ON DELETE CASCADE,
     FOREIGN KEY (tag_id) REFERENCES tags(id) ON DELETE CASCADE
 );
-
-INSERT INTO users(name, username, password) VALUES
-    ('Тестовый пользователь', 'test', '$2a$10$1hN6TfPRPS9usxbx9DVoY.ix6a8o.kxsednj6CPTkHujR2JGbvLXG'); -- u: test, p: test
 
 INSERT INTO ads(user_id, name, date, price, photo, description) VALUES
     (1, 'Объявление 1', '2021-10-11', 1000, 'https://picsum.photos/id/101/200/200', 'Тестовое объявление 1'),

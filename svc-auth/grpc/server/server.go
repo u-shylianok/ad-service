@@ -18,27 +18,32 @@ func NewServer(service *service.Service) *Server {
 	return &Server{Service: service}
 }
 
-func (s *Server) SignUp(context.Context, *pb.SignUpRequest) (*pb.User, error) {
-	logrus.Fatal("SignUp")
+func (s *Server) SignUp(ctx context.Context, in *pb.SignUpRequest) (*pb.User, error) {
+	logrus.WithField("in", in).Error("SignUp")
 	return nil, nil
 }
 
-func (s *Server) SignIn(context.Context, *pb.SignInRequest) (*pb.SignInResponse, error) {
-	logrus.Fatal("SignIn")
+func (s *Server) SignIn(ctx context.Context, in *pb.SignInRequest) (*pb.SignInResponse, error) {
+	logrus.WithField("in", in).Error("SignUp")
 	return nil, nil
 }
 
-func (s *Server) Identify(context.Context, *pb.IdentifyRequest) (*pb.IdentifyResponse, error) {
-	logrus.Fatal("Identify")
+func (s *Server) ParseToken(ctx context.Context, in *pb.ParseTokenRequest) (*pb.ParseTokenResponse, error) {
+	logrus.WithField("in", in).Error("ParseToken")
 	return nil, nil
 }
 
-func (s *Server) GetUserID(context.Context, *pb.GetUserIDRequest) (*pb.GetUserIDResponse, error) {
-	logrus.Fatal("GetUserID")
+func (s *Server) Identify(ctx context.Context, in *pb.IdentifyRequest) (*pb.IdentifyResponse, error) {
+	logrus.WithField("in", in).Error("SignUp")
 	return nil, nil
 }
 
-func (s *Server) GetUser(context.Context, *pb.GetUserRequest) (*pb.GetUserResponse, error) {
-	logrus.Fatal("GetUser")
+func (s *Server) GetUserID(ctx context.Context, in *pb.GetUserIDRequest) (*pb.GetUserIDResponse, error) {
+	logrus.WithField("in", in).Error("SignUp")
+	return nil, nil
+}
+
+func (s *Server) GetUser(ctx context.Context, in *pb.GetUserRequest) (*pb.GetUserResponse, error) {
+	logrus.WithField("in", in).Error("SignUp")
 	return nil, nil
 }

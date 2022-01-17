@@ -6,32 +6,27 @@ import (
 	"google.golang.org/grpc"
 )
 
-type Connection struct {
-	Auth *grpc.ClientConn
-}
-
 type Client struct {
+	authConn    *grpc.ClientConn
 	AuthService pbAuth.AuthServiceClient
 }
 
-func OpenConnection(adsAddress, authAddress string) (*Connection, error) {
-	connAuth, err := grpc.Dial(authAddress, grpc.WithInsecure(), grpc.WithBlock())
+func New(authAddress string) (*Client, error) {
+	var newClient *Client
+
+	authConn, err := grpc.Dial(authAddress, grpc.WithInsecure(), grpc.WithBlock())
 	if err != nil {
 		return nil, err
 	}
-	return &Connection{
-		Auth: connAuth,
-	}, nil
+
+	newClient.AuthService = pbAuth.NewAuthServiceClient(authConn)
+	newClient.authConn = authConn
+
+	return newClient, nil
 }
 
-func (c *Connection) Close() {
-	if err := c.Auth.Close(); err != nil {
+func (c *Client) Close() {
+	if err := c.authConn.Close(); err != nil {
 		log.WithError(err).Error("failed to close Auth connection")
-	}
-}
-
-func NewClient(conn *Connection) *Client {
-	return &Client{
-		AuthService: pbAuth.NewAuthServiceClient(conn.Auth),
 	}
 }

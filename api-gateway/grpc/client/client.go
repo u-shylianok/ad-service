@@ -7,43 +7,38 @@ import (
 	"google.golang.org/grpc"
 )
 
-type Connection struct {
-	Ads  *grpc.ClientConn
-	Auth *grpc.ClientConn
-}
-
 type Client struct {
+	adsConn     *grpc.ClientConn
+	authConn    *grpc.ClientConn
 	AdsService  pbAds.AdServiceClient
 	AuthService pbAuth.AuthServiceClient
 }
 
-func OpenConnection(adsAddress, authAddress string) (*Connection, error) {
-	connAds, err := grpc.Dial(adsAddress, grpc.WithInsecure(), grpc.WithBlock())
+func New(adsAddress, authAddress string) (*Client, error) {
+	var newClient *Client
+
+	adsConn, err := grpc.Dial(adsAddress, grpc.WithInsecure(), grpc.WithBlock())
 	if err != nil {
 		return nil, err
 	}
-	// connAuth, err := grpc.Dial(authAddress, grpc.WithInsecure(), grpc.WithBlock())
-	// if err != nil {
-	// 	return nil, err
-	// }
-	return &Connection{
-		Ads:  connAds,
-		Auth: nil,
-	}, nil
+	authConn, err := grpc.Dial(authAddress, grpc.WithInsecure(), grpc.WithBlock())
+	if err != nil {
+		return nil, err
+	}
+
+	newClient.AdsService = pbAds.NewAdServiceClient(adsConn)
+	newClient.AuthService = pbAuth.NewAuthServiceClient(authConn)
+	newClient.adsConn = adsConn
+	newClient.authConn = authConn
+
+	return newClient, nil
 }
 
-func (c *Connection) Close() {
-	if err := c.Ads.Close(); err != nil {
+func (c *Client) Close() {
+	if err := c.adsConn.Close(); err != nil {
 		log.WithError(err).Error("failed to close Ad connection")
 	}
-	if err := c.Auth.Close(); err != nil {
+	if err := c.authConn.Close(); err != nil {
 		log.WithError(err).Error("failed to close Auth connection")
-	}
-}
-
-func NewClient(conn *Connection) *Client {
-	return &Client{
-		AdsService:  pbAds.NewAdServiceClient(conn.Ads),
-		AuthService: pbAuth.NewAuthServiceClient(conn.Auth),
 	}
 }

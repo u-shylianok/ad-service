@@ -3,6 +3,8 @@ package server
 import (
 	"context"
 
+	"github.com/golang/protobuf/ptypes/empty"
+	"github.com/sirupsen/logrus"
 	pb "github.com/u-shylianok/ad-service/svc-ads/client/ads"
 	"github.com/u-shylianok/ad-service/svc-ads/grpc/client"
 	"github.com/u-shylianok/ad-service/svc-ads/model"
@@ -17,21 +19,12 @@ type Server struct {
 	clients *client.Client
 }
 
-func NewServer(service *service.Service, clients *client.Client) *Server {
+func New(service *service.Service, clients *client.Client) *Server {
 	return &Server{
 		Service: service,
 		clients: clients,
 	}
 }
-
-// func (s *Server) ListAds(ctx context.Context, req *pb.ListAdsRequest) (*pb.ListAdsResponse, error) {
-// 	s.Service.Ad.ListAds(nil)
-// 	return nil, nil
-// }
-
-// func (s *Server) SearchAds(context.Context, *pb.SearchAdsRequest) (*pb.SearchAdsResponse, error) {
-// 	return nil, nil
-// }
 
 func (s *Server) GetAd(ctx context.Context, in *pb.GetAdRequest) (*pb.Ad, error) {
 	ad, err := s.Service.GetAd(in.GetId(), model.AdOptionalFieldsParam{})
@@ -51,22 +44,37 @@ func (s *Server) GetAd(ctx context.Context, in *pb.GetAdRequest) (*pb.Ad, error)
 	return out, nil
 }
 
-// func (s *Server) CreateAd(context.Context, *pb.CreateAdRequest) (*pb.Ad, error) {
-// 	return nil, nil
-// }
+func (s *Server) ListAds(ctx context.Context, in *pb.ListAdsRequest) (*pb.ListAdsResponse, error) {
+	logrus.WithField("in", in).Error("ListAds")
+	return nil, nil
+}
 
-// func (s *Server) UpdateAd(context.Context, *pb.UpdateAdRequest) (*pb.Ad, error) {
-// 	return nil, nil
-// }
+func (s *Server) SearchAds(ctx context.Context, in *pb.SearchAdsRequest) (*pb.SearchAdsResponse, error) {
+	logrus.WithField("in", in).Error("SearchAds")
+	return nil, nil
+}
 
-// func (s *Server) DeleteAd(context.Context, *pb.DeleteAdRequest) (*empty.Empty, error) {
-// 	return nil, nil
-// }
+func (s *Server) CreateAd(ctx context.Context, in *pb.CreateAdRequest) (*pb.Ad, error) {
+	logrus.WithField("in", in).Error("CreateAd")
+	return nil, nil
+}
 
-// func (s *Server) ListPhotos(context.Context, *pb.ListPhotosRequest) (*pb.ListPhotosResponse, error) {
-// 	return nil, nil
-// }
+func (s *Server) UpdateAd(ctx context.Context, in *pb.UpdateAdRequest) (*pb.Ad, error) {
+	logrus.WithField("in", in).Error("UpdateAd")
+	return nil, nil
+}
 
-// func (s *Server) ListTags(context.Context, *pb.ListTagsRequest) (*pb.ListTagsResponse, error) {
-// 	return nil, nil
-// }
+func (s *Server) DeleteAd(ctx context.Context, in *pb.DeleteAdRequest) (*empty.Empty, error) {
+	logrus.WithField("in", in).Error("DeleteAd")
+	return nil, nil
+}
+
+func (s *Server) ListPhotos(ctx context.Context, in *pb.ListPhotosRequest) (*pb.ListPhotosResponse, error) {
+	logrus.WithField("in", in).Error("ListPhotos")
+	return nil, nil
+}
+
+func (s *Server) ListTags(ctx context.Context, in *pb.ListTagsRequest) (*pb.ListTagsResponse, error) {
+	logrus.WithField("in", in).Error("ListTags")
+	return nil, nil
+}

@@ -9,6 +9,7 @@ import (
 	_ "github.com/jackc/pgx/v4/stdlib"
 	log "github.com/sirupsen/logrus"
 	pb "github.com/u-shylianok/ad-service/svc-ads/client/ads"
+	"github.com/u-shylianok/ad-service/svc-ads/grpc/client"
 	"github.com/u-shylianok/ad-service/svc-ads/grpc/server"
 	"github.com/u-shylianok/ad-service/svc-ads/model"
 	"github.com/u-shylianok/ad-service/svc-ads/repository"
@@ -31,6 +32,14 @@ func main() {
 		log.Fatalf("failed to initialize db: %s", err)
 	}
 
+	log.Info("start gRPC clients connection")
+	grpcClients, err := client.New(os.Getenv("SVC_AUTH_ADDRESS"))
+	if err != nil {
+		log.Fatalf("did not connect: %v", err)
+	}
+	defer grpcClients.Close()
+	log.Info("connection started")
+
 	repos := repository.NewRepository(db)
 	services := service.NewService(repos)
 	result, err := services.Ad.GetAd(1, model.AdOptionalFieldsParam{})
@@ -46,7 +55,7 @@ func main() {
 			log.Fatalf("failed to listen: %v", err)
 		}
 
-		server := server.NewServer(services)
+		server := server.New(services, grpcClients)
 		pb.RegisterAdServiceServer(srv, server)
 		if err := srv.Serve(lis); err != nil {
 			log.Fatalf("failed to serve: %v", err)

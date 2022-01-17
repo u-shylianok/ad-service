@@ -21,33 +21,33 @@ func NewAdService(adRepo repository.Ad, photoRepo repository.Photo,
 	}
 }
 
-// func (s *AdService) CreateAd(userID int, ad model.AdRequest) (int, error) {
-// 	adID, err := s.adRepo.Create(userID, ad)
-// 	if err != nil {
-// 		return adID, err
-// 	}
+func (s *AdService) CreateAd(userID int, ad model.AdRequest) (int, error) {
+	adID, err := s.adRepo.Create(userID, ad)
+	if err != nil {
+		return adID, err
+	}
 
-// 	if ad.OtherPhotos != nil {
-// 		if err := s.photoRepo.CreateList(adID, *ad.OtherPhotos); err != nil {
-// 			return adID, err
-// 		}
-// 	}
+	if ad.OtherPhotos != nil {
+		if err := s.photoRepo.CreateList(adID, *ad.OtherPhotos); err != nil {
+			return adID, err
+		}
+	}
 
-// 	if ad.Tags != nil {
-// 		for _, tagName := range *ad.Tags {
-// 			tagID, err := s.tagRepo.GetIDOrCreateIfNotExists(tagName)
-// 			if err != nil {
-// 				continue
-// 			}
+	if ad.Tags != nil {
+		for _, tagName := range *ad.Tags {
+			tagID, err := s.tagRepo.GetIDOrCreateIfNotExists(tagName)
+			if err != nil {
+				continue
+			}
 
-// 			if err := s.tagRepo.AttachToAd(adID, tagID); err != nil {
-// 				return adID, err
-// 			}
-// 		}
-// 	}
+			if err := s.tagRepo.AttachToAd(adID, tagID); err != nil {
+				return adID, err
+			}
+		}
+	}
 
-// 	return adID, err
-// }
+	return adID, err
+}
 
 // func (s *AdService) ListAds(params []model.AdsSortingParam) ([]model.AdResponse, error) {
 // 	ads, err := s.adRepo.List(params)

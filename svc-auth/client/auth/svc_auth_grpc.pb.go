@@ -20,6 +20,7 @@ const _ = grpc.SupportPackageIsVersion7
 type AuthServiceClient interface {
 	SignUp(ctx context.Context, in *SignUpRequest, opts ...grpc.CallOption) (*User, error)
 	SignIn(ctx context.Context, in *SignInRequest, opts ...grpc.CallOption) (*SignInResponse, error)
+	ParseToken(ctx context.Context, in *ParseTokenRequest, opts ...grpc.CallOption) (*ParseTokenResponse, error)
 	Identify(ctx context.Context, in *IdentifyRequest, opts ...grpc.CallOption) (*IdentifyResponse, error)
 	GetUserID(ctx context.Context, in *GetUserIDRequest, opts ...grpc.CallOption) (*GetUserIDResponse, error)
 	GetUser(ctx context.Context, in *GetUserRequest, opts ...grpc.CallOption) (*GetUserResponse, error)
@@ -45,6 +46,15 @@ func (c *authServiceClient) SignUp(ctx context.Context, in *SignUpRequest, opts 
 func (c *authServiceClient) SignIn(ctx context.Context, in *SignInRequest, opts ...grpc.CallOption) (*SignInResponse, error) {
 	out := new(SignInResponse)
 	err := c.cc.Invoke(ctx, "/svc_auth.AuthService/SignIn", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *authServiceClient) ParseToken(ctx context.Context, in *ParseTokenRequest, opts ...grpc.CallOption) (*ParseTokenResponse, error) {
+	out := new(ParseTokenResponse)
+	err := c.cc.Invoke(ctx, "/svc_auth.AuthService/ParseToken", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -84,6 +94,7 @@ func (c *authServiceClient) GetUser(ctx context.Context, in *GetUserRequest, opt
 type AuthServiceServer interface {
 	SignUp(context.Context, *SignUpRequest) (*User, error)
 	SignIn(context.Context, *SignInRequest) (*SignInResponse, error)
+	ParseToken(context.Context, *ParseTokenRequest) (*ParseTokenResponse, error)
 	Identify(context.Context, *IdentifyRequest) (*IdentifyResponse, error)
 	GetUserID(context.Context, *GetUserIDRequest) (*GetUserIDResponse, error)
 	GetUser(context.Context, *GetUserRequest) (*GetUserResponse, error)
@@ -99,6 +110,9 @@ func (UnimplementedAuthServiceServer) SignUp(context.Context, *SignUpRequest) (*
 }
 func (UnimplementedAuthServiceServer) SignIn(context.Context, *SignInRequest) (*SignInResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SignIn not implemented")
+}
+func (UnimplementedAuthServiceServer) ParseToken(context.Context, *ParseTokenRequest) (*ParseTokenResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ParseToken not implemented")
 }
 func (UnimplementedAuthServiceServer) Identify(context.Context, *IdentifyRequest) (*IdentifyResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Identify not implemented")
@@ -154,6 +168,24 @@ func _AuthService_SignIn_Handler(srv interface{}, ctx context.Context, dec func(
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(AuthServiceServer).SignIn(ctx, req.(*SignInRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AuthService_ParseToken_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ParseTokenRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AuthServiceServer).ParseToken(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/svc_auth.AuthService/ParseToken",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AuthServiceServer).ParseToken(ctx, req.(*ParseTokenRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -226,6 +258,10 @@ var AuthService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "SignIn",
 			Handler:    _AuthService_SignIn_Handler,
+		},
+		{
+			MethodName: "ParseToken",
+			Handler:    _AuthService_ParseToken_Handler,
 		},
 		{
 			MethodName: "Identify",
