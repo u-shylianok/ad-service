@@ -1,69 +1,63 @@
 package handler
 
-// import (
-// 	"net/http"
+import (
+	"context"
+	"net/http"
 
-// 	"github.com/gin-gonic/gin"
-// 	"github.com/sirupsen/logrus"
-// )
+	"github.com/gin-gonic/gin"
+	"github.com/sirupsen/logrus"
+	"github.com/u-shylianok/ad-service/api-gateway/domain/model"
+)
 
-// func (h *Handler) signUp(c *gin.Context) {
-// 	var log = handlerLogger.WithFields(logrus.Fields{
-// 		"method": "signUp",
-// 	})
+func (h *Handler) signUp(c *gin.Context) {
+	var log = handlerLogger.WithFields(logrus.Fields{
+		"method": "signUp",
+	})
 
-// 	var input model.User
-// 	if err := c.BindJSON(&input); err != nil {
-// 		log.WithError(err).Error("failed to bind request JSON to struct")
-// 		newErrorResponse(c, http.StatusBadRequest, "invalid input body")
-// 		return
-// 	}
-// 	log.WithField("input", input).Debug("input bound successfully")
+	var input model.SignUpRequest
+	if err := c.BindJSON(&input); err != nil {
+		log.WithError(err).Error("failed to bind request JSON to struct")
+		newErrorResponse(c, http.StatusBadRequest, "invalid input body")
+		return
+	}
+	log.WithField("input", input).Debug("input bound successfully")
 
-// 	id, err := h.services.Auth.CreateUser(input)
-// 	if err != nil {
-// 		log.WithError(err).Error("failed to create user")
-// 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
-// 		return
-// 	}
-// 	log.WithField("id", id).Debug("user created successfully")
+	response, err := h.clients.AuthService.SignUp(context.Background(), input.ToPb())
+	if err != nil {
+		log.WithError(err).Error("failed to create user")
+		newErrorResponse(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+	log.WithField("id", response.Id).Debug("user created successfully")
 
-// 	c.JSON(http.StatusOK, map[string]interface{}{
-// 		"id": id,
-// 	})
-// }
+	c.JSON(http.StatusOK, map[string]interface{}{
+		"id": response.Id,
+	})
+}
 
-// func (h *Handler) signIn(c *gin.Context) {
-// 	var log = handlerLogger.WithFields(logrus.Fields{
-// 		"method": "signIn",
-// 	})
+func (h *Handler) signIn(c *gin.Context) {
+	var log = handlerLogger.WithFields(logrus.Fields{
+		"method": "signIn",
+	})
 
-// 	var input model.SignInRequest
-// 	if err := c.BindJSON(&input); err != nil {
-// 		log.WithError(err).Error("failed to bind request JSON to struct")
-// 		newErrorResponse(c, http.StatusBadRequest, err.Error())
-// 		return
-// 	}
-// 	log.WithField("input", input).Debug("input bound successfully")
+	var input model.SignInRequest
+	if err := c.BindJSON(&input); err != nil {
+		log.WithError(err).Error("failed to bind request JSON to struct")
+		newErrorResponse(c, http.StatusBadRequest, err.Error())
+		return
+	}
+	log.WithField("input", input).Debug("input bound successfully")
 
-// 	id, err := h.services.Auth.CheckUser(input.Username, input.Password)
-// 	if err != nil {
-// 		log.WithError(err).Error("failed to check user by username and password")
-// 		newErrorResponse(c, http.StatusUnauthorized, "incorrect username or password")
-// 		return
-// 	}
-// 	log.WithField("userID", id).Debug("user verified successfully")
+	response, err := h.clients.AuthService.SignIn(context.Background(), input.ToPb())
+	if err != nil {
+		log.WithError(err).Error("failed to sign in")
+		newErrorResponse(c, http.StatusUnauthorized, "failed to sign in:"+err.Error())
+		return
+	}
+	log.WithField("token", response.Token).Debug("token generated successfully")
 
-// 	token, expiresAt, err := h.services.Auth.GenerateToken(id)
-// 	if err != nil {
-// 		log.WithError(err).Error("failed to generate token")
-// 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
-// 		return
-// 	}
-// 	log.WithField("token", token).Debug("token generated successfully")
-
-// 	c.JSON(http.StatusOK, map[string]interface{}{
-// 		"token":      token,
-// 		"expires_at": expiresAt,
-// 	})
-// }
+	c.JSON(http.StatusOK, map[string]interface{}{
+		"token":      response.Token,
+		"expires_at": response.ExpiresAt,
+	})
+}
