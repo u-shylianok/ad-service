@@ -3,10 +3,10 @@ package handler
 import (
 	"context"
 	"net/http"
-	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
+	"github.com/u-shylianok/ad-service/api-gateway/domain/model"
 	pbAds "github.com/u-shylianok/ad-service/svc-ads/client/ads"
 )
 
@@ -17,7 +17,7 @@ func (h *Handler) getAd(c *gin.Context) {
 
 	log.Println("GetAd")
 
-	id, err := strconv.ParseUint(c.Param("id"), 10, 32)
+	id, err := getUint32(c.Param("id"))
 	if err != nil {
 		log.WithError(err).Error("failed to read id URL param")
 		newErrorResponse(c, http.StatusBadRequest, "invalid ad id param")
@@ -25,7 +25,10 @@ func (h *Handler) getAd(c *gin.Context) {
 	}
 	log.WithField("id", id).Debug("id param read successfully")
 
-	ad, err := h.clients.AdsService.GetAd(context.Background(), &pbAds.GetAdRequest{Id: uint32(id)})
+	optional := model.GetAdOptionalRequestFromURL(c.Request.URL.Query())
+	log.WithField("fields", optional).Debug("optional fields was formed")
+
+	ad, err := h.clients.AdsService.GetAd(context.Background(), &pbAds.GetAdRequest{Id: id, Optional: optional})
 	if err != nil {
 		log.WithError(err).Error("failed to get ad")
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
@@ -36,33 +39,6 @@ func (h *Handler) getAd(c *gin.Context) {
 	c.JSON(http.StatusOK, ad)
 }
 
-// func (h *Handler) getAd(c *gin.Context) {
-// 	var log = handlerLogger.WithFields(logrus.Fields{
-// 		"method": "getAd",
-// 	})
-
-// 	id, err := strconv.Atoi(c.Param("id"))
-// 	if err != nil {
-// 		log.WithError(err).Error("failed to read id URL param")
-// 		newErrorResponse(c, http.StatusBadRequest, "invalid ad id param")
-// 		return
-// 	}
-// 	log.WithField("id", id).Debug("id param read successfully")
-
-// 	fields := model.GetAdOptionalFieldsFromURL(c.Request.URL.Query())
-// 	log.WithField("fields", fields).Debug("optional fields was formed")
-
-// 	ad, err := h.services.Ad.GetAd(id, fields)
-// 	if err != nil {
-// 		log.WithError(err).Error("failed to get ad")
-// 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
-// 		return
-// 	}
-// 	log.WithField("ad", ad).Debug("ad read successfully")
-
-// 	c.JSON(http.StatusOK, ad)
-// }
-
 func (h *Handler) listAds(c *gin.Context) {
 	var log = handlerLogger.WithFields(logrus.Fields{
 		"method": "listAds",
@@ -71,7 +47,7 @@ func (h *Handler) listAds(c *gin.Context) {
 	sortingParams := model.ListAdsSortingParamsFromURL(c.Request.URL.Query())
 	log.WithField("sorting params", sortingParams).Debug("sorting params was formed")
 
-	ads, err := h.services.Ad.ListAds(sortingParams)
+	ads, err := h.clients.AdsService.ListAds(context.Background(), &pbAds.ListAdsRequest{SortingParams: sortingParams})
 	if err != nil {
 		log.WithError(err).Error("failed to get ads")
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
@@ -81,25 +57,6 @@ func (h *Handler) listAds(c *gin.Context) {
 
 	c.JSON(http.StatusOK, ads)
 }
-
-// func (h *Handler) listAds(c *gin.Context) {
-// 	var log = handlerLogger.WithFields(logrus.Fields{
-// 		"method": "listAds",
-// 	})
-
-// 	sortingParams := model.ListAdsSortingParamsFromURL(c.Request.URL.Query())
-// 	log.WithField("sorting params", sortingParams).Debug("sorting params was formed")
-
-// 	ads, err := h.services.Ad.ListAds(sortingParams)
-// 	if err != nil {
-// 		log.WithError(err).Error("failed to get ads")
-// 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
-// 		return
-// 	}
-// 	log.WithField("ads", ads).Debug("ads read successfully")
-
-// 	c.JSON(http.StatusOK, ads)
-// }
 
 func (h *Handler) searchAds(c *gin.Context) {
 	var log = handlerLogger.WithFields(logrus.Fields{
@@ -109,7 +66,7 @@ func (h *Handler) searchAds(c *gin.Context) {
 	filter := model.GetAdFilterFromURL(c.Request.URL.Query())
 	log.WithField("filter", filter).Debug("sorting params was formed")
 
-	ads, err := h.services.Ad.SearchAds(filter)
+	ads, err := h.clients.AdsService.SearchAds(context.Background(), &pbAds.SearchAdsRequest{Filter: filter})
 	if err != nil {
 		log.WithError(err).Error("failed to get ads")
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
@@ -119,25 +76,6 @@ func (h *Handler) searchAds(c *gin.Context) {
 
 	c.JSON(http.StatusOK, ads)
 }
-
-// func (h *Handler) searchAds(c *gin.Context) {
-// 	var log = handlerLogger.WithFields(logrus.Fields{
-// 		"method": "searchAds",
-// 	})
-
-// 	filter := model.GetAdFilterFromURL(c.Request.URL.Query())
-// 	log.WithField("filter", filter).Debug("sorting params was formed")
-
-// 	ads, err := h.services.Ad.SearchAds(filter)
-// 	if err != nil {
-// 		log.WithError(err).Error("failed to get ads")
-// 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
-// 		return
-// 	}
-// 	log.WithField("ads", ads).Debug("ads read successfully")
-
-// 	c.JSON(http.StatusOK, ads)
-// }
 
 func (h *Handler) createAd(c *gin.Context) {
 	var log = handlerLogger.WithFields(logrus.Fields{
@@ -167,16 +105,16 @@ func (h *Handler) createAd(c *gin.Context) {
 	}
 	log.Debug("input validated successfully")
 
-	id, err := h.services.Ad.CreateAd(userID, input)
+	ad, err := h.clients.AdsService.CreateAd(context.Background(), &pbAds.CreateAdRequest{UserId: userID, Ad: input.ToPb()})
 	if err != nil {
 		log.WithError(err).Error("failed to create ad")
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
-	log.WithField("id", id).Debug("ad created successfully")
+	log.WithField("id", ad.Id).Debug("ad created successfully")
 
 	c.JSON(http.StatusCreated, map[string]interface{}{
-		"id": id,
+		"id": ad.Id,
 	})
 }
 
@@ -234,7 +172,7 @@ func (h *Handler) updateAd(c *gin.Context) {
 	}
 	log.WithField("userID", userID).Debug("userID getted successfully")
 
-	id, err := strconv.Atoi(c.Param("id"))
+	id, err := getUint32(c.Param("id"))
 	if err != nil {
 		log.WithError(err).Error("failed to read id URL param")
 		newErrorResponse(c, http.StatusBadRequest, "invalid ad id param")
@@ -257,7 +195,7 @@ func (h *Handler) updateAd(c *gin.Context) {
 	}
 	log.Debug("input validated successfully")
 
-	if err := h.services.Ad.UpdateAd(userID, id, input); err != nil {
+	if _, err := h.clients.AdsService.UpdateAd(context.Background(), &pbAds.UpdateAdRequest{UserId: userID, AdId: id, Ad: input.ToPb()}); err != nil {
 		log.WithError(err).Error("failed to update ad")
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
@@ -330,7 +268,7 @@ func (h *Handler) deleteAd(c *gin.Context) {
 	}
 	log.WithField("userID", userID).Debug("userID getted successfully")
 
-	id, err := strconv.Atoi(c.Param("id"))
+	id, err := getUint32(c.Param("id"))
 	if err != nil {
 		log.WithError(err).Error("failed to read id URL param")
 		newErrorResponse(c, http.StatusBadRequest, "invalid ad id param")
@@ -338,7 +276,7 @@ func (h *Handler) deleteAd(c *gin.Context) {
 	}
 	log.WithField("id", id).Debug("id param read successfully")
 
-	if err := h.services.Ad.DeleteAd(userID, id); err != nil {
+	if _, err := h.clients.AdsService.DeleteAd(context.Background(), &pbAds.DeleteAdRequest{UserId: userID, AdId: id}); err != nil {
 		log.WithError(err).Error("failed to delete ad")
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return

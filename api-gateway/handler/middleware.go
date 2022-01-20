@@ -49,7 +49,7 @@ func (h *Handler) userIdentity(c *gin.Context) {
 	c.Set(UserIDCtxKey, userID)
 }
 
-func getUserID(c *gin.Context) (int, error) {
+func getUserID(c *gin.Context) (uint32, error) {
 	var log = handlerLogger.WithFields(logrus.Fields{
 		"method": "getUserID",
 	})
@@ -60,7 +60,7 @@ func getUserID(c *gin.Context) (int, error) {
 		return 0, fmt.Errorf("user id not found")
 	}
 
-	id, ok := userCtx.(int)
+	id, ok := userCtx.(uint32)
 	if !ok {
 		log.Error("user id is of invalid type")
 		return 0, fmt.Errorf("user id is of invalid type")

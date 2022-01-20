@@ -20,6 +20,82 @@ service AdService {
     rpc ListTags(ListTagsRequest) returns (ListTagsResponse) {}
 }
 
+message GetAdRequest {
+    uint32 id = 1;
+    GetAdOptionalRequest optional = 2;
+}
+
+message GetAdOptionalRequest {
+    bool description = 1;
+	bool photos = 2;
+    bool tags = 3;
+}
+
+message ListAdsRequest {
+    repeated SortingParam sorting_params = 1;
+}
+
+message SortingParam {
+    string field = 1;
+    bool is_desc = 2;
+}
+
+message ListAdsResponse {
+    repeated Ad ads = 1;
+}
+
+message SearchAdsRequest {
+    AdFilter filter = 1;
+}
+
+message AdFilter {
+    string username = 1;
+    google.protobuf.Timestamp start_date = 2;
+    google.protobuf.Timestamp end_date = 3;
+    repeated string tags = 4;
+}
+
+message SearchAdsResponse {
+    repeated Ad ads = 1;
+}
+
+message AdRequest {
+    string name = 1;
+    int32 price = 2;
+    string description = 3;
+    string photo = 4;
+    repeated string photos = 5;
+    repeated string tags = 6;
+}
+
+message CreateAdRequest {
+    uint32 user_id = 1;
+    AdRequest ad = 2;
+}
+
+message UpdateAdRequest {
+    uint32 user_id = 1;
+    uint32 ad_id = 2;
+    AdRequest ad = 3;
+}
+
+message DeleteAdRequest {
+    uint32 user_id = 1;
+    uint32 ad_id = 2;
+}
+
+message Ad {
+    uint32 id = 1;
+    uint32 user_id = 2;
+    string name = 3;
+    google.protobuf.Timestamp date = 4;
+    int32 price = 5;
+    string description = 6;
+    string photo = 7;
+    repeated string photos = 8;
+    repeated string tags = 9;
+}
+
 message ListPhotosRequest {
     uint32 ad_id = 1;
 }
@@ -34,64 +110,4 @@ message ListTagsRequest {
 
 message ListTagsResponse {
     repeated string tags = 1;
-}
-
-message ListAdsRequest {
-    repeated string sortby = 1;
-    repeated string order = 2;
-}
-
-message ListAdsResponse {
-    repeated Ad ads = 1;
-}
-
-message SearchAdsRequest {
-    string username = 1;
-    google.protobuf.Timestamp start_date = 2;
-    google.protobuf.Timestamp end_date = 3;
-    repeated string tags = 4;
-}
-
-message SearchAdsResponse {
-    repeated Ad ads = 1;
-}
-
-message GetAdRequest {
-    uint32 id = 1;
-}
-
-message CreateAdRequest {
-    uint32 user_id = 1;
-    string name = 2;
-    int32 price = 3;
-    string description = 4;
-    string photo = 5;
-    repeated string photos = 6;
-    repeated string tags = 7;
-}
-
-message UpdateAdRequest {
-    uint32 id = 1;
-    string name = 2;
-    int32 price = 3;
-    string description = 4;
-    string photo = 5;
-    repeated string photos = 6;
-    repeated string tags = 7;
-}
-
-message DeleteAdRequest {
-    uint32 id = 1;
-}
-
-message Ad {
-    uint32 id = 1;
-    uint32 user_id = 2;
-    string name = 3;
-    google.protobuf.Timestamp date = 4;
-    int32 price = 5;
-    string description = 6;
-    string photo = 7;
-    repeated string photos = 8;
-    repeated string tags = 9;
 }

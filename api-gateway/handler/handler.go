@@ -1,6 +1,8 @@
 package handler
 
 import (
+	"strconv"
+
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
 	"github.com/u-shylianok/ad-service/api-gateway/grpc/client"
@@ -77,4 +79,12 @@ type statusResponse struct {
 func newErrorResponse(c *gin.Context, statusCode int, message string) {
 	logrus.Error(message)
 	c.AbortWithStatusJSON(statusCode, errorResponse{message})
+}
+
+func getUint32(str string) (uint32, error) {
+	id, err := strconv.ParseUint(str, 10, 32)
+	if err != nil {
+		return 0, err
+	}
+	return uint32(id), err
 }
