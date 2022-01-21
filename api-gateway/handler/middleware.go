@@ -1,12 +1,14 @@
 package handler
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
+	pbAuth "github.com/u-shylianok/ad-service/svc-auth/client/auth"
 )
 
 const (
@@ -39,7 +41,7 @@ func (h *Handler) userIdentity(c *gin.Context) {
 		return
 	}
 
-	userID, err := h.clients.AuthService.ParseToken(headerParts[1])
+	userID, err := h.clients.AuthService.ParseToken(context.Background(), &pbAuth.ParseTokenRequest{Token: headerParts[1]})
 	if err != nil {
 		log.WithError(err).Error("failed to parse token")
 		newErrorResponse(c, http.StatusUnauthorized, err.Error())
