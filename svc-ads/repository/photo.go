@@ -16,14 +16,14 @@ func NewPhotoPostrgres(db *sqlx.DB) *PhotoPostgres {
 	return &PhotoPostgres{db: db}
 }
 
-func (r *PhotoPostgres) Create(adID int, link string) (int, error) {
+func (r *PhotoPostgres) Create(adID uint32, link string) (uint32, error) {
 	tx, err := r.db.Beginx()
 	if err != nil {
 		//logrus.Errorf("[create photo]: error: %s", err.Error())
 		return 0, err
 	}
 
-	var photoID int
+	var photoID uint32
 	createPhotoQuery := "INSERT INTO photos (ad_id, link) VALUES ($1, $2) RETURNING id"
 	row := tx.QueryRow(createPhotoQuery, adID, link)
 	if err := row.Scan(&photoID); err != nil {
@@ -37,7 +37,7 @@ func (r *PhotoPostgres) Create(adID int, link string) (int, error) {
 	return photoID, tx.Commit()
 }
 
-func (r *PhotoPostgres) CreateList(adID int, photos []string) error {
+func (r *PhotoPostgres) CreateList(adID uint32, photos []string) error {
 	tx, err := r.db.Beginx()
 	if err != nil {
 		//logrus.Errorf("[create photos]: error: %s", err.Error())
@@ -74,11 +74,10 @@ func (r *PhotoPostgres) ListLinks() ([]string, error) {
 		//logrus.Error(err)
 		return nil, err
 	}
-
 	return photoLinks, nil
 }
 
-func (r *PhotoPostgres) ListLinksByAd(adID int) ([]string, error) {
+func (r *PhotoPostgres) ListLinksByAd(adID uint32) ([]string, error) {
 	var photoLinks []string
 
 	listAdsQuery := "SELECT link FROM photos WHERE ad_id = $1"
@@ -86,13 +85,11 @@ func (r *PhotoPostgres) ListLinksByAd(adID int) ([]string, error) {
 		//logrus.Error(err)
 		return nil, err
 	}
-
 	return photoLinks, nil
 }
 
-func (r *PhotoPostgres) DeleteAllByAd(adID int) error {
+func (r *PhotoPostgres) DeleteAllByAd(adID uint32) error {
 	deletePhotosQuery := "DELETE FROM photos WHERE ad_id = $1"
 	_, err := r.db.Exec(deletePhotosQuery, adID)
-
 	return err
 }

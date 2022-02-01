@@ -6,7 +6,7 @@ import (
 
 	"github.com/jmoiron/sqlx"
 	"github.com/sirupsen/logrus"
-	"github.com/u-shylianok/ad-service/svc-ads/model"
+	"github.com/u-shylianok/ad-service/svc-ads/domain/model"
 )
 
 type TagPostgres struct {
@@ -17,7 +17,7 @@ func NewTagPostrgres(db *sqlx.DB) *TagPostgres {
 	return &TagPostgres{db: db}
 }
 
-func (r *TagPostgres) Create(name string) (int, error) {
+func (r *TagPostgres) Create(name string) (uint32, error) {
 
 	tx, err := r.db.Beginx()
 	if err != nil {
@@ -25,7 +25,7 @@ func (r *TagPostgres) Create(name string) (int, error) {
 		return 0, err
 	}
 
-	var tagID int
+	var tagID uint32
 	createTagQuery := "INSERT INTO tags (name) VALUES ($1) RETURNING id"
 	row := tx.QueryRow(createTagQuery, name)
 	if err := row.Scan(&tagID); err != nil {
@@ -63,7 +63,7 @@ func (r *TagPostgres) ListNames() ([]string, error) {
 	return tagNames, nil
 }
 
-func (r *TagPostgres) ListNamesByAd(adID int) ([]string, error) {
+func (r *TagPostgres) ListNamesByAd(adID uint32) ([]string, error) {
 	var tagNames []string
 
 	listTagNamesQuery := `
@@ -79,7 +79,7 @@ func (r *TagPostgres) ListNamesByAd(adID int) ([]string, error) {
 	return tagNames, nil
 }
 
-func (r *TagPostgres) AttachToAd(adID int, tagID int) error {
+func (r *TagPostgres) AttachToAd(adID, tagID uint32) error {
 
 	tx, err := r.db.Beginx()
 	if err != nil {
@@ -98,22 +98,22 @@ func (r *TagPostgres) AttachToAd(adID int, tagID int) error {
 	return tx.Commit()
 }
 
-func (r *TagPostgres) DetachFromAd(adID int, tagID int) error {
+func (r *TagPostgres) DetachFromAd(adID, tagID uint32) error {
 	deleteAdsTagQuery := "DELETE FROM ads_tags WHERE ad_id = $1 AND tag_id = $2"
 	_, err := r.db.Exec(deleteAdsTagQuery, adID, tagID)
 
 	return err
 }
 
-func (r *TagPostgres) DetachAllFromAd(adID int) error {
+func (r *TagPostgres) DetachAllFromAd(adID uint32) error {
 	deleteAdsTagsQuery := "DELETE FROM ads_tags WHERE ad_id = $1"
 	_, err := r.db.Exec(deleteAdsTagsQuery, adID)
 
 	return err
 }
 
-func (r *TagPostgres) GetIDOrCreateIfNotExists(tagName string) (int, error) {
-	var tagID int
+func (r *TagPostgres) GetIDOrCreateIfNotExists(tagName string) (uint32, error) {
+	var tagID uint32
 
 	tag, err := r.GetByName(tagName)
 	if err != nil && !errors.Is(err, sql.ErrNoRows) {

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/u-shylianok/ad-service/svc-ads/model"
+	"github.com/u-shylianok/ad-service/svc-ads/domain/model"
 )
 
 func BuildAdFilterQuery(filter model.AdFilter) (string, []interface{}) {

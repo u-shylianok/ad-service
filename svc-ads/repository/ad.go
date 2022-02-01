@@ -6,7 +6,7 @@ import (
 
 	"github.com/jmoiron/sqlx"
 	"github.com/sirupsen/logrus"
-	"github.com/u-shylianok/ad-service/svc-ads/model"
+	"github.com/u-shylianok/ad-service/svc-ads/domain/model"
 	"github.com/u-shylianok/ad-service/svc-ads/repository/postgres/query"
 )
 
@@ -18,28 +18,7 @@ func NewAdPostrgres(db *sqlx.DB) *AdPostgres {
 	return &AdPostgres{db: db}
 }
 
-func (r *AdPostgres) Create(userID int, ad model.AdRequest) (int, error) {
-	tx, err := r.db.Beginx()
-	if err != nil {
-		//logrus.Errorf("[create ad]: error: %s", err.Error())
-		return 0, err
-	}
-
-	var adID int
-	createAdQuery := "INSERT INTO ads (user_id, name, price, photo, description) VALUES ($1, $2, $3, $4, $5) RETURNING id"
-	row := tx.QueryRow(createAdQuery, userID, ad.Name, ad.Price, ad.MainPhoto, ad.Description)
-	if err := row.Scan(&adID); err != nil {
-		//logrus.Errorf("[create ad]: error: %s", err.Error())
-		if err := tx.Rollback(); err != nil {
-			logrus.WithError(err).Error("rollback error")
-		}
-		return 0, err
-	}
-
-	return adID, tx.Commit()
-}
-
-func (r *AdPostgres) Get(adID uint32, fields model.AdOptionalFieldsParam) (model.Ad, error) {
+func (r *AdPostgres) Get(adID uint32, fields model.AdsOptional) (model.Ad, error) {
 	var ad model.Ad
 
 	var fieldsQuery string
@@ -95,7 +74,28 @@ func (r *AdPostgres) ListWithFilter(filter model.AdFilter) ([]model.Ad, error) {
 	return ads, nil
 }
 
-func (r *AdPostgres) Update(userID, adID int, ad model.AdRequest) error {
+func (r *AdPostgres) Create(userID uint32, ad model.AdRequest) (uint32, error) {
+	tx, err := r.db.Beginx()
+	if err != nil {
+		//logrus.Errorf("[create ad]: error: %s", err.Error())
+		return 0, err
+	}
+
+	var adID uint32
+	createAdQuery := "INSERT INTO ads (user_id, name, price, photo, description) VALUES ($1, $2, $3, $4, $5) RETURNING id"
+	row := tx.QueryRow(createAdQuery, userID, ad.Name, ad.Price, ad.MainPhoto, ad.Description)
+	if err := row.Scan(&adID); err != nil {
+		//logrus.Errorf("[create ad]: error: %s", err.Error())
+		if err := tx.Rollback(); err != nil {
+			logrus.WithError(err).Error("rollback error")
+		}
+		return 0, err
+	}
+
+	return adID, tx.Commit()
+}
+
+func (r *AdPostgres) Update(userID, adID uint32, ad model.AdRequest) error {
 
 	updateAdQuery := "UPDATE ads SET name = $1, price = $2, description = $3, photo = $4 WHERE user_id = $5 AND id = $6"
 	_, err := r.db.Exec(updateAdQuery, ad.Name, ad.Price, ad.Description, ad.MainPhoto, userID, adID)
@@ -103,7 +103,7 @@ func (r *AdPostgres) Update(userID, adID int, ad model.AdRequest) error {
 	return err
 }
 
-func (r *AdPostgres) Delete(userID, adID int) error {
+func (r *AdPostgres) Delete(userID, adID uint32) error {
 
 	deleteAdQuery := "DELETE FROM ads WHERE user_id = $1 AND id = $2"
 	_, err := r.db.Exec(deleteAdQuery, userID, adID)
