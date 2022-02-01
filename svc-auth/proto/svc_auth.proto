@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package svc_auth;
 
-option go_package = "../client/auth";
+option go_package = "github.com/u-shylianok/ad-service/svc-auth/client/auth";
 
 service AuthService {
     rpc SignUp(SignUpRequest) returns (User) {}

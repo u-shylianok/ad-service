@@ -14,6 +14,12 @@ type Ad struct {
 	MainPhoto   string    `db:"photo"`
 }
 
+type GetAdOptional struct {
+	Description bool
+	Photos      bool
+	Tags        bool
+}
+
 type AdResponse struct {
 	ID          uint32       `json:"id"`
 	User        UserResponse `json:"user"`

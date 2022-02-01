@@ -8,12 +8,16 @@ import (
 	"unicode/utf8"
 
 	"github.com/sirupsen/logrus"
-	pbAds "github.com/u-shylianok/ad-service/svc-ads/client/ads"
-	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
-func GetAdOptionalRequestFromURL(values url.Values) *pbAds.GetAdOptionalRequest {
-	result := &pbAds.GetAdOptionalRequest{}
+type AdsOptional struct {
+	Description bool
+	Photos      bool
+	Tags        bool
+}
+
+func GetAdsOptionalFromURL(values url.Values) AdsOptional {
+	result := AdsOptional{}
 	if values == nil {
 		return result
 	}
@@ -33,10 +37,26 @@ func GetAdOptionalRequestFromURL(values url.Values) *pbAds.GetAdOptionalRequest 
 	return result
 }
 
+type AdResponse struct {
+	ID          uint32       `json:"id"`
+	User        UserResponse `json:"user"`
+	Name        string       `json:"name"`
+	Date        time.Time    `json:"date"`
+	Price       int          `json:"price"`
+	MainPhoto   string       `json:"main_photo"`
+	Description *string      `json:"description,omitempty"`
+	OtherPhotos *[]string    `json:"other_photos,omitempty"`
+	Tags        *[]string    `json:"tags,omitempty"`
+}
+
+type AdsSortingParam struct {
+	Field  string
+	IsDesc bool
+}
+
 // Параметры чувствительны к порядку, в котором они написаны. sort_by[i] соответствует order[i].
 // Если параметр указан неверно (напрмер, "AAA"), то он будет пропущен, как и Order, соответствующий ему.
-func ListAdsSortingParamsFromURL(values url.Values) []*pbAds.SortingParam {
-
+func GetAdsSortingParamsFromURL(values url.Values) []AdsSortingParam {
 	if values == nil {
 		return nil
 	}
@@ -45,7 +65,7 @@ func ListAdsSortingParamsFromURL(values url.Values) []*pbAds.SortingParam {
 
 	ordersLen := len(orderParams)
 
-	var result []*pbAds.SortingParam
+	var result []AdsSortingParam
 
 	for i, sortParam := range sortParams {
 		sortParam := strings.ToLower(sortParam)
@@ -57,9 +77,8 @@ func ListAdsSortingParamsFromURL(values url.Values) []*pbAds.SortingParam {
 		if i < ordersLen {
 			isDesc = strings.ToLower(orderParams[i]) == "dsc"
 		}
-		result = append(result, &pbAds.SortingParam{Field: sortParam, IsDesc: isDesc})
+		result = append(result, AdsSortingParam{Field: sortParam, IsDesc: isDesc})
 	}
-
 	return result
 }
 
@@ -87,14 +106,14 @@ type AdFilter struct {
 
 const defaultDateFormat = "2006-01-02"
 
-func GetAdFilterFromURL(values url.Values) *pbAds.AdFilter {
-	result := &pbAds.AdFilter{}
-
+func GetAdFilterFromURL(values url.Values) AdFilter {
+	var result AdFilter
 	if values == nil {
 		return result
 	}
 
 	result.Username = values.Get("username")
+	result.Tags = values["tags"]
 
 	startDateRaw := values.Get("startdate")
 	if startDateRaw != "" {
@@ -102,7 +121,7 @@ func GetAdFilterFromURL(values url.Values) *pbAds.AdFilter {
 		if err != nil {
 			logrus.WithError(err).Warn("failed to parse startdate param")
 		}
-		result.StartDate = timestamppb.New(startDate)
+		result.StartDate = startDate
 	}
 
 	endDateRaw := values.Get("enddate")
@@ -111,11 +130,8 @@ func GetAdFilterFromURL(values url.Values) *pbAds.AdFilter {
 		if err != nil {
 			logrus.WithError(err).Warn("failed to parse enddate param")
 		}
-		result.EndDate = timestamppb.New(endDate)
+		result.EndDate = endDate
 	}
-
-	result.Tags = values["tags"]
-
 	return result
 }
 
@@ -129,7 +145,6 @@ type AdRequest struct {
 }
 
 func (r AdRequest) Validate() error {
-
 	// my rules START
 	if r.Name == "" {
 		return fmt.Errorf("name should not be empty")
@@ -171,15 +186,4 @@ func (r AdRequest) Validate() error {
 	}
 	// busines rules END
 	return nil
-}
-
-func (r *AdRequest) ToPb() *pbAds.AdRequest {
-	return &pbAds.AdRequest{
-		Name:        r.Name,
-		Price:       int32(r.Price),
-		Description: r.Description,
-		Photo:       r.MainPhoto,
-		Photos:      *r.OtherPhotos,
-		Tags:        *r.Tags,
-	}
 }

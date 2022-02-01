@@ -7,8 +7,9 @@ import (
 	"github.com/sirupsen/logrus"
 	pb "github.com/u-shylianok/ad-service/svc-ads/client/ads"
 	"github.com/u-shylianok/ad-service/svc-ads/grpc/client"
-	"github.com/u-shylianok/ad-service/svc-ads/model"
+	"github.com/u-shylianok/ad-service/svc-ads/grpc/dto"
 	"github.com/u-shylianok/ad-service/svc-ads/service"
+	"github.com/u-shylianok/ad-service/svc-auth/client/auth"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
@@ -27,10 +28,11 @@ func New(service *service.Service, clients *client.Client) *Server {
 }
 
 func (s *Server) GetAd(ctx context.Context, in *pb.GetAdRequest) (*pb.Ad, error) {
-	ad, err := s.Service.GetAd(in.GetId(), model.AdOptionalFieldsParam{})
+	ad, err := s.Service.GetAd(dto.FromGetAdRequest(in))
 	if err != nil {
 		return nil, err
 	}
+	s.clients.AuthService.GetUser(context.Background(), &auth.GetUserRequest{Id: ad.UserID})
 	out := &pb.Ad{
 		Id:          ad.ID,
 		Name:        ad.Name,

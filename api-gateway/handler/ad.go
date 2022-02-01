@@ -7,7 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
 	"github.com/u-shylianok/ad-service/api-gateway/domain/model"
-	pbAds "github.com/u-shylianok/ad-service/svc-ads/client/ads"
+	"github.com/u-shylianok/ad-service/api-gateway/grpc/dto"
 )
 
 func (h *Handler) getAd(c *gin.Context) {
@@ -17,18 +17,18 @@ func (h *Handler) getAd(c *gin.Context) {
 
 	log.Println("GetAd")
 
-	id, err := getUint32(c.Param("id"))
+	adID, err := getUint32(c.Param("id"))
 	if err != nil {
 		log.WithError(err).Error("failed to read id URL param")
 		newErrorResponse(c, http.StatusBadRequest, "invalid ad id param")
 		return
 	}
-	log.WithField("id", id).Debug("id param read successfully")
+	log.WithField("id", adID).Debug("id param read successfully")
 
-	optional := model.GetAdOptionalRequestFromURL(c.Request.URL.Query())
+	optional := model.GetAdsOptionalFromURL(c.Request.URL.Query())
 	log.WithField("fields", optional).Debug("optional fields was formed")
 
-	ad, err := h.clients.AdsService.GetAd(context.Background(), &pbAds.GetAdRequest{Id: id, Optional: optional})
+	ad, err := h.clients.AdsService.GetAd(context.Background(), dto.ToPbAds_GetAdRequest(adID, &optional))
 	if err != nil {
 		log.WithError(err).Error("failed to get ad")
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
@@ -36,7 +36,7 @@ func (h *Handler) getAd(c *gin.Context) {
 	}
 	log.WithField("ad", ad).Debug("ad read successfully")
 
-	c.JSON(http.StatusOK, ad)
+	c.JSON(http.StatusOK, dto.FromPbAds_GetAdResponse(ad))
 }
 
 func (h *Handler) listAds(c *gin.Context) {
@@ -44,10 +44,10 @@ func (h *Handler) listAds(c *gin.Context) {
 		"method": "listAds",
 	})
 
-	sortingParams := model.ListAdsSortingParamsFromURL(c.Request.URL.Query())
+	sortingParams := model.GetAdsSortingParamsFromURL(c.Request.URL.Query())
 	log.WithField("sorting params", sortingParams).Debug("sorting params was formed")
 
-	ads, err := h.clients.AdsService.ListAds(context.Background(), &pbAds.ListAdsRequest{SortingParams: sortingParams})
+	ads, err := h.clients.AdsService.ListAds(context.Background(), dto.ToPbAds_ListAdsRequest(sortingParams))
 	if err != nil {
 		log.WithError(err).Error("failed to get ads")
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
@@ -55,7 +55,7 @@ func (h *Handler) listAds(c *gin.Context) {
 	}
 	log.WithField("ads", ads).Debug("ads read successfully")
 
-	c.JSON(http.StatusOK, ads)
+	c.JSON(http.StatusOK, dto.FromPbAds_ListAdsResponse(ads))
 }
 
 func (h *Handler) searchAds(c *gin.Context) {
@@ -66,7 +66,7 @@ func (h *Handler) searchAds(c *gin.Context) {
 	filter := model.GetAdFilterFromURL(c.Request.URL.Query())
 	log.WithField("filter", filter).Debug("sorting params was formed")
 
-	ads, err := h.clients.AdsService.SearchAds(context.Background(), &pbAds.SearchAdsRequest{Filter: filter})
+	ads, err := h.clients.AdsService.SearchAds(context.Background(), dto.ToPbAds_SearchAdsRequest(filter))
 	if err != nil {
 		log.WithError(err).Error("failed to get ads")
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
@@ -74,7 +74,7 @@ func (h *Handler) searchAds(c *gin.Context) {
 	}
 	log.WithField("ads", ads).Debug("ads read successfully")
 
-	c.JSON(http.StatusOK, ads)
+	c.JSON(http.StatusOK, dto.FromPbAds_SearchAdsResponse(ads))
 }
 
 func (h *Handler) createAd(c *gin.Context) {
@@ -105,7 +105,7 @@ func (h *Handler) createAd(c *gin.Context) {
 	}
 	log.Debug("input validated successfully")
 
-	ad, err := h.clients.AdsService.CreateAd(context.Background(), &pbAds.CreateAdRequest{UserId: userID, Ad: input.ToPb()})
+	ad, err := h.clients.AdsService.CreateAd(context.Background(), dto.ToPbAds_CreateAdRequest(userID, input))
 	if err != nil {
 		log.WithError(err).Error("failed to create ad")
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
@@ -131,13 +131,13 @@ func (h *Handler) updateAd(c *gin.Context) {
 	}
 	log.WithField("userID", userID).Debug("userID getted successfully")
 
-	id, err := getUint32(c.Param("id"))
+	adID, err := getUint32(c.Param("id"))
 	if err != nil {
 		log.WithError(err).Error("failed to read id URL param")
 		newErrorResponse(c, http.StatusBadRequest, "invalid ad id param")
 		return
 	}
-	log.WithField("id", id).Debug("id param read successfully")
+	log.WithField("id", adID).Debug("id param read successfully")
 
 	var input model.AdRequest
 	if err := c.BindJSON(&input); err != nil {
@@ -154,12 +154,12 @@ func (h *Handler) updateAd(c *gin.Context) {
 	}
 	log.Debug("input validated successfully")
 
-	if _, err := h.clients.AdsService.UpdateAd(context.Background(), &pbAds.UpdateAdRequest{UserId: userID, AdId: id, Ad: input.ToPb()}); err != nil {
+	if _, err := h.clients.AdsService.UpdateAd(context.Background(), dto.ToPbAds_UpdateAdRequest(userID, adID, input)); err != nil {
 		log.WithError(err).Error("failed to update ad")
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
-	log.WithField("id", id).Debug("ad updated successfully")
+	log.WithField("id", adID).Debug("ad updated successfully")
 
 	c.JSON(http.StatusOK, statusResponse{
 		Status: "ok",
@@ -179,20 +179,20 @@ func (h *Handler) deleteAd(c *gin.Context) {
 	}
 	log.WithField("userID", userID).Debug("userID getted successfully")
 
-	id, err := getUint32(c.Param("id"))
+	adID, err := getUint32(c.Param("id"))
 	if err != nil {
 		log.WithError(err).Error("failed to read id URL param")
 		newErrorResponse(c, http.StatusBadRequest, "invalid ad id param")
 		return
 	}
-	log.WithField("id", id).Debug("id param read successfully")
+	log.WithField("id", adID).Debug("id param read successfully")
 
-	if _, err := h.clients.AdsService.DeleteAd(context.Background(), &pbAds.DeleteAdRequest{UserId: userID, AdId: id}); err != nil {
+	if _, err := h.clients.AdsService.DeleteAd(context.Background(), dto.ToPbAds_DeleteAdRequest(userID, adID)); err != nil {
 		log.WithError(err).Error("failed to delete ad")
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
-	log.WithField("id", id).Debug("ad deleted successfully")
+	log.WithField("id", adID).Debug("ad deleted successfully")
 
 	c.JSON(http.StatusOK, statusResponse{
 		Status: "ok",

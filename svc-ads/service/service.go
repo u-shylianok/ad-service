@@ -14,7 +14,7 @@ type Service struct {
 type Ad interface {
 	// ListAds(params []model.AdsSortingParam) ([]model.AdResponse, error)
 	// SearchAds(filter model.AdFilter) ([]model.AdResponse, error)
-	GetAd(adID uint32, fields model.AdOptionalFieldsParam) (model.AdResponse, error)
+	GetAd(adID uint32, fields model.GetAdOptional) (model.AdResponse, error)
 	CreateAd(userID int, ad model.AdRequest) (int, error)
 	// UpdateAd(userID, adID int, ad model.AdRequest) error
 	// DeleteAd(userID, adID int) error

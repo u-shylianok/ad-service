@@ -105,7 +105,7 @@ func (s *AdService) CreateAd(userID int, ad model.AdRequest) (int, error) {
 // 	return adsResponse, nil
 // }
 
-func (s *AdService) GetAd(adID uint32, fields model.AdOptionalFieldsParam) (model.AdResponse, error) {
+func (s *AdService) GetAd(adID uint32, fields model.GetAdOptional) (model.AdResponse, error) {
 	ad, err := s.adRepo.Get(adID, fields)
 	if err != nil {
 		return model.AdResponse{}, err

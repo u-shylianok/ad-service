@@ -19,7 +19,7 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type AdServiceClient interface {
-	GetAd(ctx context.Context, in *GetAdRequest, opts ...grpc.CallOption) (*Ad, error)
+	GetAd(ctx context.Context, in *GetAdRequest, opts ...grpc.CallOption) (*GetAdResponse, error)
 	ListAds(ctx context.Context, in *ListAdsRequest, opts ...grpc.CallOption) (*ListAdsResponse, error)
 	SearchAds(ctx context.Context, in *SearchAdsRequest, opts ...grpc.CallOption) (*SearchAdsResponse, error)
 	CreateAd(ctx context.Context, in *CreateAdRequest, opts ...grpc.CallOption) (*Ad, error)
@@ -37,8 +37,8 @@ func NewAdServiceClient(cc grpc.ClientConnInterface) AdServiceClient {
 	return &adServiceClient{cc}
 }
 
-func (c *adServiceClient) GetAd(ctx context.Context, in *GetAdRequest, opts ...grpc.CallOption) (*Ad, error) {
-	out := new(Ad)
+func (c *adServiceClient) GetAd(ctx context.Context, in *GetAdRequest, opts ...grpc.CallOption) (*GetAdResponse, error) {
+	out := new(GetAdResponse)
 	err := c.cc.Invoke(ctx, "/svc_ads.AdService/GetAd", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -113,7 +113,7 @@ func (c *adServiceClient) ListTags(ctx context.Context, in *ListTagsRequest, opt
 // All implementations must embed UnimplementedAdServiceServer
 // for forward compatibility
 type AdServiceServer interface {
-	GetAd(context.Context, *GetAdRequest) (*Ad, error)
+	GetAd(context.Context, *GetAdRequest) (*GetAdResponse, error)
 	ListAds(context.Context, *ListAdsRequest) (*ListAdsResponse, error)
 	SearchAds(context.Context, *SearchAdsRequest) (*SearchAdsResponse, error)
 	CreateAd(context.Context, *CreateAdRequest) (*Ad, error)
@@ -128,7 +128,7 @@ type AdServiceServer interface {
 type UnimplementedAdServiceServer struct {
 }
 
-func (UnimplementedAdServiceServer) GetAd(context.Context, *GetAdRequest) (*Ad, error) {
+func (UnimplementedAdServiceServer) GetAd(context.Context, *GetAdRequest) (*GetAdResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetAd not implemented")
 }
 func (UnimplementedAdServiceServer) ListAds(context.Context, *ListAdsRequest) (*ListAdsResponse, error) {

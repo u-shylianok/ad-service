@@ -4,11 +4,12 @@ package svc_ads;
 
 import "google/protobuf/empty.proto";
 import "google/protobuf/timestamp.proto";
+import "svc-auth/proto/svc_auth.proto";
 
-option go_package = "../client/ads";
+option go_package = "github.com/u-shylianok/ad-service/svc-ads/client/ads";
 
 service AdService {
-    rpc GetAd(GetAdRequest) returns (Ad) {}
+    rpc GetAd(GetAdRequest) returns (GetAdResponse) {}
     rpc ListAds(ListAdsRequest) returns (ListAdsResponse) {}
     rpc SearchAds(SearchAdsRequest) returns (SearchAdsResponse) {}
 
@@ -23,6 +24,10 @@ service AdService {
 message GetAdRequest {
     uint32 id = 1;
     GetAdOptionalRequest optional = 2;
+}
+
+message GetAdResponse {
+    AdResponse ad = 1;
 }
 
 message GetAdOptionalRequest {
@@ -41,7 +46,7 @@ message SortingParam {
 }
 
 message ListAdsResponse {
-    repeated Ad ads = 1;
+    repeated AdResponse ads = 1;
 }
 
 message SearchAdsRequest {
@@ -56,7 +61,7 @@ message AdFilter {
 }
 
 message SearchAdsResponse {
-    repeated Ad ads = 1;
+    repeated AdResponse ads = 1;
 }
 
 message AdRequest {
@@ -94,6 +99,11 @@ message Ad {
     string photo = 7;
     repeated string photos = 8;
     repeated string tags = 9;
+}
+
+message AdResponse {
+    Ad ad = 1;
+    svc_auth.User user = 2;
 }
 
 message ListPhotosRequest {
