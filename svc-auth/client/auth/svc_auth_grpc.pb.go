@@ -18,11 +18,9 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type AuthServiceClient interface {
-	SignUp(ctx context.Context, in *SignUpRequest, opts ...grpc.CallOption) (*User, error)
+	SignUp(ctx context.Context, in *SignUpRequest, opts ...grpc.CallOption) (*UserResponse, error)
 	SignIn(ctx context.Context, in *SignInRequest, opts ...grpc.CallOption) (*SignInResponse, error)
 	ParseToken(ctx context.Context, in *ParseTokenRequest, opts ...grpc.CallOption) (*ParseTokenResponse, error)
-	Identify(ctx context.Context, in *IdentifyRequest, opts ...grpc.CallOption) (*IdentifyResponse, error)
-	GetUserID(ctx context.Context, in *GetUserIDRequest, opts ...grpc.CallOption) (*GetUserIDResponse, error)
 	GetUser(ctx context.Context, in *GetUserRequest, opts ...grpc.CallOption) (*GetUserResponse, error)
 }
 
@@ -34,8 +32,8 @@ func NewAuthServiceClient(cc grpc.ClientConnInterface) AuthServiceClient {
 	return &authServiceClient{cc}
 }
 
-func (c *authServiceClient) SignUp(ctx context.Context, in *SignUpRequest, opts ...grpc.CallOption) (*User, error) {
-	out := new(User)
+func (c *authServiceClient) SignUp(ctx context.Context, in *SignUpRequest, opts ...grpc.CallOption) (*UserResponse, error) {
+	out := new(UserResponse)
 	err := c.cc.Invoke(ctx, "/svc_auth.AuthService/SignUp", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -61,24 +59,6 @@ func (c *authServiceClient) ParseToken(ctx context.Context, in *ParseTokenReques
 	return out, nil
 }
 
-func (c *authServiceClient) Identify(ctx context.Context, in *IdentifyRequest, opts ...grpc.CallOption) (*IdentifyResponse, error) {
-	out := new(IdentifyResponse)
-	err := c.cc.Invoke(ctx, "/svc_auth.AuthService/Identify", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *authServiceClient) GetUserID(ctx context.Context, in *GetUserIDRequest, opts ...grpc.CallOption) (*GetUserIDResponse, error) {
-	out := new(GetUserIDResponse)
-	err := c.cc.Invoke(ctx, "/svc_auth.AuthService/GetUserID", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
 func (c *authServiceClient) GetUser(ctx context.Context, in *GetUserRequest, opts ...grpc.CallOption) (*GetUserResponse, error) {
 	out := new(GetUserResponse)
 	err := c.cc.Invoke(ctx, "/svc_auth.AuthService/GetUser", in, out, opts...)
@@ -92,11 +72,9 @@ func (c *authServiceClient) GetUser(ctx context.Context, in *GetUserRequest, opt
 // All implementations must embed UnimplementedAuthServiceServer
 // for forward compatibility
 type AuthServiceServer interface {
-	SignUp(context.Context, *SignUpRequest) (*User, error)
+	SignUp(context.Context, *SignUpRequest) (*UserResponse, error)
 	SignIn(context.Context, *SignInRequest) (*SignInResponse, error)
 	ParseToken(context.Context, *ParseTokenRequest) (*ParseTokenResponse, error)
-	Identify(context.Context, *IdentifyRequest) (*IdentifyResponse, error)
-	GetUserID(context.Context, *GetUserIDRequest) (*GetUserIDResponse, error)
 	GetUser(context.Context, *GetUserRequest) (*GetUserResponse, error)
 	mustEmbedUnimplementedAuthServiceServer()
 }
@@ -105,7 +83,7 @@ type AuthServiceServer interface {
 type UnimplementedAuthServiceServer struct {
 }
 
-func (UnimplementedAuthServiceServer) SignUp(context.Context, *SignUpRequest) (*User, error) {
+func (UnimplementedAuthServiceServer) SignUp(context.Context, *SignUpRequest) (*UserResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SignUp not implemented")
 }
 func (UnimplementedAuthServiceServer) SignIn(context.Context, *SignInRequest) (*SignInResponse, error) {
@@ -113,12 +91,6 @@ func (UnimplementedAuthServiceServer) SignIn(context.Context, *SignInRequest) (*
 }
 func (UnimplementedAuthServiceServer) ParseToken(context.Context, *ParseTokenRequest) (*ParseTokenResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ParseToken not implemented")
-}
-func (UnimplementedAuthServiceServer) Identify(context.Context, *IdentifyRequest) (*IdentifyResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Identify not implemented")
-}
-func (UnimplementedAuthServiceServer) GetUserID(context.Context, *GetUserIDRequest) (*GetUserIDResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetUserID not implemented")
 }
 func (UnimplementedAuthServiceServer) GetUser(context.Context, *GetUserRequest) (*GetUserResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetUser not implemented")
@@ -190,42 +162,6 @@ func _AuthService_ParseToken_Handler(srv interface{}, ctx context.Context, dec f
 	return interceptor(ctx, in, info, handler)
 }
 
-func _AuthService_Identify_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(IdentifyRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(AuthServiceServer).Identify(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/svc_auth.AuthService/Identify",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(AuthServiceServer).Identify(ctx, req.(*IdentifyRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _AuthService_GetUserID_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetUserIDRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(AuthServiceServer).GetUserID(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/svc_auth.AuthService/GetUserID",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(AuthServiceServer).GetUserID(ctx, req.(*GetUserIDRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 func _AuthService_GetUser_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(GetUserRequest)
 	if err := dec(in); err != nil {
@@ -262,14 +198,6 @@ var AuthService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ParseToken",
 			Handler:    _AuthService_ParseToken_Handler,
-		},
-		{
-			MethodName: "Identify",
-			Handler:    _AuthService_Identify_Handler,
-		},
-		{
-			MethodName: "GetUserID",
-			Handler:    _AuthService_GetUserID_Handler,
 		},
 		{
 			MethodName: "GetUser",

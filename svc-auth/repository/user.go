@@ -5,7 +5,7 @@ import (
 	"strings"
 
 	"github.com/jmoiron/sqlx"
-	"github.com/u-shylianok/ad-service/svc-auth/model"
+	"github.com/u-shylianok/ad-service/svc-auth/domain/model"
 )
 
 type UserPostgres struct {
@@ -16,8 +16,8 @@ func NewUserPostgres(db *sqlx.DB) *UserPostgres {
 	return &UserPostgres{db: db}
 }
 
-func (r *UserPostgres) Create(user model.User) (int, error) {
-	var id int
+func (r *UserPostgres) Create(user model.User) (uint32, error) {
+	var id uint32
 	createUserQuery := "INSERT INTO users (name, username, password) VALUES ($1, $2, $3) RETURNING id"
 
 	row := r.db.QueryRow(createUserQuery, user.Name, user.Username, user.Password)
@@ -38,7 +38,7 @@ func (r *UserPostgres) Get(username string) (model.User, error) {
 }
 
 // Gets only name and username
-func (r *UserPostgres) GetByID(id int) (model.User, error) {
+func (r *UserPostgres) GetByID(id uint32) (model.User, error) {
 	var user model.User
 	getUserQuery := "SELECT name, username FROM users WHERE id = $1"
 
@@ -48,7 +48,7 @@ func (r *UserPostgres) GetByID(id int) (model.User, error) {
 }
 
 // Gets user slice with (id, name, username)
-func (r *UserPostgres) ListInIDs(ids []int) ([]model.User, error) {
+func (r *UserPostgres) ListInIDs(ids []uint32) ([]model.User, error) {
 	var users []model.User
 
 	if len(ids) == 0 {

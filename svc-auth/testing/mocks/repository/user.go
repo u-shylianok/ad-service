@@ -4,22 +4,22 @@ package repository
 import (
 	"sync"
 
-	"github.com/u-shylianok/ad-service/svc-auth/model"
+	"github.com/u-shylianok/ad-service/svc-auth/domain/model"
 	"github.com/u-shylianok/ad-service/svc-auth/repository"
 )
 
 type UserMock struct {
-	CreateStub        func(model.User) (int, error)
+	CreateStub        func(model.User) (uint32, error)
 	createMutex       sync.RWMutex
 	createArgsForCall []struct {
 		arg1 model.User
 	}
 	createReturns struct {
-		result1 int
+		result1 uint32
 		result2 error
 	}
 	createReturnsOnCall map[int]struct {
-		result1 int
+		result1 uint32
 		result2 error
 	}
 	GetStub        func(string) (model.User, error)
@@ -35,10 +35,10 @@ type UserMock struct {
 		result1 model.User
 		result2 error
 	}
-	GetByIDStub        func(int) (model.User, error)
+	GetByIDStub        func(uint32) (model.User, error)
 	getByIDMutex       sync.RWMutex
 	getByIDArgsForCall []struct {
-		arg1 int
+		arg1 uint32
 	}
 	getByIDReturns struct {
 		result1 model.User
@@ -48,10 +48,10 @@ type UserMock struct {
 		result1 model.User
 		result2 error
 	}
-	ListInIDsStub        func([]int) ([]model.User, error)
+	ListInIDsStub        func([]uint32) ([]model.User, error)
 	listInIDsMutex       sync.RWMutex
 	listInIDsArgsForCall []struct {
-		arg1 []int
+		arg1 []uint32
 	}
 	listInIDsReturns struct {
 		result1 []model.User
@@ -65,7 +65,7 @@ type UserMock struct {
 	invocationsMutex sync.RWMutex
 }
 
-func (fake *UserMock) Create(arg1 model.User) (int, error) {
+func (fake *UserMock) Create(arg1 model.User) (uint32, error) {
 	fake.createMutex.Lock()
 	ret, specificReturn := fake.createReturnsOnCall[len(fake.createArgsForCall)]
 	fake.createArgsForCall = append(fake.createArgsForCall, struct {
@@ -90,7 +90,7 @@ func (fake *UserMock) CreateCallCount() int {
 	return len(fake.createArgsForCall)
 }
 
-func (fake *UserMock) CreateCalls(stub func(model.User) (int, error)) {
+func (fake *UserMock) CreateCalls(stub func(model.User) (uint32, error)) {
 	fake.createMutex.Lock()
 	defer fake.createMutex.Unlock()
 	fake.CreateStub = stub
@@ -103,28 +103,28 @@ func (fake *UserMock) CreateArgsForCall(i int) model.User {
 	return argsForCall.arg1
 }
 
-func (fake *UserMock) CreateReturns(result1 int, result2 error) {
+func (fake *UserMock) CreateReturns(result1 uint32, result2 error) {
 	fake.createMutex.Lock()
 	defer fake.createMutex.Unlock()
 	fake.CreateStub = nil
 	fake.createReturns = struct {
-		result1 int
+		result1 uint32
 		result2 error
 	}{result1, result2}
 }
 
-func (fake *UserMock) CreateReturnsOnCall(i int, result1 int, result2 error) {
+func (fake *UserMock) CreateReturnsOnCall(i int, result1 uint32, result2 error) {
 	fake.createMutex.Lock()
 	defer fake.createMutex.Unlock()
 	fake.CreateStub = nil
 	if fake.createReturnsOnCall == nil {
 		fake.createReturnsOnCall = make(map[int]struct {
-			result1 int
+			result1 uint32
 			result2 error
 		})
 	}
 	fake.createReturnsOnCall[i] = struct {
-		result1 int
+		result1 uint32
 		result2 error
 	}{result1, result2}
 }
@@ -193,11 +193,11 @@ func (fake *UserMock) GetReturnsOnCall(i int, result1 model.User, result2 error)
 	}{result1, result2}
 }
 
-func (fake *UserMock) GetByID(arg1 int) (model.User, error) {
+func (fake *UserMock) GetByID(arg1 uint32) (model.User, error) {
 	fake.getByIDMutex.Lock()
 	ret, specificReturn := fake.getByIDReturnsOnCall[len(fake.getByIDArgsForCall)]
 	fake.getByIDArgsForCall = append(fake.getByIDArgsForCall, struct {
-		arg1 int
+		arg1 uint32
 	}{arg1})
 	stub := fake.GetByIDStub
 	fakeReturns := fake.getByIDReturns
@@ -218,13 +218,13 @@ func (fake *UserMock) GetByIDCallCount() int {
 	return len(fake.getByIDArgsForCall)
 }
 
-func (fake *UserMock) GetByIDCalls(stub func(int) (model.User, error)) {
+func (fake *UserMock) GetByIDCalls(stub func(uint32) (model.User, error)) {
 	fake.getByIDMutex.Lock()
 	defer fake.getByIDMutex.Unlock()
 	fake.GetByIDStub = stub
 }
 
-func (fake *UserMock) GetByIDArgsForCall(i int) int {
+func (fake *UserMock) GetByIDArgsForCall(i int) uint32 {
 	fake.getByIDMutex.RLock()
 	defer fake.getByIDMutex.RUnlock()
 	argsForCall := fake.getByIDArgsForCall[i]
@@ -257,16 +257,16 @@ func (fake *UserMock) GetByIDReturnsOnCall(i int, result1 model.User, result2 er
 	}{result1, result2}
 }
 
-func (fake *UserMock) ListInIDs(arg1 []int) ([]model.User, error) {
-	var arg1Copy []int
+func (fake *UserMock) ListInIDs(arg1 []uint32) ([]model.User, error) {
+	var arg1Copy []uint32
 	if arg1 != nil {
-		arg1Copy = make([]int, len(arg1))
+		arg1Copy = make([]uint32, len(arg1))
 		copy(arg1Copy, arg1)
 	}
 	fake.listInIDsMutex.Lock()
 	ret, specificReturn := fake.listInIDsReturnsOnCall[len(fake.listInIDsArgsForCall)]
 	fake.listInIDsArgsForCall = append(fake.listInIDsArgsForCall, struct {
-		arg1 []int
+		arg1 []uint32
 	}{arg1Copy})
 	stub := fake.ListInIDsStub
 	fakeReturns := fake.listInIDsReturns
@@ -287,13 +287,13 @@ func (fake *UserMock) ListInIDsCallCount() int {
 	return len(fake.listInIDsArgsForCall)
 }
 
-func (fake *UserMock) ListInIDsCalls(stub func([]int) ([]model.User, error)) {
+func (fake *UserMock) ListInIDsCalls(stub func([]uint32) ([]model.User, error)) {
 	fake.listInIDsMutex.Lock()
 	defer fake.listInIDsMutex.Unlock()
 	fake.ListInIDsStub = stub
 }
 
-func (fake *UserMock) ListInIDsArgsForCall(i int) []int {
+func (fake *UserMock) ListInIDsArgsForCall(i int) []uint32 {
 	fake.listInIDsMutex.RLock()
 	defer fake.listInIDsMutex.RUnlock()
 	argsForCall := fake.listInIDsArgsForCall[i]

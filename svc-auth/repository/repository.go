@@ -4,7 +4,7 @@ package repository
 
 import (
 	"github.com/jmoiron/sqlx"
-	"github.com/u-shylianok/ad-service/svc-auth/model"
+	"github.com/u-shylianok/ad-service/svc-auth/domain/model"
 )
 
 type Repository struct {
@@ -13,10 +13,10 @@ type Repository struct {
 
 //counterfeiter:generate --fake-name UserMock -o ../testing/mocks/repository/user.go . User
 type User interface {
-	Create(user model.User) (int, error)
+	Create(user model.User) (uint32, error)
 	Get(username string) (model.User, error)
-	GetByID(id int) (model.User, error)
-	ListInIDs(ids []int) ([]model.User, error)
+	GetByID(id uint32) (model.User, error)
+	ListInIDs(ids []uint32) ([]model.User, error)
 }
 
 func NewRepository(db *sqlx.DB) *Repository {

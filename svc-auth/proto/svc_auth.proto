@@ -5,12 +5,10 @@ package svc_auth;
 option go_package = "github.com/u-shylianok/ad-service/svc-auth/client/auth";
 
 service AuthService {
-    rpc SignUp(SignUpRequest) returns (User) {}
+    rpc SignUp(SignUpRequest) returns (UserResponse) {}
     rpc SignIn(SignInRequest) returns (SignInResponse) {}
 
     rpc ParseToken(ParseTokenRequest) returns (ParseTokenResponse) {}
-    rpc Identify(IdentifyRequest) returns (IdentifyResponse) {}
-    rpc GetUserID(GetUserIDRequest) returns (GetUserIDResponse) {}
     rpc GetUser(GetUserRequest) returns (GetUserResponse) {}
 }
 
@@ -43,22 +41,6 @@ message ParseTokenRequest {
 
 message ParseTokenResponse {
     uint32 user_id = 1;
-}
-
-message IdentifyRequest {
-    string token = 1;
-}
-
-message IdentifyResponse {
-    string token = 1;
-}
-
-message GetUserIDRequest {
-    string token = 1;
-}
-
-message GetUserIDResponse {
-    uint32 id = 1;
 }
 
 message GetUserRequest {

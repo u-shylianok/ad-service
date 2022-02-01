@@ -8,8 +8,8 @@ import (
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/sirupsen/logrus"
+	"github.com/u-shylianok/ad-service/svc-auth/domain/model"
 	"github.com/u-shylianok/ad-service/svc-auth/internal/secure"
-	"github.com/u-shylianok/ad-service/svc-auth/model"
 	"github.com/u-shylianok/ad-service/svc-auth/repository"
 )
 
@@ -20,7 +20,7 @@ const (
 
 type tokenClaims struct {
 	jwt.StandardClaims
-	UserID int `json:"user_id"`
+	UserID uint32 `json:"user_id"`
 }
 
 type AuthService struct {
@@ -35,7 +35,7 @@ func NewAuthService(repo repository.User, hasher secure.Hasher) *AuthService {
 	}
 }
 
-func (s *AuthService) CreateUser(user model.User) (int, error) {
+func (s *AuthService) CreateUser(user model.User) (uint32, error) {
 	_, err := s.repo.Get(user.Username)
 	if err != nil && !errors.Is(err, sql.ErrNoRows) {
 		return 0, err
@@ -52,7 +52,7 @@ func (s *AuthService) CreateUser(user model.User) (int, error) {
 	return s.repo.Create(user)
 }
 
-func (s *AuthService) CheckUser(username, password string) (int, error) {
+func (s *AuthService) CheckUser(username, password string) (uint32, error) {
 	user, err := s.repo.Get(username)
 	if err != nil && !errors.Is(err, sql.ErrNoRows) {
 		return 0, err
@@ -67,7 +67,7 @@ func (s *AuthService) CheckUser(username, password string) (int, error) {
 	return user.ID, nil
 }
 
-func (s *AuthService) GenerateToken(userID int) (string, int64, error) {
+func (s *AuthService) GenerateToken(userID uint32) (string, int64, error) {
 	expiresAt := time.Now().Add(tokenTTL).Unix()
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, &tokenClaims{
 		jwt.StandardClaims{
@@ -81,7 +81,7 @@ func (s *AuthService) GenerateToken(userID int) (string, int64, error) {
 	return tokenStr, expiresAt, err
 }
 
-func (s *AuthService) ParseToken(accessToken string) (int, error) {
+func (s *AuthService) ParseToken(accessToken string) (uint32, error) {
 
 	logrus.WithField("token", accessToken).Info("token")
 	token, err := jwt.ParseWithClaims(accessToken, &tokenClaims{}, func(token *jwt.Token) (interface{}, error) {
@@ -101,4 +101,12 @@ func (s *AuthService) ParseToken(accessToken string) (int, error) {
 	}
 
 	return claims.UserID, nil
+}
+
+func (s *AuthService) GetUser(userID uint32) (model.UserResponse, error) {
+	user, err := s.repo.GetByID(userID)
+	if err != nil {
+		return model.UserResponse{}, err
+	}
+	return user.ToResponse(), nil
 }
