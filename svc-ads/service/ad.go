@@ -1,7 +1,7 @@
 package service
 
 import (
-	"github.com/u-shylianok/ad-service/svc-ads/model"
+	"github.com/u-shylianok/ad-service/svc-ads/domain/model"
 	"github.com/u-shylianok/ad-service/svc-ads/repository"
 )
 
@@ -21,7 +21,49 @@ func NewAdService(adRepo repository.Ad, photoRepo repository.Photo,
 	}
 }
 
-func (s *AdService) CreateAd(userID int, ad model.AdRequest) (int, error) {
+func (s *AdService) GetAd(adID uint32, fields model.AdsOptional) (model.Ad, error) {
+	ad, err := s.adRepo.Get(adID, fields)
+	if err != nil {
+		return model.Ad{}, err
+	}
+
+	var photos *[]string
+	if fields.Photos {
+		photoLinks, err := s.photoRepo.ListLinksByAd(adID)
+		if err == nil {
+			photos = &photoLinks
+		}
+	}
+
+	var tags *[]string
+	if fields.Tags {
+		tagNames, err := s.tagRepo.ListNamesByAd(adID)
+		if err == nil {
+			tags = &tagNames
+		}
+	}
+	ad.Photos = photos
+	ad.Tags = tags
+	return ad, nil
+}
+
+func (s *AdService) ListAds(params []model.AdsSortingParam) ([]model.Ad, error) {
+	ads, err := s.adRepo.List(params)
+	if err != nil {
+		return nil, err
+	}
+	return ads, nil
+}
+
+func (s *AdService) SearchAds(filter model.AdFilter) ([]model.Ad, error) {
+	ads, err := s.adRepo.ListWithFilter(filter)
+	if err != nil {
+		return nil, err
+	}
+	return ads, nil
+}
+
+func (s *AdService) CreateAd(userID uint32, ad model.AdRequest) (uint32, error) {
 	adID, err := s.adRepo.Create(userID, ad)
 	if err != nil {
 		return adID, err
@@ -49,128 +91,40 @@ func (s *AdService) CreateAd(userID int, ad model.AdRequest) (int, error) {
 	return adID, err
 }
 
-// func (s *AdService) ListAds(params []model.AdsSortingParam) ([]model.AdResponse, error) {
-// 	ads, err := s.adRepo.List(params)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-
-// 	usersMap := make(map[int]model.User)
-// 	var usersIDs []int
-// 	for _, ad := range ads {
-// 		if _, ok := usersMap[ad.UserID]; !ok {
-// 			usersMap[ad.UserID] = model.User{}
-// 			usersIDs = append(usersIDs, ad.UserID)
-// 		}
-// 	}
-
-// 	users, err := s.userRepo.ListInIDs(usersIDs)
-// 	if err != nil {
-// 		//logrus.Error() // Просто пока пишем ошибку
-// 		return model.ConvertAdsToResponse(ads, nil), nil
-// 	}
-// 	for _, user := range users {
-// 		usersMap[user.ID] = user
-// 	}
-// 	adsResponse := model.ConvertAdsToResponse(ads, usersMap)
-
-// 	return adsResponse, nil
-// }
-
-// func (s *AdService) SearchAds(filter model.AdFilter) ([]model.AdResponse, error) {
-// 	ads, err := s.adRepo.ListWithFilter(filter)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-
-// 	usersMap := make(map[int]model.User)
-// 	var usersIDs []int
-// 	for _, ad := range ads {
-// 		if _, ok := usersMap[ad.UserID]; !ok {
-// 			usersMap[ad.UserID] = model.User{}
-// 			usersIDs = append(usersIDs, ad.UserID)
-// 		}
-// 	}
-
-// 	users, err := s.userRepo.ListInIDs(usersIDs)
-// 	if err != nil {
-// 		//logrus.Error() // Просто пока пишем ошибку
-// 		return model.ConvertAdsToResponse(ads, nil), nil
-// 	}
-// 	for _, user := range users {
-// 		usersMap[user.ID] = user
-// 	}
-// 	adsResponse := model.ConvertAdsToResponse(ads, usersMap)
-
-// 	return adsResponse, nil
-// }
-
-func (s *AdService) GetAd(adID uint32, fields model.GetAdOptional) (model.AdResponse, error) {
-	ad, err := s.adRepo.Get(adID, fields)
+func (s *AdService) UpdateAd(userID, adID uint32, ad model.AdRequest) (uint32, error) {
+	adID, err := s.adRepo.Update(userID, adID, ad)
 	if err != nil {
-		return model.AdResponse{}, err
+		return adID, err
 	}
 
-	// var adUser model.User
-	// if user, err := s.userRepo.GetByID(ad.UserID); err == nil {
-	// 	adUser = user
-	// }
+	if err := s.photoRepo.DeleteAllByAd(adID); err != nil {
+		return adID, err
+	}
+	if ad.OtherPhotos != nil {
+		if err := s.photoRepo.CreateList(adID, *ad.OtherPhotos); err != nil {
+			return adID, err
+		}
+	}
 
-	// var photos *[]string
-	// if fields.Photos {
-	// 	photoLinks, err := s.photoRepo.ListLinksByAd(adID)
-	// 	if err == nil {
-	// 		photos = &photoLinks
-	// 	}
-	// }
+	if err := s.tagRepo.DetachAllFromAd(adID); err != nil {
+		return adID, err
+	}
+	if ad.Tags != nil {
+		for _, tagName := range *ad.Tags {
+			tagID, err := s.tagRepo.GetIDOrCreateIfNotExists(tagName)
+			if err != nil {
+				continue
+			}
 
-	// var tags *[]string
-	// if fields.Tags {
-	// 	tagNames, err := s.tagRepo.ListNamesByAd(adID)
-	// 	if err == nil {
-	// 		tags = &tagNames
-	// 	}
-	// }
+			if err := s.tagRepo.AttachToAd(adID, tagID); err != nil {
+				return adID, err
+			}
+		}
+	}
 
-	// adResponse := ad.ToResponse(adUser, photos, tags)
-	adResponse := ad.ToResponse(model.User{}, nil, nil)
-
-	return adResponse, nil
+	return adID, nil
 }
 
-// func (s *AdService) UpdateAd(userID, adID int, ad model.AdRequest) error {
-// 	if err := s.adRepo.Update(userID, adID, ad); err != nil {
-// 		return err
-// 	}
-
-// 	if err := s.photoRepo.DeleteAllByAd(adID); err != nil {
-// 		return err
-// 	}
-// 	if ad.OtherPhotos != nil {
-// 		if err := s.photoRepo.CreateList(adID, *ad.OtherPhotos); err != nil {
-// 			return err
-// 		}
-// 	}
-
-// 	if err := s.tagRepo.DetachAllFromAd(adID); err != nil {
-// 		return err
-// 	}
-// 	if ad.Tags != nil {
-// 		for _, tagName := range *ad.Tags {
-// 			tagID, err := s.tagRepo.GetIDOrCreateIfNotExists(tagName)
-// 			if err != nil {
-// 				continue
-// 			}
-
-// 			if err := s.tagRepo.AttachToAd(adID, tagID); err != nil {
-// 				return err
-// 			}
-// 		}
-// 	}
-
-// 	return nil
-// }
-
-// func (s *AdService) DeleteAd(userID, adID int) error {
-// 	return s.adRepo.Delete(userID, adID)
-// }
+func (s *AdService) DeleteAd(userID, adID uint32) error {
+	return s.adRepo.Delete(userID, adID)
+}

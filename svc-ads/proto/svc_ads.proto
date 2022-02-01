@@ -103,7 +103,7 @@ message Ad {
 
 message AdResponse {
     Ad ad = 1;
-    svc_auth.User user = 2;
+    svc_auth.UserResponse user = 2;
 }
 
 message ListPhotosRequest {

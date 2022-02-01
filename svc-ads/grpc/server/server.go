@@ -4,13 +4,12 @@ import (
 	"context"
 
 	"github.com/golang/protobuf/ptypes/empty"
-	"github.com/sirupsen/logrus"
 	pb "github.com/u-shylianok/ad-service/svc-ads/client/ads"
+	"github.com/u-shylianok/ad-service/svc-ads/domain/model"
 	"github.com/u-shylianok/ad-service/svc-ads/grpc/client"
 	"github.com/u-shylianok/ad-service/svc-ads/grpc/dto"
 	"github.com/u-shylianok/ad-service/svc-ads/service"
-	"github.com/u-shylianok/ad-service/svc-auth/client/auth"
-	"google.golang.org/protobuf/types/known/timestamppb"
+	pbAuth "github.com/u-shylianok/ad-service/svc-auth/client/auth"
 )
 
 type Server struct {
@@ -27,56 +26,130 @@ func New(service *service.Service, clients *client.Client) *Server {
 	}
 }
 
-func (s *Server) GetAd(ctx context.Context, in *pb.GetAdRequest) (*pb.Ad, error) {
-	ad, err := s.Service.GetAd(dto.FromGetAdRequest(in))
+func (s *Server) GetAd(ctx context.Context, in *pb.GetAdRequest) (*pb.GetAdResponse, error) {
+	ad, err := s.Service.GetAd(dto.FromPbAds_GetAdRequest(in))
 	if err != nil {
 		return nil, err
 	}
-	s.clients.AuthService.GetUser(context.Background(), &auth.GetUserRequest{Id: ad.UserID})
-	out := &pb.Ad{
-		Id:          ad.ID,
-		Name:        ad.Name,
-		Date:        timestamppb.New(ad.Date),
-		Price:       int32(ad.Price),
-		Description: ad.Description,
-		Photo:       ad.MainPhoto,
-		Photos:      make([]string, 0),
-		Tags:        make([]string, 0),
+
+	user, err := s.clients.AuthService.GetUser(context.Background(), dto.ToPbAuth_GetUserRequest(ad.UserID))
+	if err != nil {
+		return nil, err
 	}
-	return out, nil
+	return dto.ToPbAds_GetAdResponse(ad, user), nil
 }
 
 func (s *Server) ListAds(ctx context.Context, in *pb.ListAdsRequest) (*pb.ListAdsResponse, error) {
-	logrus.WithField("in", in).Error("ListAds")
-	return nil, nil
+	ads, err := s.Service.ListAds(dto.FromPbAds_ListAdsRequest(in))
+	if err != nil {
+		return nil, err
+	}
+
+	// TODO : draft part
+	usersMap := make(map[uint32]*pbAuth.UserResponse)
+	for _, ad := range ads {
+		user, err := s.clients.AuthService.GetUser(context.Background(), dto.ToPbAuth_GetUserRequest(ad.UserID))
+		if err != nil {
+			return nil, err
+		}
+		usersMap[ad.UserID] = user.User
+	}
+	//
+	return dto.ToPbAds_ListAdsResponse(ads, usersMap), nil
 }
 
 func (s *Server) SearchAds(ctx context.Context, in *pb.SearchAdsRequest) (*pb.SearchAdsResponse, error) {
-	logrus.WithField("in", in).Error("SearchAds")
-	return nil, nil
+	ads, err := s.Service.SearchAds(dto.FromPbAds_SearchAdsRequest(in))
+	if err != nil {
+		return nil, err
+	}
+
+	// TODO : draft part
+	usersMap := make(map[uint32]*pbAuth.UserResponse)
+	for _, ad := range ads {
+		user, err := s.clients.AuthService.GetUser(context.Background(), dto.ToPbAuth_GetUserRequest(ad.UserID))
+		if err != nil {
+			return nil, err
+		}
+		usersMap[ad.UserID] = user.User
+	}
+	//
+	return dto.ToPbAds_SearchAdsResponse(ads, usersMap), nil
 }
 
 func (s *Server) CreateAd(ctx context.Context, in *pb.CreateAdRequest) (*pb.Ad, error) {
-	logrus.WithField("in", in).Error("CreateAd")
-	return nil, nil
+	adID, err := s.Service.CreateAd(dto.FromPbAds_CreateAdRequest(in))
+	if err != nil {
+		return nil, err
+	}
+
+	// TODO : draft part
+	ad, err := s.Service.GetAd(adID, model.AdsOptional{})
+	if err != nil {
+		return nil, err
+	}
+	//
+	return dto.ToPbAds_Ad(ad), nil
 }
 
 func (s *Server) UpdateAd(ctx context.Context, in *pb.UpdateAdRequest) (*pb.Ad, error) {
-	logrus.WithField("in", in).Error("UpdateAd")
-	return nil, nil
+	adID, err := s.Service.UpdateAd(dto.FromPbAds_UpdateAdRequest(in))
+	if err != nil {
+		return nil, err
+	}
+
+	// TODO : draft part
+	ad, err := s.Service.GetAd(adID, model.AdsOptional{})
+	if err != nil {
+		return nil, err
+	}
+	//
+	return dto.ToPbAds_Ad(ad), nil
 }
 
 func (s *Server) DeleteAd(ctx context.Context, in *pb.DeleteAdRequest) (*empty.Empty, error) {
-	logrus.WithField("in", in).Error("DeleteAd")
-	return nil, nil
+	if err := s.Service.DeleteAd(dto.FromPbAds_DeleteAdRequest(in)); err != nil {
+		return nil, err
+	}
+	return &empty.Empty{}, nil
 }
 
 func (s *Server) ListPhotos(ctx context.Context, in *pb.ListPhotosRequest) (*pb.ListPhotosResponse, error) {
-	logrus.WithField("in", in).Error("ListPhotos")
-	return nil, nil
+	adID := dto.FromPbAds_ListPhotosRequest(in)
+
+	var result []string
+	if adID == 0 {
+		photos, err := s.Service.ListPhotos()
+		if err != nil {
+			return nil, err
+		}
+		result = photos
+	} else {
+		photos, err := s.Service.ListAdPhotos(adID)
+		if err != nil {
+			return nil, err
+		}
+		result = photos
+	}
+	return dto.ToPbAds_ListPhotosResponse(result), nil
 }
 
 func (s *Server) ListTags(ctx context.Context, in *pb.ListTagsRequest) (*pb.ListTagsResponse, error) {
-	logrus.WithField("in", in).Error("ListTags")
-	return nil, nil
+	adID := dto.FromPbAds_ListTagsRequest(in)
+
+	var result []string
+	if adID == 0 {
+		tags, err := s.Service.ListTags()
+		if err != nil {
+			return nil, err
+		}
+		result = tags
+	} else {
+		tags, err := s.Service.ListAdTags(adID)
+		if err != nil {
+			return nil, err
+		}
+		result = tags
+	}
+	return dto.ToPbAds_ListTagsResponse(result), nil
 }
