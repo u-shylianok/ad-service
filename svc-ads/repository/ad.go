@@ -95,12 +95,15 @@ func (r *AdPostgres) Create(userID uint32, ad model.AdRequest) (uint32, error) {
 	return adID, tx.Commit()
 }
 
-func (r *AdPostgres) Update(userID, adID uint32, ad model.AdRequest) error {
+func (r *AdPostgres) Update(userID, adID uint32, ad model.AdRequest) (uint32, error) {
+	updateAdQuery := "UPDATE ads SET name = $1, price = $2, description = $3, photo = $4 WHERE user_id = $5 AND id = $6 RETURNING id"
 
-	updateAdQuery := "UPDATE ads SET name = $1, price = $2, description = $3, photo = $4 WHERE user_id = $5 AND id = $6"
-	_, err := r.db.Exec(updateAdQuery, ad.Name, ad.Price, ad.Description, ad.MainPhoto, userID, adID)
-
-	return err
+	var id uint32
+	row := r.db.QueryRow(updateAdQuery, ad.Name, ad.Price, ad.Description, ad.MainPhoto, userID, adID)
+	if err := row.Scan(&id); err != nil {
+		return 0, err
+	}
+	return id, nil
 }
 
 func (r *AdPostgres) Delete(userID, adID uint32) error {

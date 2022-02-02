@@ -5,13 +5,13 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 
 	_ "github.com/jackc/pgx/v4/stdlib"
 	log "github.com/sirupsen/logrus"
 	pb "github.com/u-shylianok/ad-service/svc-ads/client/ads"
 	"github.com/u-shylianok/ad-service/svc-ads/grpc/client"
 	"github.com/u-shylianok/ad-service/svc-ads/grpc/server"
-	"github.com/u-shylianok/ad-service/svc-ads/model"
 	"github.com/u-shylianok/ad-service/svc-ads/repository"
 	"github.com/u-shylianok/ad-service/svc-ads/service"
 	"google.golang.org/grpc"
@@ -19,6 +19,7 @@ import (
 
 func main() {
 	setupGlobalLogger()
+	time.Sleep(5 * time.Second)
 
 	db, err := repository.NewPostgresDB(repository.Config{
 		Host:     os.Getenv("DB_HOST"),
@@ -42,11 +43,6 @@ func main() {
 
 	repos := repository.NewRepository(db)
 	services := service.NewService(repos)
-	result, err := services.Ad.GetAd(1, model.AdOptionalFieldsParam{})
-	if err != nil {
-		log.Fatal(err)
-	}
-	log.Printf("%#v", result)
 
 	srv := grpc.NewServer()
 	go func() {
@@ -75,7 +71,7 @@ func main() {
 
 func setupGlobalLogger() {
 	logLevel := os.Getenv("LOG_LEVEL")
-	if logLevel != "" {
+	if logLevel != "" && logLevel != "default" {
 		level, err := log.ParseLevel(logLevel)
 		if err != nil {
 			log.WithError(err).Error("failed to parse log level from env")

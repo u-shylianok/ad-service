@@ -8,24 +8,24 @@ import (
 )
 
 type PhotoMock struct {
-	CreateStub        func(int, string) (int, error)
+	CreateStub        func(uint32, string) (uint32, error)
 	createMutex       sync.RWMutex
 	createArgsForCall []struct {
-		arg1 int
+		arg1 uint32
 		arg2 string
 	}
 	createReturns struct {
-		result1 int
+		result1 uint32
 		result2 error
 	}
 	createReturnsOnCall map[int]struct {
-		result1 int
+		result1 uint32
 		result2 error
 	}
-	CreateListStub        func(int, []string) error
+	CreateListStub        func(uint32, []string) error
 	createListMutex       sync.RWMutex
 	createListArgsForCall []struct {
-		arg1 int
+		arg1 uint32
 		arg2 []string
 	}
 	createListReturns struct {
@@ -34,10 +34,10 @@ type PhotoMock struct {
 	createListReturnsOnCall map[int]struct {
 		result1 error
 	}
-	DeleteAllByAdStub        func(int) error
+	DeleteAllByAdStub        func(uint32) error
 	deleteAllByAdMutex       sync.RWMutex
 	deleteAllByAdArgsForCall []struct {
-		arg1 int
+		arg1 uint32
 	}
 	deleteAllByAdReturns struct {
 		result1 error
@@ -57,10 +57,10 @@ type PhotoMock struct {
 		result1 []string
 		result2 error
 	}
-	ListLinksByAdStub        func(int) ([]string, error)
+	ListLinksByAdStub        func(uint32) ([]string, error)
 	listLinksByAdMutex       sync.RWMutex
 	listLinksByAdArgsForCall []struct {
-		arg1 int
+		arg1 uint32
 	}
 	listLinksByAdReturns struct {
 		result1 []string
@@ -74,11 +74,11 @@ type PhotoMock struct {
 	invocationsMutex sync.RWMutex
 }
 
-func (fake *PhotoMock) Create(arg1 int, arg2 string) (int, error) {
+func (fake *PhotoMock) Create(arg1 uint32, arg2 string) (uint32, error) {
 	fake.createMutex.Lock()
 	ret, specificReturn := fake.createReturnsOnCall[len(fake.createArgsForCall)]
 	fake.createArgsForCall = append(fake.createArgsForCall, struct {
-		arg1 int
+		arg1 uint32
 		arg2 string
 	}{arg1, arg2})
 	stub := fake.CreateStub
@@ -100,46 +100,46 @@ func (fake *PhotoMock) CreateCallCount() int {
 	return len(fake.createArgsForCall)
 }
 
-func (fake *PhotoMock) CreateCalls(stub func(int, string) (int, error)) {
+func (fake *PhotoMock) CreateCalls(stub func(uint32, string) (uint32, error)) {
 	fake.createMutex.Lock()
 	defer fake.createMutex.Unlock()
 	fake.CreateStub = stub
 }
 
-func (fake *PhotoMock) CreateArgsForCall(i int) (int, string) {
+func (fake *PhotoMock) CreateArgsForCall(i int) (uint32, string) {
 	fake.createMutex.RLock()
 	defer fake.createMutex.RUnlock()
 	argsForCall := fake.createArgsForCall[i]
 	return argsForCall.arg1, argsForCall.arg2
 }
 
-func (fake *PhotoMock) CreateReturns(result1 int, result2 error) {
+func (fake *PhotoMock) CreateReturns(result1 uint32, result2 error) {
 	fake.createMutex.Lock()
 	defer fake.createMutex.Unlock()
 	fake.CreateStub = nil
 	fake.createReturns = struct {
-		result1 int
+		result1 uint32
 		result2 error
 	}{result1, result2}
 }
 
-func (fake *PhotoMock) CreateReturnsOnCall(i int, result1 int, result2 error) {
+func (fake *PhotoMock) CreateReturnsOnCall(i int, result1 uint32, result2 error) {
 	fake.createMutex.Lock()
 	defer fake.createMutex.Unlock()
 	fake.CreateStub = nil
 	if fake.createReturnsOnCall == nil {
 		fake.createReturnsOnCall = make(map[int]struct {
-			result1 int
+			result1 uint32
 			result2 error
 		})
 	}
 	fake.createReturnsOnCall[i] = struct {
-		result1 int
+		result1 uint32
 		result2 error
 	}{result1, result2}
 }
 
-func (fake *PhotoMock) CreateList(arg1 int, arg2 []string) error {
+func (fake *PhotoMock) CreateList(arg1 uint32, arg2 []string) error {
 	var arg2Copy []string
 	if arg2 != nil {
 		arg2Copy = make([]string, len(arg2))
@@ -148,7 +148,7 @@ func (fake *PhotoMock) CreateList(arg1 int, arg2 []string) error {
 	fake.createListMutex.Lock()
 	ret, specificReturn := fake.createListReturnsOnCall[len(fake.createListArgsForCall)]
 	fake.createListArgsForCall = append(fake.createListArgsForCall, struct {
-		arg1 int
+		arg1 uint32
 		arg2 []string
 	}{arg1, arg2Copy})
 	stub := fake.CreateListStub
@@ -170,13 +170,13 @@ func (fake *PhotoMock) CreateListCallCount() int {
 	return len(fake.createListArgsForCall)
 }
 
-func (fake *PhotoMock) CreateListCalls(stub func(int, []string) error) {
+func (fake *PhotoMock) CreateListCalls(stub func(uint32, []string) error) {
 	fake.createListMutex.Lock()
 	defer fake.createListMutex.Unlock()
 	fake.CreateListStub = stub
 }
 
-func (fake *PhotoMock) CreateListArgsForCall(i int) (int, []string) {
+func (fake *PhotoMock) CreateListArgsForCall(i int) (uint32, []string) {
 	fake.createListMutex.RLock()
 	defer fake.createListMutex.RUnlock()
 	argsForCall := fake.createListArgsForCall[i]
@@ -206,11 +206,11 @@ func (fake *PhotoMock) CreateListReturnsOnCall(i int, result1 error) {
 	}{result1}
 }
 
-func (fake *PhotoMock) DeleteAllByAd(arg1 int) error {
+func (fake *PhotoMock) DeleteAllByAd(arg1 uint32) error {
 	fake.deleteAllByAdMutex.Lock()
 	ret, specificReturn := fake.deleteAllByAdReturnsOnCall[len(fake.deleteAllByAdArgsForCall)]
 	fake.deleteAllByAdArgsForCall = append(fake.deleteAllByAdArgsForCall, struct {
-		arg1 int
+		arg1 uint32
 	}{arg1})
 	stub := fake.DeleteAllByAdStub
 	fakeReturns := fake.deleteAllByAdReturns
@@ -231,13 +231,13 @@ func (fake *PhotoMock) DeleteAllByAdCallCount() int {
 	return len(fake.deleteAllByAdArgsForCall)
 }
 
-func (fake *PhotoMock) DeleteAllByAdCalls(stub func(int) error) {
+func (fake *PhotoMock) DeleteAllByAdCalls(stub func(uint32) error) {
 	fake.deleteAllByAdMutex.Lock()
 	defer fake.deleteAllByAdMutex.Unlock()
 	fake.DeleteAllByAdStub = stub
 }
 
-func (fake *PhotoMock) DeleteAllByAdArgsForCall(i int) int {
+func (fake *PhotoMock) DeleteAllByAdArgsForCall(i int) uint32 {
 	fake.deleteAllByAdMutex.RLock()
 	defer fake.deleteAllByAdMutex.RUnlock()
 	argsForCall := fake.deleteAllByAdArgsForCall[i]
@@ -323,11 +323,11 @@ func (fake *PhotoMock) ListLinksReturnsOnCall(i int, result1 []string, result2 e
 	}{result1, result2}
 }
 
-func (fake *PhotoMock) ListLinksByAd(arg1 int) ([]string, error) {
+func (fake *PhotoMock) ListLinksByAd(arg1 uint32) ([]string, error) {
 	fake.listLinksByAdMutex.Lock()
 	ret, specificReturn := fake.listLinksByAdReturnsOnCall[len(fake.listLinksByAdArgsForCall)]
 	fake.listLinksByAdArgsForCall = append(fake.listLinksByAdArgsForCall, struct {
-		arg1 int
+		arg1 uint32
 	}{arg1})
 	stub := fake.ListLinksByAdStub
 	fakeReturns := fake.listLinksByAdReturns
@@ -348,13 +348,13 @@ func (fake *PhotoMock) ListLinksByAdCallCount() int {
 	return len(fake.listLinksByAdArgsForCall)
 }
 
-func (fake *PhotoMock) ListLinksByAdCalls(stub func(int) ([]string, error)) {
+func (fake *PhotoMock) ListLinksByAdCalls(stub func(uint32) ([]string, error)) {
 	fake.listLinksByAdMutex.Lock()
 	defer fake.listLinksByAdMutex.Unlock()
 	fake.ListLinksByAdStub = stub
 }
 
-func (fake *PhotoMock) ListLinksByAdArgsForCall(i int) int {
+func (fake *PhotoMock) ListLinksByAdArgsForCall(i int) uint32 {
 	fake.listLinksByAdMutex.RLock()
 	defer fake.listLinksByAdMutex.RUnlock()
 	argsForCall := fake.listLinksByAdArgsForCall[i]

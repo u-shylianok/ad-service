@@ -20,7 +20,7 @@ func ToPbAuth_SignInRequest(req model.SignInRequest) *pbAuth.SignInRequest {
 	}
 }
 
-func FromPbAuth_User(user *pbAuth.User) model.UserResponse {
+func FromPbAuth_User(user *pbAuth.UserResponse) model.UserResponse {
 	return model.UserResponse{
 		Name:     user.Name,
 		Username: user.Username,

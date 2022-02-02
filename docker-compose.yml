@@ -13,6 +13,7 @@ services:
       - PORT=${API_GATEWAY_PORT}
       - SVC_ADS_ADDRESS=${SVC_ADS}:${SVC_ADS_PORT}
       - SVC_AUTH_ADDRESS=${SVC_AUTH}:${SVC_AUTH_PORT}
+      - LOG_LEVEL=${LOG_LEVEL:-default}
     depends_on:
       - ${SVC_ADS}
       - ${SVC_AUTH}
@@ -27,13 +28,16 @@ services:
     ports:
       - ${SVC_ADS_PORT}:${SVC_ADS_PORT}
     environment:
+      - GRPC_GO_LOG_VERBOSITY_LEVEL=99
+      - GRPC_GO_LOG_SEVERITY_LEVEL=info
       - PORT=${SVC_ADS_PORT}
       - DB_HOST=${DB_ADS}
-      - DB_PORT=${DB_ADS_PORT}
+      - DB_PORT=5432
       - DB_USER=postgres
       - DB_PASSWORD=postgres
       - DB_DBNAME=postgres
       - DB_SSL=disable
+      - SVC_AUTH_ADDRESS=${SVC_AUTH}:${SVC_AUTH_PORT}
       - LOG_LEVEL=${LOG_LEVEL:-default}
     depends_on:
       - ${DB_ADS}
@@ -48,9 +52,11 @@ services:
     ports:
       - ${SVC_AUTH_PORT}:${SVC_AUTH_PORT}
     environment:
+      - GRPC_GO_LOG_VERBOSITY_LEVEL=99
+      - GRPC_GO_LOG_SEVERITY_LEVEL=info
       - PORT=${SVC_AUTH_PORT}
       - DB_HOST=${DB_AUTH}
-      - DB_PORT=${DB_AUTH_PORT}
+      - DB_PORT=5432
       - DB_USER=postgres
       - DB_PASSWORD=postgres
       - DB_DBNAME=postgres

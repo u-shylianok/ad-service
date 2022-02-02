@@ -4,16 +4,16 @@ package repository
 import (
 	"sync"
 
-	"github.com/u-shylianok/ad-service/svc-ads/model"
+	"github.com/u-shylianok/ad-service/svc-ads/domain/model"
 	"github.com/u-shylianok/ad-service/svc-ads/repository"
 )
 
 type TagMock struct {
-	AttachToAdStub        func(int, int) error
+	AttachToAdStub        func(uint32, uint32) error
 	attachToAdMutex       sync.RWMutex
 	attachToAdArgsForCall []struct {
-		arg1 int
-		arg2 int
+		arg1 uint32
+		arg2 uint32
 	}
 	attachToAdReturns struct {
 		result1 error
@@ -21,23 +21,23 @@ type TagMock struct {
 	attachToAdReturnsOnCall map[int]struct {
 		result1 error
 	}
-	CreateStub        func(string) (int, error)
+	CreateStub        func(string) (uint32, error)
 	createMutex       sync.RWMutex
 	createArgsForCall []struct {
 		arg1 string
 	}
 	createReturns struct {
-		result1 int
+		result1 uint32
 		result2 error
 	}
 	createReturnsOnCall map[int]struct {
-		result1 int
+		result1 uint32
 		result2 error
 	}
-	DetachAllFromAdStub        func(int) error
+	DetachAllFromAdStub        func(uint32) error
 	detachAllFromAdMutex       sync.RWMutex
 	detachAllFromAdArgsForCall []struct {
-		arg1 int
+		arg1 uint32
 	}
 	detachAllFromAdReturns struct {
 		result1 error
@@ -45,11 +45,11 @@ type TagMock struct {
 	detachAllFromAdReturnsOnCall map[int]struct {
 		result1 error
 	}
-	DetachFromAdStub        func(int, int) error
+	DetachFromAdStub        func(uint32, uint32) error
 	detachFromAdMutex       sync.RWMutex
 	detachFromAdArgsForCall []struct {
-		arg1 int
-		arg2 int
+		arg1 uint32
+		arg2 uint32
 	}
 	detachFromAdReturns struct {
 		result1 error
@@ -70,17 +70,17 @@ type TagMock struct {
 		result1 model.Tag
 		result2 error
 	}
-	GetIDOrCreateIfNotExistsStub        func(string) (int, error)
+	GetIDOrCreateIfNotExistsStub        func(string) (uint32, error)
 	getIDOrCreateIfNotExistsMutex       sync.RWMutex
 	getIDOrCreateIfNotExistsArgsForCall []struct {
 		arg1 string
 	}
 	getIDOrCreateIfNotExistsReturns struct {
-		result1 int
+		result1 uint32
 		result2 error
 	}
 	getIDOrCreateIfNotExistsReturnsOnCall map[int]struct {
-		result1 int
+		result1 uint32
 		result2 error
 	}
 	ListNamesStub        func() ([]string, error)
@@ -95,10 +95,10 @@ type TagMock struct {
 		result1 []string
 		result2 error
 	}
-	ListNamesByAdStub        func(int) ([]string, error)
+	ListNamesByAdStub        func(uint32) ([]string, error)
 	listNamesByAdMutex       sync.RWMutex
 	listNamesByAdArgsForCall []struct {
-		arg1 int
+		arg1 uint32
 	}
 	listNamesByAdReturns struct {
 		result1 []string
@@ -112,12 +112,12 @@ type TagMock struct {
 	invocationsMutex sync.RWMutex
 }
 
-func (fake *TagMock) AttachToAd(arg1 int, arg2 int) error {
+func (fake *TagMock) AttachToAd(arg1 uint32, arg2 uint32) error {
 	fake.attachToAdMutex.Lock()
 	ret, specificReturn := fake.attachToAdReturnsOnCall[len(fake.attachToAdArgsForCall)]
 	fake.attachToAdArgsForCall = append(fake.attachToAdArgsForCall, struct {
-		arg1 int
-		arg2 int
+		arg1 uint32
+		arg2 uint32
 	}{arg1, arg2})
 	stub := fake.AttachToAdStub
 	fakeReturns := fake.attachToAdReturns
@@ -138,13 +138,13 @@ func (fake *TagMock) AttachToAdCallCount() int {
 	return len(fake.attachToAdArgsForCall)
 }
 
-func (fake *TagMock) AttachToAdCalls(stub func(int, int) error) {
+func (fake *TagMock) AttachToAdCalls(stub func(uint32, uint32) error) {
 	fake.attachToAdMutex.Lock()
 	defer fake.attachToAdMutex.Unlock()
 	fake.AttachToAdStub = stub
 }
 
-func (fake *TagMock) AttachToAdArgsForCall(i int) (int, int) {
+func (fake *TagMock) AttachToAdArgsForCall(i int) (uint32, uint32) {
 	fake.attachToAdMutex.RLock()
 	defer fake.attachToAdMutex.RUnlock()
 	argsForCall := fake.attachToAdArgsForCall[i]
@@ -174,7 +174,7 @@ func (fake *TagMock) AttachToAdReturnsOnCall(i int, result1 error) {
 	}{result1}
 }
 
-func (fake *TagMock) Create(arg1 string) (int, error) {
+func (fake *TagMock) Create(arg1 string) (uint32, error) {
 	fake.createMutex.Lock()
 	ret, specificReturn := fake.createReturnsOnCall[len(fake.createArgsForCall)]
 	fake.createArgsForCall = append(fake.createArgsForCall, struct {
@@ -199,7 +199,7 @@ func (fake *TagMock) CreateCallCount() int {
 	return len(fake.createArgsForCall)
 }
 
-func (fake *TagMock) CreateCalls(stub func(string) (int, error)) {
+func (fake *TagMock) CreateCalls(stub func(string) (uint32, error)) {
 	fake.createMutex.Lock()
 	defer fake.createMutex.Unlock()
 	fake.CreateStub = stub
@@ -212,37 +212,37 @@ func (fake *TagMock) CreateArgsForCall(i int) string {
 	return argsForCall.arg1
 }
 
-func (fake *TagMock) CreateReturns(result1 int, result2 error) {
+func (fake *TagMock) CreateReturns(result1 uint32, result2 error) {
 	fake.createMutex.Lock()
 	defer fake.createMutex.Unlock()
 	fake.CreateStub = nil
 	fake.createReturns = struct {
-		result1 int
+		result1 uint32
 		result2 error
 	}{result1, result2}
 }
 
-func (fake *TagMock) CreateReturnsOnCall(i int, result1 int, result2 error) {
+func (fake *TagMock) CreateReturnsOnCall(i int, result1 uint32, result2 error) {
 	fake.createMutex.Lock()
 	defer fake.createMutex.Unlock()
 	fake.CreateStub = nil
 	if fake.createReturnsOnCall == nil {
 		fake.createReturnsOnCall = make(map[int]struct {
-			result1 int
+			result1 uint32
 			result2 error
 		})
 	}
 	fake.createReturnsOnCall[i] = struct {
-		result1 int
+		result1 uint32
 		result2 error
 	}{result1, result2}
 }
 
-func (fake *TagMock) DetachAllFromAd(arg1 int) error {
+func (fake *TagMock) DetachAllFromAd(arg1 uint32) error {
 	fake.detachAllFromAdMutex.Lock()
 	ret, specificReturn := fake.detachAllFromAdReturnsOnCall[len(fake.detachAllFromAdArgsForCall)]
 	fake.detachAllFromAdArgsForCall = append(fake.detachAllFromAdArgsForCall, struct {
-		arg1 int
+		arg1 uint32
 	}{arg1})
 	stub := fake.DetachAllFromAdStub
 	fakeReturns := fake.detachAllFromAdReturns
@@ -263,13 +263,13 @@ func (fake *TagMock) DetachAllFromAdCallCount() int {
 	return len(fake.detachAllFromAdArgsForCall)
 }
 
-func (fake *TagMock) DetachAllFromAdCalls(stub func(int) error) {
+func (fake *TagMock) DetachAllFromAdCalls(stub func(uint32) error) {
 	fake.detachAllFromAdMutex.Lock()
 	defer fake.detachAllFromAdMutex.Unlock()
 	fake.DetachAllFromAdStub = stub
 }
 
-func (fake *TagMock) DetachAllFromAdArgsForCall(i int) int {
+func (fake *TagMock) DetachAllFromAdArgsForCall(i int) uint32 {
 	fake.detachAllFromAdMutex.RLock()
 	defer fake.detachAllFromAdMutex.RUnlock()
 	argsForCall := fake.detachAllFromAdArgsForCall[i]
@@ -299,12 +299,12 @@ func (fake *TagMock) DetachAllFromAdReturnsOnCall(i int, result1 error) {
 	}{result1}
 }
 
-func (fake *TagMock) DetachFromAd(arg1 int, arg2 int) error {
+func (fake *TagMock) DetachFromAd(arg1 uint32, arg2 uint32) error {
 	fake.detachFromAdMutex.Lock()
 	ret, specificReturn := fake.detachFromAdReturnsOnCall[len(fake.detachFromAdArgsForCall)]
 	fake.detachFromAdArgsForCall = append(fake.detachFromAdArgsForCall, struct {
-		arg1 int
-		arg2 int
+		arg1 uint32
+		arg2 uint32
 	}{arg1, arg2})
 	stub := fake.DetachFromAdStub
 	fakeReturns := fake.detachFromAdReturns
@@ -325,13 +325,13 @@ func (fake *TagMock) DetachFromAdCallCount() int {
 	return len(fake.detachFromAdArgsForCall)
 }
 
-func (fake *TagMock) DetachFromAdCalls(stub func(int, int) error) {
+func (fake *TagMock) DetachFromAdCalls(stub func(uint32, uint32) error) {
 	fake.detachFromAdMutex.Lock()
 	defer fake.detachFromAdMutex.Unlock()
 	fake.DetachFromAdStub = stub
 }
 
-func (fake *TagMock) DetachFromAdArgsForCall(i int) (int, int) {
+func (fake *TagMock) DetachFromAdArgsForCall(i int) (uint32, uint32) {
 	fake.detachFromAdMutex.RLock()
 	defer fake.detachFromAdMutex.RUnlock()
 	argsForCall := fake.detachFromAdArgsForCall[i]
@@ -425,7 +425,7 @@ func (fake *TagMock) GetByNameReturnsOnCall(i int, result1 model.Tag, result2 er
 	}{result1, result2}
 }
 
-func (fake *TagMock) GetIDOrCreateIfNotExists(arg1 string) (int, error) {
+func (fake *TagMock) GetIDOrCreateIfNotExists(arg1 string) (uint32, error) {
 	fake.getIDOrCreateIfNotExistsMutex.Lock()
 	ret, specificReturn := fake.getIDOrCreateIfNotExistsReturnsOnCall[len(fake.getIDOrCreateIfNotExistsArgsForCall)]
 	fake.getIDOrCreateIfNotExistsArgsForCall = append(fake.getIDOrCreateIfNotExistsArgsForCall, struct {
@@ -450,7 +450,7 @@ func (fake *TagMock) GetIDOrCreateIfNotExistsCallCount() int {
 	return len(fake.getIDOrCreateIfNotExistsArgsForCall)
 }
 
-func (fake *TagMock) GetIDOrCreateIfNotExistsCalls(stub func(string) (int, error)) {
+func (fake *TagMock) GetIDOrCreateIfNotExistsCalls(stub func(string) (uint32, error)) {
 	fake.getIDOrCreateIfNotExistsMutex.Lock()
 	defer fake.getIDOrCreateIfNotExistsMutex.Unlock()
 	fake.GetIDOrCreateIfNotExistsStub = stub
@@ -463,28 +463,28 @@ func (fake *TagMock) GetIDOrCreateIfNotExistsArgsForCall(i int) string {
 	return argsForCall.arg1
 }
 
-func (fake *TagMock) GetIDOrCreateIfNotExistsReturns(result1 int, result2 error) {
+func (fake *TagMock) GetIDOrCreateIfNotExistsReturns(result1 uint32, result2 error) {
 	fake.getIDOrCreateIfNotExistsMutex.Lock()
 	defer fake.getIDOrCreateIfNotExistsMutex.Unlock()
 	fake.GetIDOrCreateIfNotExistsStub = nil
 	fake.getIDOrCreateIfNotExistsReturns = struct {
-		result1 int
+		result1 uint32
 		result2 error
 	}{result1, result2}
 }
 
-func (fake *TagMock) GetIDOrCreateIfNotExistsReturnsOnCall(i int, result1 int, result2 error) {
+func (fake *TagMock) GetIDOrCreateIfNotExistsReturnsOnCall(i int, result1 uint32, result2 error) {
 	fake.getIDOrCreateIfNotExistsMutex.Lock()
 	defer fake.getIDOrCreateIfNotExistsMutex.Unlock()
 	fake.GetIDOrCreateIfNotExistsStub = nil
 	if fake.getIDOrCreateIfNotExistsReturnsOnCall == nil {
 		fake.getIDOrCreateIfNotExistsReturnsOnCall = make(map[int]struct {
-			result1 int
+			result1 uint32
 			result2 error
 		})
 	}
 	fake.getIDOrCreateIfNotExistsReturnsOnCall[i] = struct {
-		result1 int
+		result1 uint32
 		result2 error
 	}{result1, result2}
 }
@@ -545,11 +545,11 @@ func (fake *TagMock) ListNamesReturnsOnCall(i int, result1 []string, result2 err
 	}{result1, result2}
 }
 
-func (fake *TagMock) ListNamesByAd(arg1 int) ([]string, error) {
+func (fake *TagMock) ListNamesByAd(arg1 uint32) ([]string, error) {
 	fake.listNamesByAdMutex.Lock()
 	ret, specificReturn := fake.listNamesByAdReturnsOnCall[len(fake.listNamesByAdArgsForCall)]
 	fake.listNamesByAdArgsForCall = append(fake.listNamesByAdArgsForCall, struct {
-		arg1 int
+		arg1 uint32
 	}{arg1})
 	stub := fake.ListNamesByAdStub
 	fakeReturns := fake.listNamesByAdReturns
@@ -570,13 +570,13 @@ func (fake *TagMock) ListNamesByAdCallCount() int {
 	return len(fake.listNamesByAdArgsForCall)
 }
 
-func (fake *TagMock) ListNamesByAdCalls(stub func(int) ([]string, error)) {
+func (fake *TagMock) ListNamesByAdCalls(stub func(uint32) ([]string, error)) {
 	fake.listNamesByAdMutex.Lock()
 	defer fake.listNamesByAdMutex.Unlock()
 	fake.ListNamesByAdStub = stub
 }
 
-func (fake *TagMock) ListNamesByAdArgsForCall(i int) int {
+func (fake *TagMock) ListNamesByAdArgsForCall(i int) uint32 {
 	fake.listNamesByAdMutex.RLock()
 	defer fake.listNamesByAdMutex.RUnlock()
 	argsForCall := fake.listNamesByAdArgsForCall[i]

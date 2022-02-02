@@ -17,10 +17,12 @@ type Client struct {
 func New(adsAddress, authAddress string) (*Client, error) {
 	var newClient *Client
 
-	adsConn, err := grpc.Dial(adsAddress, grpc.WithInsecure(), grpc.WithBlock())
+	log.Info("start dial ads" + adsAddress)
+	adsConn, err := grpc.Dial(adsAddress, grpc.WithInsecure(), grpc.WithDisableHealthCheck())
 	if err != nil {
 		return nil, err
 	}
+	log.Info("start dial auth" + authAddress)
 	authConn, err := grpc.Dial(authAddress, grpc.WithInsecure(), grpc.WithBlock())
 	if err != nil {
 		return nil, err

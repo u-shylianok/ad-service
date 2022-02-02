@@ -4,30 +4,30 @@ package repository
 import (
 	"sync"
 
-	"github.com/u-shylianok/ad-service/svc-ads/model"
+	"github.com/u-shylianok/ad-service/svc-ads/domain/model"
 	"github.com/u-shylianok/ad-service/svc-ads/repository"
 )
 
 type AdMock struct {
-	CreateStub        func(int, model.AdRequest) (int, error)
+	CreateStub        func(uint32, model.AdRequest) (uint32, error)
 	createMutex       sync.RWMutex
 	createArgsForCall []struct {
-		arg1 int
+		arg1 uint32
 		arg2 model.AdRequest
 	}
 	createReturns struct {
-		result1 int
+		result1 uint32
 		result2 error
 	}
 	createReturnsOnCall map[int]struct {
-		result1 int
+		result1 uint32
 		result2 error
 	}
-	DeleteStub        func(int, int) error
+	DeleteStub        func(uint32, uint32) error
 	deleteMutex       sync.RWMutex
 	deleteArgsForCall []struct {
-		arg1 int
-		arg2 int
+		arg1 uint32
+		arg2 uint32
 	}
 	deleteReturns struct {
 		result1 error
@@ -35,11 +35,11 @@ type AdMock struct {
 	deleteReturnsOnCall map[int]struct {
 		result1 error
 	}
-	GetStub        func(int, model.AdOptionalFieldsParam) (model.Ad, error)
+	GetStub        func(uint32, model.AdsOptional) (model.Ad, error)
 	getMutex       sync.RWMutex
 	getArgsForCall []struct {
-		arg1 int
-		arg2 model.AdOptionalFieldsParam
+		arg1 uint32
+		arg2 model.AdsOptional
 	}
 	getReturns struct {
 		result1 model.Ad
@@ -75,28 +75,30 @@ type AdMock struct {
 		result1 []model.Ad
 		result2 error
 	}
-	UpdateStub        func(int, int, model.AdRequest) error
+	UpdateStub        func(uint32, uint32, model.AdRequest) (uint32, error)
 	updateMutex       sync.RWMutex
 	updateArgsForCall []struct {
-		arg1 int
-		arg2 int
+		arg1 uint32
+		arg2 uint32
 		arg3 model.AdRequest
 	}
 	updateReturns struct {
-		result1 error
+		result1 uint32
+		result2 error
 	}
 	updateReturnsOnCall map[int]struct {
-		result1 error
+		result1 uint32
+		result2 error
 	}
 	invocations      map[string][][]interface{}
 	invocationsMutex sync.RWMutex
 }
 
-func (fake *AdMock) Create(arg1 int, arg2 model.AdRequest) (int, error) {
+func (fake *AdMock) Create(arg1 uint32, arg2 model.AdRequest) (uint32, error) {
 	fake.createMutex.Lock()
 	ret, specificReturn := fake.createReturnsOnCall[len(fake.createArgsForCall)]
 	fake.createArgsForCall = append(fake.createArgsForCall, struct {
-		arg1 int
+		arg1 uint32
 		arg2 model.AdRequest
 	}{arg1, arg2})
 	stub := fake.CreateStub
@@ -118,51 +120,51 @@ func (fake *AdMock) CreateCallCount() int {
 	return len(fake.createArgsForCall)
 }
 
-func (fake *AdMock) CreateCalls(stub func(int, model.AdRequest) (int, error)) {
+func (fake *AdMock) CreateCalls(stub func(uint32, model.AdRequest) (uint32, error)) {
 	fake.createMutex.Lock()
 	defer fake.createMutex.Unlock()
 	fake.CreateStub = stub
 }
 
-func (fake *AdMock) CreateArgsForCall(i int) (int, model.AdRequest) {
+func (fake *AdMock) CreateArgsForCall(i int) (uint32, model.AdRequest) {
 	fake.createMutex.RLock()
 	defer fake.createMutex.RUnlock()
 	argsForCall := fake.createArgsForCall[i]
 	return argsForCall.arg1, argsForCall.arg2
 }
 
-func (fake *AdMock) CreateReturns(result1 int, result2 error) {
+func (fake *AdMock) CreateReturns(result1 uint32, result2 error) {
 	fake.createMutex.Lock()
 	defer fake.createMutex.Unlock()
 	fake.CreateStub = nil
 	fake.createReturns = struct {
-		result1 int
+		result1 uint32
 		result2 error
 	}{result1, result2}
 }
 
-func (fake *AdMock) CreateReturnsOnCall(i int, result1 int, result2 error) {
+func (fake *AdMock) CreateReturnsOnCall(i int, result1 uint32, result2 error) {
 	fake.createMutex.Lock()
 	defer fake.createMutex.Unlock()
 	fake.CreateStub = nil
 	if fake.createReturnsOnCall == nil {
 		fake.createReturnsOnCall = make(map[int]struct {
-			result1 int
+			result1 uint32
 			result2 error
 		})
 	}
 	fake.createReturnsOnCall[i] = struct {
-		result1 int
+		result1 uint32
 		result2 error
 	}{result1, result2}
 }
 
-func (fake *AdMock) Delete(arg1 int, arg2 int) error {
+func (fake *AdMock) Delete(arg1 uint32, arg2 uint32) error {
 	fake.deleteMutex.Lock()
 	ret, specificReturn := fake.deleteReturnsOnCall[len(fake.deleteArgsForCall)]
 	fake.deleteArgsForCall = append(fake.deleteArgsForCall, struct {
-		arg1 int
-		arg2 int
+		arg1 uint32
+		arg2 uint32
 	}{arg1, arg2})
 	stub := fake.DeleteStub
 	fakeReturns := fake.deleteReturns
@@ -183,13 +185,13 @@ func (fake *AdMock) DeleteCallCount() int {
 	return len(fake.deleteArgsForCall)
 }
 
-func (fake *AdMock) DeleteCalls(stub func(int, int) error) {
+func (fake *AdMock) DeleteCalls(stub func(uint32, uint32) error) {
 	fake.deleteMutex.Lock()
 	defer fake.deleteMutex.Unlock()
 	fake.DeleteStub = stub
 }
 
-func (fake *AdMock) DeleteArgsForCall(i int) (int, int) {
+func (fake *AdMock) DeleteArgsForCall(i int) (uint32, uint32) {
 	fake.deleteMutex.RLock()
 	defer fake.deleteMutex.RUnlock()
 	argsForCall := fake.deleteArgsForCall[i]
@@ -219,12 +221,12 @@ func (fake *AdMock) DeleteReturnsOnCall(i int, result1 error) {
 	}{result1}
 }
 
-func (fake *AdMock) Get(arg1 int, arg2 model.AdOptionalFieldsParam) (model.Ad, error) {
+func (fake *AdMock) Get(arg1 uint32, arg2 model.AdsOptional) (model.Ad, error) {
 	fake.getMutex.Lock()
 	ret, specificReturn := fake.getReturnsOnCall[len(fake.getArgsForCall)]
 	fake.getArgsForCall = append(fake.getArgsForCall, struct {
-		arg1 int
-		arg2 model.AdOptionalFieldsParam
+		arg1 uint32
+		arg2 model.AdsOptional
 	}{arg1, arg2})
 	stub := fake.GetStub
 	fakeReturns := fake.getReturns
@@ -245,13 +247,13 @@ func (fake *AdMock) GetCallCount() int {
 	return len(fake.getArgsForCall)
 }
 
-func (fake *AdMock) GetCalls(stub func(int, model.AdOptionalFieldsParam) (model.Ad, error)) {
+func (fake *AdMock) GetCalls(stub func(uint32, model.AdsOptional) (model.Ad, error)) {
 	fake.getMutex.Lock()
 	defer fake.getMutex.Unlock()
 	fake.GetStub = stub
 }
 
-func (fake *AdMock) GetArgsForCall(i int) (int, model.AdOptionalFieldsParam) {
+func (fake *AdMock) GetArgsForCall(i int) (uint32, model.AdsOptional) {
 	fake.getMutex.RLock()
 	defer fake.getMutex.RUnlock()
 	argsForCall := fake.getArgsForCall[i]
@@ -417,12 +419,12 @@ func (fake *AdMock) ListWithFilterReturnsOnCall(i int, result1 []model.Ad, resul
 	}{result1, result2}
 }
 
-func (fake *AdMock) Update(arg1 int, arg2 int, arg3 model.AdRequest) error {
+func (fake *AdMock) Update(arg1 uint32, arg2 uint32, arg3 model.AdRequest) (uint32, error) {
 	fake.updateMutex.Lock()
 	ret, specificReturn := fake.updateReturnsOnCall[len(fake.updateArgsForCall)]
 	fake.updateArgsForCall = append(fake.updateArgsForCall, struct {
-		arg1 int
-		arg2 int
+		arg1 uint32
+		arg2 uint32
 		arg3 model.AdRequest
 	}{arg1, arg2, arg3})
 	stub := fake.UpdateStub
@@ -433,9 +435,9 @@ func (fake *AdMock) Update(arg1 int, arg2 int, arg3 model.AdRequest) error {
 		return stub(arg1, arg2, arg3)
 	}
 	if specificReturn {
-		return ret.result1
+		return ret.result1, ret.result2
 	}
-	return fakeReturns.result1
+	return fakeReturns.result1, fakeReturns.result2
 }
 
 func (fake *AdMock) UpdateCallCount() int {
@@ -444,40 +446,43 @@ func (fake *AdMock) UpdateCallCount() int {
 	return len(fake.updateArgsForCall)
 }
 
-func (fake *AdMock) UpdateCalls(stub func(int, int, model.AdRequest) error) {
+func (fake *AdMock) UpdateCalls(stub func(uint32, uint32, model.AdRequest) (uint32, error)) {
 	fake.updateMutex.Lock()
 	defer fake.updateMutex.Unlock()
 	fake.UpdateStub = stub
 }
 
-func (fake *AdMock) UpdateArgsForCall(i int) (int, int, model.AdRequest) {
+func (fake *AdMock) UpdateArgsForCall(i int) (uint32, uint32, model.AdRequest) {
 	fake.updateMutex.RLock()
 	defer fake.updateMutex.RUnlock()
 	argsForCall := fake.updateArgsForCall[i]
 	return argsForCall.arg1, argsForCall.arg2, argsForCall.arg3
 }
 
-func (fake *AdMock) UpdateReturns(result1 error) {
+func (fake *AdMock) UpdateReturns(result1 uint32, result2 error) {
 	fake.updateMutex.Lock()
 	defer fake.updateMutex.Unlock()
 	fake.UpdateStub = nil
 	fake.updateReturns = struct {
-		result1 error
-	}{result1}
+		result1 uint32
+		result2 error
+	}{result1, result2}
 }
 
-func (fake *AdMock) UpdateReturnsOnCall(i int, result1 error) {
+func (fake *AdMock) UpdateReturnsOnCall(i int, result1 uint32, result2 error) {
 	fake.updateMutex.Lock()
 	defer fake.updateMutex.Unlock()
 	fake.UpdateStub = nil
 	if fake.updateReturnsOnCall == nil {
 		fake.updateReturnsOnCall = make(map[int]struct {
-			result1 error
+			result1 uint32
+			result2 error
 		})
 	}
 	fake.updateReturnsOnCall[i] = struct {
-		result1 error
-	}{result1}
+		result1 uint32
+		result2 error
+	}{result1, result2}
 }
 
 func (fake *AdMock) Invocations() map[string][][]interface{} {

@@ -19,7 +19,7 @@ type Ad interface {
 	Get(adID uint32, fields model.AdsOptional) (model.Ad, error)
 	List(params []model.AdsSortingParam) ([]model.Ad, error)
 	ListWithFilter(filter model.AdFilter) ([]model.Ad, error)
-	Update(userID, adID uint32, ad model.AdRequest) error
+	Update(userID, adID uint32, ad model.AdRequest) (uint32, error)
 	Delete(userID, adID uint32) error
 }
 

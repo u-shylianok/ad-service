@@ -42,7 +42,7 @@ func (s *AdService) GetAd(adID uint32, fields model.AdsOptional) (model.Ad, erro
 			tags = &tagNames
 		}
 	}
-	ad.Photos = photos
+	ad.OtherPhotos = photos
 	ad.Tags = tags
 	return ad, nil
 }

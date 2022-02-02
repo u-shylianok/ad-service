@@ -25,7 +25,7 @@ type Server struct {
 
 func main() {
 	setupGlobalLogger()
-
+	time.Sleep(10 * time.Second)
 	log.Info("start gRPC clients connection")
 	grpcClients, err := client.New(os.Getenv("SVC_ADS_ADDRESS"), os.Getenv("SVC_AUTH_ADDRESS"))
 	if err != nil {
@@ -74,7 +74,7 @@ func (s *Server) Shutdown(ctx context.Context) error {
 
 func setupGlobalLogger() {
 	logLevel := os.Getenv("LOG_LEVEL")
-	if logLevel != "" {
+	if logLevel != "" && logLevel != "default" {
 		level, err := log.ParseLevel(logLevel)
 		if err != nil {
 			log.WithError(err).Error("failed to parse log level from env")

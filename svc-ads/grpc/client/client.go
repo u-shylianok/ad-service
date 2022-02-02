@@ -14,10 +14,12 @@ type Client struct {
 func New(authAddress string) (*Client, error) {
 	var newClient *Client
 
-	authConn, err := grpc.Dial(authAddress, grpc.WithInsecure(), grpc.WithBlock())
+	log.Info("start dial auth " + authAddress)
+	authConn, err := grpc.Dial(authAddress, grpc.WithInsecure())
 	if err != nil {
 		return nil, err
 	}
+	log.WithField("auth", authConn).Info("auth connection")
 
 	newClient.AuthService = pbAuth.NewAuthServiceClient(authConn)
 	newClient.authConn = authConn

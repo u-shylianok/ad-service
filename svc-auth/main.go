@@ -5,6 +5,7 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 
 	_ "github.com/jackc/pgx/v4/stdlib"
 	log "github.com/sirupsen/logrus"
@@ -18,6 +19,7 @@ import (
 
 func main() {
 	setupGlobalLogger()
+	time.Sleep(3 * time.Second)
 
 	db, err := repository.NewPostgresDB(repository.Config{
 		Host:     os.Getenv("DB_HOST"),
@@ -62,7 +64,7 @@ func main() {
 
 func setupGlobalLogger() {
 	logLevel := os.Getenv("LOG_LEVEL")
-	if logLevel != "" {
+	if logLevel != "" && logLevel != "default" {
 		level, err := log.ParseLevel(logLevel)
 		if err != nil {
 			log.WithError(err).Error("failed to parse log level from env")
