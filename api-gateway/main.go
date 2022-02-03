@@ -25,14 +25,14 @@ type Server struct {
 
 func main() {
 	setupGlobalLogger()
-	time.Sleep(10 * time.Second)
+
 	log.Info("start gRPC clients connection")
 	grpcClients, err := client.New(os.Getenv("SVC_ADS_ADDRESS"), os.Getenv("SVC_AUTH_ADDRESS"))
 	if err != nil {
 		log.Fatalf("did not connect: %v", err)
 	}
 	defer grpcClients.Close()
-	log.Info("connection started")
+	log.Info("gRPC connection started")
 
 	handlers := handler.NewHandler(grpcClients)
 

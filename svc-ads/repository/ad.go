@@ -38,7 +38,7 @@ func (r *AdPostgres) List(params []model.AdsSortingParam) ([]model.Ad, error) {
 	var ads []model.Ad
 
 	var orderbyQuery string
-	if params != nil {
+	if len(params) != 0 {
 		queryPart := make([]string, len(params))
 		for i, param := range params {
 			if param.IsDesc {

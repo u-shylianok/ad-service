@@ -61,3 +61,11 @@ func (s *Server) GetUser(ctx context.Context, in *pb.GetUserRequest) (*pb.GetUse
 	}
 	return dto.ToPbAuth_GetUserResponse(user), nil
 }
+
+func (s *Server) ListUsersInIDs(ctx context.Context, in *pb.ListUsersInIDsRequest) (*pb.ListUsersInIDsResponse, error) {
+	users, err := s.Service.ListUsersInIDs(dto.FromPbAuth_ListUsersInIDsRequest(in))
+	if err != nil {
+		return nil, err
+	}
+	return dto.ToPbAuth_ListUsersInIDsResponse(users), nil
+}

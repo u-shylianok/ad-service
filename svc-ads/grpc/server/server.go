@@ -9,7 +9,6 @@ import (
 	"github.com/u-shylianok/ad-service/svc-ads/grpc/client"
 	"github.com/u-shylianok/ad-service/svc-ads/grpc/dto"
 	"github.com/u-shylianok/ad-service/svc-ads/service"
-	pbAuth "github.com/u-shylianok/ad-service/svc-auth/client/auth"
 )
 
 type Server struct {
@@ -45,17 +44,20 @@ func (s *Server) ListAds(ctx context.Context, in *pb.ListAdsRequest) (*pb.ListAd
 		return nil, err
 	}
 
-	// TODO : draft part
-	usersMap := make(map[uint32]*pbAuth.UserResponse)
+	ids := make(map[uint32]bool)
+	usersIDs := []uint32{}
 	for _, ad := range ads {
-		user, err := s.clients.AuthService.GetUser(context.Background(), dto.ToPbAuth_GetUserRequest(ad.UserID))
-		if err != nil {
-			return nil, err
+		usersID := ad.UserID
+		if _, value := ids[usersID]; !value {
+			ids[usersID] = true
+			usersIDs = append(usersIDs, usersID)
 		}
-		usersMap[ad.UserID] = user.User
 	}
-	//
-	return dto.ToPbAds_ListAdsResponse(ads, usersMap), nil
+	users, err := s.clients.AuthService.ListUsersInIDs(context.Background(), dto.ToPbAuth_ListUsersInIDsRequest(usersIDs))
+	if err != nil {
+		return nil, err
+	}
+	return dto.ToPbAds_ListAdsResponse(ads, users), nil
 }
 
 func (s *Server) SearchAds(ctx context.Context, in *pb.SearchAdsRequest) (*pb.SearchAdsResponse, error) {
@@ -64,17 +66,20 @@ func (s *Server) SearchAds(ctx context.Context, in *pb.SearchAdsRequest) (*pb.Se
 		return nil, err
 	}
 
-	// TODO : draft part
-	usersMap := make(map[uint32]*pbAuth.UserResponse)
+	ids := make(map[uint32]bool)
+	usersIDs := []uint32{}
 	for _, ad := range ads {
-		user, err := s.clients.AuthService.GetUser(context.Background(), dto.ToPbAuth_GetUserRequest(ad.UserID))
-		if err != nil {
-			return nil, err
+		usersID := ad.UserID
+		if _, value := ids[usersID]; !value {
+			ids[usersID] = true
+			usersIDs = append(usersIDs, usersID)
 		}
-		usersMap[ad.UserID] = user.User
 	}
-	//
-	return dto.ToPbAds_SearchAdsResponse(ads, usersMap), nil
+	users, err := s.clients.AuthService.ListUsersInIDs(context.Background(), dto.ToPbAuth_ListUsersInIDsRequest(usersIDs))
+	if err != nil {
+		return nil, err
+	}
+	return dto.ToPbAds_SearchAdsResponse(ads, users), nil
 }
 
 func (s *Server) CreateAd(ctx context.Context, in *pb.CreateAdRequest) (*pb.Ad, error) {

@@ -22,6 +22,7 @@ type AuthServiceClient interface {
 	SignIn(ctx context.Context, in *SignInRequest, opts ...grpc.CallOption) (*SignInResponse, error)
 	ParseToken(ctx context.Context, in *ParseTokenRequest, opts ...grpc.CallOption) (*ParseTokenResponse, error)
 	GetUser(ctx context.Context, in *GetUserRequest, opts ...grpc.CallOption) (*GetUserResponse, error)
+	ListUsersInIDs(ctx context.Context, in *ListUsersInIDsRequest, opts ...grpc.CallOption) (*ListUsersInIDsResponse, error)
 }
 
 type authServiceClient struct {
@@ -68,6 +69,15 @@ func (c *authServiceClient) GetUser(ctx context.Context, in *GetUserRequest, opt
 	return out, nil
 }
 
+func (c *authServiceClient) ListUsersInIDs(ctx context.Context, in *ListUsersInIDsRequest, opts ...grpc.CallOption) (*ListUsersInIDsResponse, error) {
+	out := new(ListUsersInIDsResponse)
+	err := c.cc.Invoke(ctx, "/svc_auth.AuthService/ListUsersInIDs", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // AuthServiceServer is the server API for AuthService service.
 // All implementations must embed UnimplementedAuthServiceServer
 // for forward compatibility
@@ -76,6 +86,7 @@ type AuthServiceServer interface {
 	SignIn(context.Context, *SignInRequest) (*SignInResponse, error)
 	ParseToken(context.Context, *ParseTokenRequest) (*ParseTokenResponse, error)
 	GetUser(context.Context, *GetUserRequest) (*GetUserResponse, error)
+	ListUsersInIDs(context.Context, *ListUsersInIDsRequest) (*ListUsersInIDsResponse, error)
 	mustEmbedUnimplementedAuthServiceServer()
 }
 
@@ -94,6 +105,9 @@ func (UnimplementedAuthServiceServer) ParseToken(context.Context, *ParseTokenReq
 }
 func (UnimplementedAuthServiceServer) GetUser(context.Context, *GetUserRequest) (*GetUserResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetUser not implemented")
+}
+func (UnimplementedAuthServiceServer) ListUsersInIDs(context.Context, *ListUsersInIDsRequest) (*ListUsersInIDsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListUsersInIDs not implemented")
 }
 func (UnimplementedAuthServiceServer) mustEmbedUnimplementedAuthServiceServer() {}
 
@@ -180,6 +194,24 @@ func _AuthService_GetUser_Handler(srv interface{}, ctx context.Context, dec func
 	return interceptor(ctx, in, info, handler)
 }
 
+func _AuthService_ListUsersInIDs_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListUsersInIDsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AuthServiceServer).ListUsersInIDs(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/svc_auth.AuthService/ListUsersInIDs",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AuthServiceServer).ListUsersInIDs(ctx, req.(*ListUsersInIDsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // AuthService_ServiceDesc is the grpc.ServiceDesc for AuthService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -202,6 +234,10 @@ var AuthService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetUser",
 			Handler:    _AuthService_GetUser_Handler,
+		},
+		{
+			MethodName: "ListUsersInIDs",
+			Handler:    _AuthService_ListUsersInIDs_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

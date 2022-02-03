@@ -110,3 +110,15 @@ func (s *AuthService) GetUser(userID uint32) (model.UserResponse, error) {
 	}
 	return user.ToResponse(), nil
 }
+
+func (s *AuthService) ListUsersInIDs(ids []uint32) ([]model.UserResponse, error) {
+	users, err := s.repo.ListInIDs(ids)
+	if err != nil {
+		return nil, err
+	}
+	result := make([]model.UserResponse, len(users))
+	for i, user := range users {
+		result[i] = user.ToResponse()
+	}
+	return result, nil
+}

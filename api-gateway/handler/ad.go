@@ -15,8 +15,6 @@ func (h *Handler) getAd(c *gin.Context) {
 		"method": "getAd",
 	})
 
-	log.Println("GetAd")
-
 	adID, err := getUint32(c.Param("id"))
 	if err != nil {
 		log.WithError(err).Error("failed to read id URL param")

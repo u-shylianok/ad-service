@@ -7,3 +7,9 @@ func ToPbAuth_GetUserRequest(userID uint32) *pbAuth.GetUserRequest {
 		Id: userID,
 	}
 }
+
+func ToPbAuth_ListUsersInIDsRequest(usersIDs []uint32) *pbAuth.ListUsersInIDsRequest {
+	return &pbAuth.ListUsersInIDsRequest{
+		Ids: usersIDs,
+	}
+}

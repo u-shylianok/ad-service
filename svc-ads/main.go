@@ -5,7 +5,6 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
-	"time"
 
 	_ "github.com/jackc/pgx/v4/stdlib"
 	log "github.com/sirupsen/logrus"
@@ -19,7 +18,6 @@ import (
 
 func main() {
 	setupGlobalLogger()
-	time.Sleep(5 * time.Second)
 
 	db, err := repository.NewPostgresDB(repository.Config{
 		Host:     os.Getenv("DB_HOST"),
@@ -39,7 +37,7 @@ func main() {
 		log.Fatalf("did not connect: %v", err)
 	}
 	defer grpcClients.Close()
-	log.Info("connection started")
+	log.Info("gRPC connection started")
 
 	repos := repository.NewRepository(db)
 	services := service.NewService(repos)

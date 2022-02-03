@@ -28,17 +28,24 @@ func FromPbAds_GetAdResponse(res *pbAds.GetAdResponse) *model.AdResponse {
 func FromPbAds_AdResponse(res *pbAds.AdResponse) *model.AdResponse {
 	ad := res.Ad
 	user := res.User
-	return &model.AdResponse{
-		ID:          ad.Id,
-		User:        FromPbAuth_User(user),
-		Name:        ad.Name,
-		Date:        ad.Date.AsTime(),
-		Price:       int(ad.Price),
-		MainPhoto:   ad.Photo,
-		Description: &ad.Description,
-		OtherPhotos: &ad.Photos,
-		Tags:        &ad.Tags,
+	result := &model.AdResponse{
+		ID:        ad.Id,
+		User:      FromPbAuth_User(user),
+		Name:      ad.Name,
+		Date:      ad.Date.AsTime(),
+		Price:     int(ad.Price),
+		MainPhoto: ad.Photo,
 	}
+	if ad.Description != "" {
+		result.Description = &ad.Description
+	}
+	if ad.Photos != nil {
+		result.OtherPhotos = &ad.Photos
+	}
+	if ad.Tags != nil {
+		result.Tags = &ad.Tags
+	}
+	return result
 }
 
 func ToPbAds_ListAdsRequest(params []model.AdsSortingParam) *pbAds.ListAdsRequest {

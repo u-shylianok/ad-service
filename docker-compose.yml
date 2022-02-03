@@ -28,8 +28,6 @@ services:
     ports:
       - ${SVC_ADS_PORT}:${SVC_ADS_PORT}
     environment:
-      - GRPC_GO_LOG_VERBOSITY_LEVEL=99
-      - GRPC_GO_LOG_SEVERITY_LEVEL=info
       - PORT=${SVC_ADS_PORT}
       - DB_HOST=${DB_ADS}
       - DB_PORT=5432

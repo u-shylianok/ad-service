@@ -5,7 +5,6 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
-	"time"
 
 	_ "github.com/jackc/pgx/v4/stdlib"
 	log "github.com/sirupsen/logrus"
@@ -19,7 +18,6 @@ import (
 
 func main() {
 	setupGlobalLogger()
-	time.Sleep(3 * time.Second)
 
 	db, err := repository.NewPostgresDB(repository.Config{
 		Host:     os.Getenv("DB_HOST"),

@@ -30,17 +30,24 @@ func ToPbAds_AdResponse(ad model.Ad, user *pbAuth.UserResponse) *pbAds.AdRespons
 }
 
 func ToPbAds_Ad(ad model.Ad) *pbAds.Ad {
-	return &pbAds.Ad{
-		Id:          ad.ID,
-		UserId:      ad.UserID,
-		Name:        ad.Name,
-		Date:        timestamppb.New(ad.Date),
-		Price:       int32(ad.Price),
-		Description: *ad.Description,
-		Photo:       ad.MainPhoto,
-		Photos:      *ad.OtherPhotos,
-		Tags:        *ad.Tags,
+	result := &pbAds.Ad{
+		Id:     ad.ID,
+		UserId: ad.UserID,
+		Name:   ad.Name,
+		Date:   timestamppb.New(ad.Date),
+		Price:  int32(ad.Price),
+		Photo:  ad.MainPhoto,
 	}
+	if ad.Description != nil {
+		result.Description = *ad.Description
+	}
+	if ad.OtherPhotos != nil {
+		result.Photos = *ad.OtherPhotos
+	}
+	if ad.Tags != nil {
+		result.Tags = *ad.Tags
+	}
+	return result
 }
 
 func FromPbAds_ListAdsRequest(req *pbAds.ListAdsRequest) []model.AdsSortingParam {
@@ -58,10 +65,15 @@ func FromPbAds_SortingParam(param *pbAds.SortingParam) model.AdsSortingParam {
 	}
 }
 
-func ToPbAds_ListAdsResponse(ads []model.Ad, users map[uint32]*pbAuth.UserResponse) *pbAds.ListAdsResponse {
+func ToPbAds_ListAdsResponse(ads []model.Ad, users *pbAuth.ListUsersInIDsResponse) *pbAds.ListAdsResponse {
+	usersMap := make(map[uint32]*pbAuth.UserResponse)
+	for _, user := range users.Users {
+		usersMap[user.Id] = user
+	}
+
 	result := make([]*pbAds.AdResponse, len(ads))
 	for i, ad := range ads {
-		result[i] = ToPbAds_AdResponse(ad, users[ad.ID])
+		result[i] = ToPbAds_AdResponse(ad, usersMap[ad.UserID])
 	}
 	return &pbAds.ListAdsResponse{
 		Ads: result,
@@ -81,10 +93,15 @@ func FromPbAds_AdFilter(filter *pbAds.AdFilter) model.AdFilter {
 	}
 }
 
-func ToPbAds_SearchAdsResponse(ads []model.Ad, users map[uint32]*pbAuth.UserResponse) *pbAds.SearchAdsResponse {
+func ToPbAds_SearchAdsResponse(ads []model.Ad, users *pbAuth.ListUsersInIDsResponse) *pbAds.SearchAdsResponse {
+	usersMap := make(map[uint32]*pbAuth.UserResponse)
+	for _, user := range users.Users {
+		usersMap[user.Id] = user
+	}
+
 	result := make([]*pbAds.AdResponse, len(ads))
 	for i, ad := range ads {
-		result[i] = ToPbAds_AdResponse(ad, users[ad.ID])
+		result[i] = ToPbAds_AdResponse(ad, usersMap[ad.ID])
 	}
 	return &pbAds.SearchAdsResponse{
 		Ads: result,

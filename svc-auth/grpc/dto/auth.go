@@ -51,3 +51,17 @@ func ToPbAuth_GetUserResponse(user model.UserResponse) *pbAuth.GetUserResponse {
 		User: ToPbAuth_UserResponse(user),
 	}
 }
+
+func FromPbAuth_ListUsersInIDsRequest(req *pbAuth.ListUsersInIDsRequest) []uint32 {
+	return req.Ids
+}
+
+func ToPbAuth_ListUsersInIDsResponse(users []model.UserResponse) *pbAuth.ListUsersInIDsResponse {
+	result := make([]*pbAuth.UserResponse, len(users))
+	for i, user := range users {
+		result[i] = ToPbAuth_UserResponse(user)
+	}
+	return &pbAuth.ListUsersInIDsResponse{
+		Users: result,
+	}
+}

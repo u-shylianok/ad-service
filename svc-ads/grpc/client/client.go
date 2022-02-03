@@ -4,6 +4,7 @@ import (
 	log "github.com/sirupsen/logrus"
 	pbAuth "github.com/u-shylianok/ad-service/svc-auth/client/auth"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 )
 
 type Client struct {
@@ -12,14 +13,12 @@ type Client struct {
 }
 
 func New(authAddress string) (*Client, error) {
-	var newClient *Client
+	newClient := &Client{}
 
-	log.Info("start dial auth " + authAddress)
-	authConn, err := grpc.Dial(authAddress, grpc.WithInsecure())
+	authConn, err := grpc.Dial(authAddress, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		return nil, err
 	}
-	log.WithField("auth", authConn).Info("auth connection")
 
 	newClient.AuthService = pbAuth.NewAuthServiceClient(authConn)
 	newClient.authConn = authConn

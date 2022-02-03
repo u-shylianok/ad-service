@@ -17,6 +17,7 @@ type Auth interface {
 	ParseToken(accessToken string) (uint32, error)
 
 	GetUser(userID uint32) (model.UserResponse, error)
+	ListUsersInIDs(ids []uint32) ([]model.UserResponse, error)
 }
 
 func NewService(repos *repository.Repository, secure *secure.Secure) *Service {

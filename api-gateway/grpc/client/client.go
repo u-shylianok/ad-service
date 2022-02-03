@@ -5,6 +5,7 @@ import (
 	pbAds "github.com/u-shylianok/ad-service/svc-ads/client/ads"
 	pbAuth "github.com/u-shylianok/ad-service/svc-auth/client/auth"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 )
 
 type Client struct {
@@ -15,15 +16,13 @@ type Client struct {
 }
 
 func New(adsAddress, authAddress string) (*Client, error) {
-	var newClient *Client
+	newClient := &Client{}
 
-	log.Info("start dial ads" + adsAddress)
-	adsConn, err := grpc.Dial(adsAddress, grpc.WithInsecure(), grpc.WithDisableHealthCheck())
+	adsConn, err := grpc.Dial(adsAddress, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		return nil, err
 	}
-	log.Info("start dial auth" + authAddress)
-	authConn, err := grpc.Dial(authAddress, grpc.WithInsecure(), grpc.WithBlock())
+	authConn, err := grpc.Dial(authAddress, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		return nil, err
 	}
