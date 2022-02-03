@@ -50,9 +50,9 @@ vendor/
 # binary
 main
 bin/
-.api-gateway/build/api-gateway
-.svc-ads/build/svc-ads
-.svc-auth/build/svc-auth
+api-gateway/build/api-gateway
+svc-ads/build/svc-ads
+svc-auth/build/svc-auth
 
 
 # Elastic Beanstalk Files
