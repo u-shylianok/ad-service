@@ -1,4 +1,4 @@
-.PHONY: build up start debug-start down clean cleanall tidy test $(TOOLS) tools gen_mocks gen_proto lint
+.PHONY: build docker_build docker_up start debug_start down clean cleanall tidy test $(TOOLS) tools gen_mocks gen_proto lint
 
 TOOLS += github.com/maxbrunsfeld/counterfeiter/v6
 
@@ -17,14 +17,16 @@ build:
 	cd $(API_GATEWAY) && $(MAKE) --silent build
 	cd $(SVC_ADS) && $(MAKE) --silent build
 	cd $(SVC_AUTH) && $(MAKE) --silent build
+
+docker_build:
 	docker-compose build
 
-up:
+docker_up:
 	docker-compose up
 
-start: build up
+start: build docker_build docker_up
 
-debug-start:
+debug_start:
 	LOG_LEVEL=debug $(MAKE) start
 
 down:
