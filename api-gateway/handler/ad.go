@@ -26,7 +26,7 @@ func (h *Handler) getAd(c *gin.Context) {
 	optional := model.GetAdsOptionalFromURL(c.Request.URL.Query())
 	log.WithField("fields", optional).Debug("optional fields was formed")
 
-	ad, err := h.clients.AdsService.GetAd(context.Background(), dto.ToPbAds_GetAdRequest(adID, &optional))
+	ad, err := h.clients.AdsService.GetAd(context.Background(), dto.PbAds.ToGetAdRequest(adID, &optional))
 	if err != nil {
 		log.WithError(err).Error("failed to get ad")
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
@@ -34,7 +34,7 @@ func (h *Handler) getAd(c *gin.Context) {
 	}
 	log.WithField("ad", ad).Debug("ad read successfully")
 
-	c.JSON(http.StatusOK, dto.FromPbAds_GetAdResponse(ad))
+	c.JSON(http.StatusOK, dto.PbAds.FromGetAdResponse(ad))
 }
 
 func (h *Handler) listAds(c *gin.Context) {
@@ -45,7 +45,7 @@ func (h *Handler) listAds(c *gin.Context) {
 	sortingParams := model.GetAdsSortingParamsFromURL(c.Request.URL.Query())
 	log.WithField("sorting params", sortingParams).Debug("sorting params was formed")
 
-	ads, err := h.clients.AdsService.ListAds(context.Background(), dto.ToPbAds_ListAdsRequest(sortingParams))
+	ads, err := h.clients.AdsService.ListAds(context.Background(), dto.PbAds.ToListAdsRequest(sortingParams))
 	if err != nil {
 		log.WithError(err).Error("failed to get ads")
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
@@ -53,7 +53,7 @@ func (h *Handler) listAds(c *gin.Context) {
 	}
 	log.WithField("ads", ads).Debug("ads read successfully")
 
-	c.JSON(http.StatusOK, dto.FromPbAds_ListAdsResponse(ads))
+	c.JSON(http.StatusOK, dto.PbAds.FromListAdsResponse(ads))
 }
 
 func (h *Handler) searchAds(c *gin.Context) {
@@ -64,7 +64,7 @@ func (h *Handler) searchAds(c *gin.Context) {
 	filter := model.GetAdFilterFromURL(c.Request.URL.Query())
 	log.WithField("filter", filter).Debug("sorting params was formed")
 
-	ads, err := h.clients.AdsService.SearchAds(context.Background(), dto.ToPbAds_SearchAdsRequest(filter))
+	ads, err := h.clients.AdsService.SearchAds(context.Background(), dto.PbAds.ToSearchAdsRequest(filter))
 	if err != nil {
 		log.WithError(err).Error("failed to get ads")
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
@@ -72,7 +72,7 @@ func (h *Handler) searchAds(c *gin.Context) {
 	}
 	log.WithField("ads", ads).Debug("ads read successfully")
 
-	c.JSON(http.StatusOK, dto.FromPbAds_SearchAdsResponse(ads))
+	c.JSON(http.StatusOK, dto.PbAds.FromSearchAdsResponse(ads))
 }
 
 func (h *Handler) createAd(c *gin.Context) {
@@ -103,7 +103,7 @@ func (h *Handler) createAd(c *gin.Context) {
 	}
 	log.Debug("input validated successfully")
 
-	ad, err := h.clients.AdsService.CreateAd(context.Background(), dto.ToPbAds_CreateAdRequest(userID, input))
+	ad, err := h.clients.AdsService.CreateAd(context.Background(), dto.PbAds.ToCreateAdRequest(userID, input))
 	if err != nil {
 		log.WithError(err).Error("failed to create ad")
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
@@ -152,7 +152,9 @@ func (h *Handler) updateAd(c *gin.Context) {
 	}
 	log.Debug("input validated successfully")
 
-	if _, err := h.clients.AdsService.UpdateAd(context.Background(), dto.ToPbAds_UpdateAdRequest(userID, adID, input)); err != nil {
+	if _, err := h.clients.AdsService.UpdateAd(context.Background(),
+		dto.PbAds.ToUpdateAdRequest(userID, adID, input)); err != nil {
+
 		log.WithError(err).Error("failed to update ad")
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
@@ -185,7 +187,9 @@ func (h *Handler) deleteAd(c *gin.Context) {
 	}
 	log.WithField("id", adID).Debug("id param read successfully")
 
-	if _, err := h.clients.AdsService.DeleteAd(context.Background(), dto.ToPbAds_DeleteAdRequest(userID, adID)); err != nil {
+	if _, err := h.clients.AdsService.DeleteAd(context.Background(),
+		dto.PbAds.ToDeleteAdRequest(userID, adID)); err != nil {
+
 		log.WithError(err).Error("failed to delete ad")
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return

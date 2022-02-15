@@ -66,4 +66,6 @@ gen_proto:
 	cd $(SVC_AUTH) && $(MAKE) --silent gen_proto
 
 lint:
-	golangci-lint run ./$(SVC_ADS)/...
+	cd $(API_GATEWAY) && golangci-lint run
+	cd $(SVC_ADS) && golangci-lint run
+	cd $(SVC_AUTH) && golangci-lint run

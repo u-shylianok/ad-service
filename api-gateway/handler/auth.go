@@ -23,7 +23,7 @@ func (h *Handler) signUp(c *gin.Context) {
 	}
 	log.WithField("input", input).Debug("input bound successfully")
 
-	response, err := h.clients.AuthService.SignUp(context.Background(), dto.ToPbAuth_SignUpRequest(input))
+	response, err := h.clients.AuthService.SignUp(context.Background(), dto.PbAuth.ToSignUpRequest(input))
 	if err != nil {
 		log.WithError(err).Error("failed to create user")
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
@@ -49,7 +49,7 @@ func (h *Handler) signIn(c *gin.Context) {
 	}
 	log.WithField("input", input).Debug("input bound successfully")
 
-	response, err := h.clients.AuthService.SignIn(context.Background(), dto.ToPbAuth_SignInRequest(input))
+	response, err := h.clients.AuthService.SignIn(context.Background(), dto.PbAuth.ToSignInRequest(input))
 	if err != nil {
 		log.WithError(err).Error("failed to sign in")
 		newErrorResponse(c, http.StatusUnauthorized, "failed to sign in:"+err.Error())
