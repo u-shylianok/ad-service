@@ -26,20 +26,20 @@ func New(service *service.Service, clients *client.Client) *Server {
 }
 
 func (s *Server) GetAd(ctx context.Context, in *pb.GetAdRequest) (*pb.GetAdResponse, error) {
-	ad, err := s.Service.GetAd(dto.FromPbAds_GetAdRequest(in))
+	ad, err := s.Service.GetAd(dto.PbAds.FromGetAdRequest(in))
 	if err != nil {
 		return nil, err
 	}
 
-	user, err := s.clients.AuthService.GetUser(context.Background(), dto.ToPbAuth_GetUserRequest(ad.UserID))
+	user, err := s.clients.AuthService.GetUser(context.Background(), dto.PbAuth.ToGetUserRequest(ad.UserID))
 	if err != nil {
 		return nil, err
 	}
-	return dto.ToPbAds_GetAdResponse(ad, user), nil
+	return dto.PbAds.ToGetAdResponse(ad, user), nil
 }
 
 func (s *Server) ListAds(ctx context.Context, in *pb.ListAdsRequest) (*pb.ListAdsResponse, error) {
-	ads, err := s.Service.ListAds(dto.FromPbAds_ListAdsRequest(in))
+	ads, err := s.Service.ListAds(dto.PbAds.FromListAdsRequest(in))
 	if err != nil {
 		return nil, err
 	}
@@ -53,15 +53,15 @@ func (s *Server) ListAds(ctx context.Context, in *pb.ListAdsRequest) (*pb.ListAd
 			usersIDs = append(usersIDs, usersID)
 		}
 	}
-	users, err := s.clients.AuthService.ListUsersInIDs(context.Background(), dto.ToPbAuth_ListUsersInIDsRequest(usersIDs))
+	users, err := s.clients.AuthService.ListUsersInIDs(context.Background(), dto.PbAuth.ToListUsersInIDsRequest(usersIDs))
 	if err != nil {
 		return nil, err
 	}
-	return dto.ToPbAds_ListAdsResponse(ads, users), nil
+	return dto.PbAds.ToListAdsResponse(ads, users), nil
 }
 
 func (s *Server) SearchAds(ctx context.Context, in *pb.SearchAdsRequest) (*pb.SearchAdsResponse, error) {
-	ads, err := s.Service.SearchAds(dto.FromPbAds_SearchAdsRequest(in))
+	ads, err := s.Service.SearchAds(dto.PbAds.FromSearchAdsRequest(in))
 	if err != nil {
 		return nil, err
 	}
@@ -75,15 +75,15 @@ func (s *Server) SearchAds(ctx context.Context, in *pb.SearchAdsRequest) (*pb.Se
 			usersIDs = append(usersIDs, usersID)
 		}
 	}
-	users, err := s.clients.AuthService.ListUsersInIDs(context.Background(), dto.ToPbAuth_ListUsersInIDsRequest(usersIDs))
+	users, err := s.clients.AuthService.ListUsersInIDs(context.Background(), dto.PbAuth.ToListUsersInIDsRequest(usersIDs))
 	if err != nil {
 		return nil, err
 	}
-	return dto.ToPbAds_SearchAdsResponse(ads, users), nil
+	return dto.PbAds.ToSearchAdsResponse(ads, users), nil
 }
 
 func (s *Server) CreateAd(ctx context.Context, in *pb.CreateAdRequest) (*pb.Ad, error) {
-	adID, err := s.Service.CreateAd(dto.FromPbAds_CreateAdRequest(in))
+	adID, err := s.Service.CreateAd(dto.PbAds.FromCreateAdRequest(in))
 	if err != nil {
 		return nil, err
 	}
@@ -94,11 +94,11 @@ func (s *Server) CreateAd(ctx context.Context, in *pb.CreateAdRequest) (*pb.Ad, 
 		return nil, err
 	}
 	//
-	return dto.ToPbAds_Ad(ad), nil
+	return dto.PbAds.ToAd(ad), nil
 }
 
 func (s *Server) UpdateAd(ctx context.Context, in *pb.UpdateAdRequest) (*pb.Ad, error) {
-	adID, err := s.Service.UpdateAd(dto.FromPbAds_UpdateAdRequest(in))
+	adID, err := s.Service.UpdateAd(dto.PbAds.FromUpdateAdRequest(in))
 	if err != nil {
 		return nil, err
 	}
@@ -109,18 +109,18 @@ func (s *Server) UpdateAd(ctx context.Context, in *pb.UpdateAdRequest) (*pb.Ad, 
 		return nil, err
 	}
 	//
-	return dto.ToPbAds_Ad(ad), nil
+	return dto.PbAds.ToAd(ad), nil
 }
 
 func (s *Server) DeleteAd(ctx context.Context, in *pb.DeleteAdRequest) (*empty.Empty, error) {
-	if err := s.Service.DeleteAd(dto.FromPbAds_DeleteAdRequest(in)); err != nil {
+	if err := s.Service.DeleteAd(dto.PbAds.FromDeleteAdRequest(in)); err != nil {
 		return nil, err
 	}
 	return &empty.Empty{}, nil
 }
 
 func (s *Server) ListPhotos(ctx context.Context, in *pb.ListPhotosRequest) (*pb.ListPhotosResponse, error) {
-	adID := dto.FromPbAds_ListPhotosRequest(in)
+	adID := dto.PbAds.FromListPhotosRequest(in)
 
 	var result []string
 	if adID == 0 {
@@ -136,11 +136,11 @@ func (s *Server) ListPhotos(ctx context.Context, in *pb.ListPhotosRequest) (*pb.
 		}
 		result = photos
 	}
-	return dto.ToPbAds_ListPhotosResponse(result), nil
+	return dto.PbAds.ToListPhotosResponse(result), nil
 }
 
 func (s *Server) ListTags(ctx context.Context, in *pb.ListTagsRequest) (*pb.ListTagsResponse, error) {
-	adID := dto.FromPbAds_ListTagsRequest(in)
+	adID := dto.PbAds.FromListTagsRequest(in)
 
 	var result []string
 	if adID == 0 {
@@ -156,5 +156,5 @@ func (s *Server) ListTags(ctx context.Context, in *pb.ListTagsRequest) (*pb.List
 		}
 		result = tags
 	}
-	return dto.ToPbAds_ListTagsResponse(result), nil
+	return dto.PbAds.ToListTagsResponse(result), nil
 }

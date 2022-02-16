@@ -7,7 +7,11 @@ import (
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
-func FromPbAds_GetAdRequest(req *pbAds.GetAdRequest) (uint32, model.AdsOptional) {
+type pbAdsConvert struct{}
+
+var PbAds pbAdsConvert
+
+func (c *pbAdsConvert) FromGetAdRequest(req *pbAds.GetAdRequest) (uint32, model.AdsOptional) {
 	opt := req.Optional
 	return req.GetId(), model.AdsOptional{
 		Description: opt.Description,
@@ -16,20 +20,20 @@ func FromPbAds_GetAdRequest(req *pbAds.GetAdRequest) (uint32, model.AdsOptional)
 	}
 }
 
-func ToPbAds_GetAdResponse(ad model.Ad, user *pbAuth.GetUserResponse) *pbAds.GetAdResponse {
+func (c *pbAdsConvert) ToGetAdResponse(ad model.Ad, user *pbAuth.GetUserResponse) *pbAds.GetAdResponse {
 	return &pbAds.GetAdResponse{
-		Ad: ToPbAds_AdResponse(ad, user.User),
+		Ad: c.ToAdResponse(ad, user.User),
 	}
 }
 
-func ToPbAds_AdResponse(ad model.Ad, user *pbAuth.UserResponse) *pbAds.AdResponse {
+func (c *pbAdsConvert) ToAdResponse(ad model.Ad, user *pbAuth.UserResponse) *pbAds.AdResponse {
 	return &pbAds.AdResponse{
-		Ad:   ToPbAds_Ad(ad),
+		Ad:   c.ToAd(ad),
 		User: user,
 	}
 }
 
-func ToPbAds_Ad(ad model.Ad) *pbAds.Ad {
+func (c *pbAdsConvert) ToAd(ad model.Ad) *pbAds.Ad {
 	result := &pbAds.Ad{
 		Id:     ad.ID,
 		UserId: ad.UserID,
@@ -50,22 +54,22 @@ func ToPbAds_Ad(ad model.Ad) *pbAds.Ad {
 	return result
 }
 
-func FromPbAds_ListAdsRequest(req *pbAds.ListAdsRequest) []model.AdsSortingParam {
+func (c *pbAdsConvert) FromListAdsRequest(req *pbAds.ListAdsRequest) []model.AdsSortingParam {
 	result := make([]model.AdsSortingParam, len(req.SortingParams))
 	for i, param := range req.SortingParams {
-		result[i] = FromPbAds_SortingParam(param)
+		result[i] = c.FromSortingParam(param)
 	}
 	return result
 }
 
-func FromPbAds_SortingParam(param *pbAds.SortingParam) model.AdsSortingParam {
+func (c *pbAdsConvert) FromSortingParam(param *pbAds.SortingParam) model.AdsSortingParam {
 	return model.AdsSortingParam{
 		Field:  param.Field,
 		IsDesc: param.IsDesc,
 	}
 }
 
-func ToPbAds_ListAdsResponse(ads []model.Ad, users *pbAuth.ListUsersInIDsResponse) *pbAds.ListAdsResponse {
+func (c *pbAdsConvert) ToListAdsResponse(ads []model.Ad, users *pbAuth.ListUsersInIDsResponse) *pbAds.ListAdsResponse {
 	usersMap := make(map[uint32]*pbAuth.UserResponse)
 	for _, user := range users.Users {
 		usersMap[user.Id] = user
@@ -73,18 +77,18 @@ func ToPbAds_ListAdsResponse(ads []model.Ad, users *pbAuth.ListUsersInIDsRespons
 
 	result := make([]*pbAds.AdResponse, len(ads))
 	for i, ad := range ads {
-		result[i] = ToPbAds_AdResponse(ad, usersMap[ad.UserID])
+		result[i] = c.ToAdResponse(ad, usersMap[ad.UserID])
 	}
 	return &pbAds.ListAdsResponse{
 		Ads: result,
 	}
 }
 
-func FromPbAds_SearchAdsRequest(req *pbAds.SearchAdsRequest) model.AdFilter {
-	return FromPbAds_AdFilter(req.Filter)
+func (c *pbAdsConvert) FromSearchAdsRequest(req *pbAds.SearchAdsRequest) model.AdFilter {
+	return c.FromAdFilter(req.Filter)
 }
 
-func FromPbAds_AdFilter(filter *pbAds.AdFilter) model.AdFilter {
+func (c *pbAdsConvert) FromAdFilter(filter *pbAds.AdFilter) model.AdFilter {
 	return model.AdFilter{
 		Username:  filter.Username,
 		StartDate: filter.StartDate.AsTime(),
@@ -93,7 +97,9 @@ func FromPbAds_AdFilter(filter *pbAds.AdFilter) model.AdFilter {
 	}
 }
 
-func ToPbAds_SearchAdsResponse(ads []model.Ad, users *pbAuth.ListUsersInIDsResponse) *pbAds.SearchAdsResponse {
+func (c *pbAdsConvert) ToSearchAdsResponse(ads []model.Ad,
+	users *pbAuth.ListUsersInIDsResponse) *pbAds.SearchAdsResponse {
+
 	usersMap := make(map[uint32]*pbAuth.UserResponse)
 	for _, user := range users.Users {
 		usersMap[user.Id] = user
@@ -101,18 +107,18 @@ func ToPbAds_SearchAdsResponse(ads []model.Ad, users *pbAuth.ListUsersInIDsRespo
 
 	result := make([]*pbAds.AdResponse, len(ads))
 	for i, ad := range ads {
-		result[i] = ToPbAds_AdResponse(ad, usersMap[ad.ID])
+		result[i] = c.ToAdResponse(ad, usersMap[ad.ID])
 	}
 	return &pbAds.SearchAdsResponse{
 		Ads: result,
 	}
 }
 
-func FromPbAds_CreateAdRequest(req *pbAds.CreateAdRequest) (uint32, model.AdRequest) {
-	return req.UserId, FromPbAds_AdRequest(req.Ad)
+func (c *pbAdsConvert) FromCreateAdRequest(req *pbAds.CreateAdRequest) (uint32, model.AdRequest) {
+	return req.UserId, c.FromAdRequest(req.Ad)
 }
 
-func FromPbAds_AdRequest(req *pbAds.AdRequest) model.AdRequest {
+func (c *pbAdsConvert) FromAdRequest(req *pbAds.AdRequest) model.AdRequest {
 	return model.AdRequest{
 		Name:        req.Name,
 		Price:       int(req.Price),
@@ -123,29 +129,29 @@ func FromPbAds_AdRequest(req *pbAds.AdRequest) model.AdRequest {
 	}
 }
 
-func FromPbAds_UpdateAdRequest(req *pbAds.UpdateAdRequest) (uint32, uint32, model.AdRequest) {
-	return req.UserId, req.AdId, FromPbAds_AdRequest(req.Ad)
+func (c *pbAdsConvert) FromUpdateAdRequest(req *pbAds.UpdateAdRequest) (uint32, uint32, model.AdRequest) {
+	return req.UserId, req.AdId, c.FromAdRequest(req.Ad)
 }
 
-func FromPbAds_DeleteAdRequest(req *pbAds.DeleteAdRequest) (uint32, uint32) {
+func (c *pbAdsConvert) FromDeleteAdRequest(req *pbAds.DeleteAdRequest) (uint32, uint32) {
 	return req.UserId, req.AdId
 }
 
-func FromPbAds_ListPhotosRequest(req *pbAds.ListPhotosRequest) uint32 {
+func (c *pbAdsConvert) FromListPhotosRequest(req *pbAds.ListPhotosRequest) uint32 {
 	return req.AdId
 }
 
-func ToPbAds_ListPhotosResponse(photos []string) *pbAds.ListPhotosResponse {
+func (c *pbAdsConvert) ToListPhotosResponse(photos []string) *pbAds.ListPhotosResponse {
 	return &pbAds.ListPhotosResponse{
 		Photos: photos,
 	}
 }
 
-func FromPbAds_ListTagsRequest(req *pbAds.ListTagsRequest) uint32 {
+func (c *pbAdsConvert) FromListTagsRequest(req *pbAds.ListTagsRequest) uint32 {
 	return req.AdId
 }
 
-func ToPbAds_ListTagsResponse(tags []string) *pbAds.ListTagsResponse {
+func (c *pbAdsConvert) ToListTagsResponse(tags []string) *pbAds.ListTagsResponse {
 	return &pbAds.ListTagsResponse{
 		Tags: tags,
 	}

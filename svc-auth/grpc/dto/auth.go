@@ -5,7 +5,11 @@ import (
 	"github.com/u-shylianok/ad-service/svc-auth/domain/model"
 )
 
-func FromPbAuth_SignUpRequest(req *pbAuth.SignUpRequest) model.User {
+type pbAuthConvert struct{}
+
+var PbAuth pbAuthConvert
+
+func (c *pbAuthConvert) FromSignUpRequest(req *pbAuth.SignUpRequest) model.User {
 	return model.User{
 		Name:     req.Name,
 		Username: req.Username,
@@ -13,7 +17,7 @@ func FromPbAuth_SignUpRequest(req *pbAuth.SignUpRequest) model.User {
 	}
 }
 
-func ToPbAuth_UserResponse(user model.UserResponse) *pbAuth.UserResponse {
+func (c *pbAuthConvert) ToUserResponse(user model.UserResponse) *pbAuth.UserResponse {
 	return &pbAuth.UserResponse{
 		Id:       user.ID,
 		Name:     user.Name,
@@ -21,45 +25,45 @@ func ToPbAuth_UserResponse(user model.UserResponse) *pbAuth.UserResponse {
 	}
 }
 
-func FromPbAuth_SignInRequest(req *pbAuth.SignInRequest) (string, string) {
+func (c *pbAuthConvert) FromSignInRequest(req *pbAuth.SignInRequest) (string, string) {
 	return req.Username, req.Password
 }
 
-func ToPbAuth_SignInResponse(token string, expiresAt int64) *pbAuth.SignInResponse {
+func (c *pbAuthConvert) ToSignInResponse(token string, expiresAt int64) *pbAuth.SignInResponse {
 	return &pbAuth.SignInResponse{
 		Token:     token,
 		ExpiresAt: expiresAt,
 	}
 }
 
-func FromPbAuth_ParseTokenRequest(req *pbAuth.ParseTokenRequest) string {
+func (c *pbAuthConvert) FromParseTokenRequest(req *pbAuth.ParseTokenRequest) string {
 	return req.Token
 }
 
-func ToPbAuth_ParseTokenResponse(userID uint32) *pbAuth.ParseTokenResponse {
+func (c *pbAuthConvert) ToParseTokenResponse(userID uint32) *pbAuth.ParseTokenResponse {
 	return &pbAuth.ParseTokenResponse{
 		UserId: userID,
 	}
 }
 
-func FromPbAuth_GetUserRequest(req *pbAuth.GetUserRequest) uint32 {
+func (c *pbAuthConvert) FromGetUserRequest(req *pbAuth.GetUserRequest) uint32 {
 	return req.Id
 }
 
-func ToPbAuth_GetUserResponse(user model.UserResponse) *pbAuth.GetUserResponse {
+func (c *pbAuthConvert) ToGetUserResponse(user model.UserResponse) *pbAuth.GetUserResponse {
 	return &pbAuth.GetUserResponse{
-		User: ToPbAuth_UserResponse(user),
+		User: c.ToUserResponse(user),
 	}
 }
 
-func FromPbAuth_ListUsersInIDsRequest(req *pbAuth.ListUsersInIDsRequest) []uint32 {
+func (c *pbAuthConvert) FromListUsersInIDsRequest(req *pbAuth.ListUsersInIDsRequest) []uint32 {
 	return req.Ids
 }
 
-func ToPbAuth_ListUsersInIDsResponse(users []model.UserResponse) *pbAuth.ListUsersInIDsResponse {
+func (c *pbAuthConvert) ToListUsersInIDsResponse(users []model.UserResponse) *pbAuth.ListUsersInIDsResponse {
 	result := make([]*pbAuth.UserResponse, len(users))
 	for i, user := range users {
-		result[i] = ToPbAuth_UserResponse(user)
+		result[i] = c.ToUserResponse(user)
 	}
 	return &pbAuth.ListUsersInIDsResponse{
 		Users: result,
