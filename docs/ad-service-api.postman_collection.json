@@ -1,0 +1,593 @@
+{
+	"info": {
+		"_postman_id": "817a0f04-ea5f-43af-b459-850db73e77f7",
+		"name": "ad-service-api",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "/auth",
+			"item": [
+				{
+					"name": "/auth/signup",
+					"item": [
+						{
+							"name": "Auth SignUp [user=user]",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"name\": \"Новый пользователь\",\n    \"username\": \"user\",\n    \"password\": \"user\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "localhost:8000/auth/signup",
+									"host": [
+										"localhost"
+									],
+									"port": "8000",
+									"path": [
+										"auth",
+										"signup"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "/auth/signin",
+					"item": [
+						{
+							"name": "Auth SignIn [user=test]",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"username\": \"test\",\n    \"password\": \"test\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "localhost:8000/auth/signin",
+									"host": [
+										"localhost"
+									],
+									"port": "8000",
+									"path": [
+										"auth",
+										"signin"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "/ads [Signed] (Create, Update, Delete)",
+			"item": [
+				{
+					"name": "/ads/:id",
+					"item": [
+						{
+							"name": "Delete Ad [id=9]",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "localhost:8000/ads/9",
+									"host": [
+										"localhost"
+									],
+									"port": "8000",
+									"path": [
+										"ads",
+										"9"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Delete Ad [id=8]",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "localhost:8000/ads/8",
+									"host": [
+										"localhost"
+									],
+									"port": "8000",
+									"path": [
+										"ads",
+										"8"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "/ads",
+					"item": [
+						{
+							"name": "Create Ad",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"name\": \"ТЕСТ ДОБАВЛЕНИЯ\",\n    \"price\": 123123,\n    \"description\": \"Добавляем - проверяем\",\n    \"main_photo\": \"https://picsum.photos/id/121/200/200\",\n    \"other_photos\": [\n        \"https://picsum.photos/id/122/200/200\",\n        \"https://picsum.photos/id/123/200/200\"\n    ],\n    \"tags\": [\n        \"Тэг 1\",\n        \"ЗЕЛЕНЫЙ\",\n        \"Тэг 2\",\n        \"ВАЖНОЕ\"\n    ]\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "localhost:8000/ads/",
+									"host": [
+										"localhost"
+									],
+									"port": "8000",
+									"path": [
+										"ads",
+										""
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				}
+			],
+			"auth": {
+				"type": "bearer",
+				"bearer": [
+					{
+						"key": "token",
+						"value": "{{currentAccessToken}}",
+						"type": "string"
+					}
+				]
+			},
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"const echoPostRequest = {",
+							"  url: 'localhost:8000/auth/signin',",
+							"  method: 'POST',",
+							"  header: 'Content-Type:application/json',",
+							"  body: {",
+							"    mode: 'application/json',",
+							"    raw: JSON.stringify(",
+							"        {",
+							"            \"username\": \"test\",",
+							"            \"password\": \"test\"",
+							"        })",
+							"  }",
+							"};",
+							"",
+							"var getToken = true;",
+							"",
+							"if (!pm.environment.get('accessTokenExpiry') || ",
+							"    !pm.environment.get('currentAccessToken')) {",
+							"    console.log('Token or expiry date are missing')",
+							"} else if (pm.environment.get('accessTokenExpiry') <= (new Date()).getTime()) {",
+							"    console.log('Token is expired')",
+							"} else {",
+							"    getToken = false;",
+							"    console.log('Token and expiry date are all good');",
+							"}",
+							"",
+							"if (getToken === true) {",
+							"    pm.sendRequest(echoPostRequest, function (err, res) {",
+							"    console.log(err ? err : res.json());",
+							"        if (err === null) {",
+							"            console.log('Saving the token and expiry date')",
+							"            var responseJson = res.json();",
+							"            pm.environment.set('currentAccessToken', responseJson.token)",
+							"    ",
+							"            var expiryDate = new Date();",
+							"            // expiryDate.setSeconds(expiryDate.getSeconds() + responseJson.expires_at);",
+							"            expiryDate.setSeconds(responseJson.expires_at);",
+							"            pm.environment.set('accessTokenExpiry', expiryDate.getTime());",
+							"        }",
+							"    });",
+							"}"
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			]
+		},
+		{
+			"name": "/ads (Read)",
+			"item": [
+				{
+					"name": "/ads",
+					"item": [
+						{
+							"name": "List Ads",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "localhost:8000/ads/",
+									"host": [
+										"localhost"
+									],
+									"port": "8000",
+									"path": [
+										"ads",
+										""
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "List Ads. Error sorting param [...,sortby=kek]",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "localhost:8000/ads/?sortby=name&sortby=price&sortby=kek&sortby=description&order=dsc&order=dsc&order=asc&order=dsc",
+									"host": [
+										"localhost"
+									],
+									"port": "8000",
+									"path": [
+										"ads",
+										""
+									],
+									"query": [
+										{
+											"key": "sortby",
+											"value": "name"
+										},
+										{
+											"key": "sortby",
+											"value": "price"
+										},
+										{
+											"key": "sortby",
+											"value": "kek"
+										},
+										{
+											"key": "sortby",
+											"value": "description"
+										},
+										{
+											"key": "order",
+											"value": "dsc"
+										},
+										{
+											"key": "order",
+											"value": "dsc"
+										},
+										{
+											"key": "order",
+											"value": "asc"
+										},
+										{
+											"key": "order",
+											"value": "dsc"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "List Ads [sortby=name,order=dsc]",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "localhost:8000/ads/?sortby=name&order=dsc",
+									"host": [
+										"localhost"
+									],
+									"port": "8000",
+									"path": [
+										"ads",
+										""
+									],
+									"query": [
+										{
+											"key": "sortby",
+											"value": "name"
+										},
+										{
+											"key": "order",
+											"value": "dsc"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "/ads/search",
+					"item": []
+				},
+				{
+					"name": "/ads/:id",
+					"item": [
+						{
+							"name": "/ads/:id/photos",
+							"item": [
+								{
+									"name": "List Ad [id=8] Photos",
+									"request": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "localhost:8000/ads/8/photos",
+											"host": [
+												"localhost"
+											],
+											"port": "8000",
+											"path": [
+												"ads",
+												"8",
+												"photos"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "List Ad [id=9] Photos",
+									"request": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "localhost:8000/ads/9/photos",
+											"host": [
+												"localhost"
+											],
+											"port": "8000",
+											"path": [
+												"ads",
+												"9",
+												"photos"
+											]
+										}
+									},
+									"response": []
+								}
+							]
+						},
+						{
+							"name": "/ads/:id/tags",
+							"item": [
+								{
+									"name": "List Ad [id=8] Tags",
+									"request": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "localhost:8000/ads/8/tags",
+											"host": [
+												"localhost"
+											],
+											"port": "8000",
+											"path": [
+												"ads",
+												"8",
+												"tags"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "List Ad [id=9] Tags",
+									"request": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "localhost:8000/ads/9/tags",
+											"host": [
+												"localhost"
+											],
+											"port": "8000",
+											"path": [
+												"ads",
+												"9",
+												"tags"
+											]
+										}
+									},
+									"response": []
+								}
+							]
+						},
+						{
+							"name": "Get Ad [id=8]",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "localhost:8000/ads/8",
+									"host": [
+										"localhost"
+									],
+									"port": "8000",
+									"path": [
+										"ads",
+										"8"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get Ad [id=9]",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "localhost:8000/ads/9",
+									"host": [
+										"localhost"
+									],
+									"port": "8000",
+									"path": [
+										"ads",
+										"9"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get Ad [id=8] all fields",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "localhost:8000/ads/8?fields=description&fields=photos&fields=tags",
+									"host": [
+										"localhost"
+									],
+									"port": "8000",
+									"path": [
+										"ads",
+										"8"
+									],
+									"query": [
+										{
+											"key": "fields",
+											"value": "description"
+										},
+										{
+											"key": "fields",
+											"value": "photos"
+										},
+										{
+											"key": "fields",
+											"value": "tags"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get Ad [id=9] all fields",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "localhost:8000/ads/9?fields=description&fields=photos&fields=tags",
+									"host": [
+										"localhost"
+									],
+									"port": "8000",
+									"path": [
+										"ads",
+										"9"
+									],
+									"query": [
+										{
+											"key": "fields",
+											"value": "description"
+										},
+										{
+											"key": "fields",
+											"value": "photos"
+										},
+										{
+											"key": "fields",
+											"value": "tags"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "/tags",
+			"item": [
+				{
+					"name": "List Tags",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "localhost:8000/tags/",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"tags",
+								""
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "/photos",
+			"item": [
+				{
+					"name": "List Photos",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "localhost:8000/photos/",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"photos",
+								""
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}

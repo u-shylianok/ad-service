@@ -30,3 +30,7 @@ func (c *pbAuthConvert) FromUser(user *pbAuth.UserResponse) model.UserResponse {
 		Username: user.GetUsername(),
 	}
 }
+
+func (c *pbAuthConvert) FromParseTokenResponse(res *pbAuth.ParseTokenResponse) uint32 {
+	return res.UserId
+}

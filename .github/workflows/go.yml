@@ -33,7 +33,7 @@ jobs:
         uses: actions/checkout@v2
         
       - id: set-matrix
-        run: ./tools/resolve-modules.sh
+        run: ./.github/scripts/resolve-modules.sh
 
   lint:
     runs-on: ubuntu-latest

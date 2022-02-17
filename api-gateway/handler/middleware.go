@@ -8,12 +8,13 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
+	"github.com/u-shylianok/ad-service/api-gateway/grpc/dto"
 	pbAuth "github.com/u-shylianok/ad-service/svc-auth/client/auth"
 )
 
 const (
 	AuthHeader   = "Authorization"
-	UserIDCtxKey = "userID"
+	UserIDCtxKey = "user_id"
 )
 
 func (h *Handler) userIdentity(c *gin.Context) {
@@ -41,12 +42,13 @@ func (h *Handler) userIdentity(c *gin.Context) {
 		return
 	}
 
-	userID, err := h.clients.AuthService.ParseToken(context.Background(), &pbAuth.ParseTokenRequest{Token: headerParts[1]})
+	res, err := h.clients.AuthService.ParseToken(context.Background(), &pbAuth.ParseTokenRequest{Token: headerParts[1]})
 	if err != nil {
 		log.WithError(err).Error("failed to parse token")
 		newErrorResponse(c, http.StatusUnauthorized, err.Error())
 		return
 	}
+	userID := dto.PbAuth.FromParseTokenResponse(res)
 
 	c.Set(UserIDCtxKey, userID)
 }
@@ -56,11 +58,13 @@ func getUserID(c *gin.Context) (uint32, error) {
 		"method": "getUserID",
 	})
 
+	// log.Infof("%#v", c)
 	userCtx, ok := c.Get(UserIDCtxKey)
 	if !ok {
 		log.Error("failed to parse token")
 		return 0, fmt.Errorf("user id not found")
 	}
+	// log.Error(userCtx)
 
 	id, ok := userCtx.(uint32)
 	if !ok {
