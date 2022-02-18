@@ -62,7 +62,9 @@ func (s *Server) GetUser(ctx context.Context, in *pb.GetUserRequest) (*pb.GetUse
 	return dto.PbAuth.ToGetUserResponse(user), nil
 }
 
-func (s *Server) GetUserIDByUsername(ctx context.Context, in *pb.GetUserIDByUsernameRequest) (*pb.GetUserIDByUsernameResponse, error) {
+func (s *Server) GetUserIDByUsername(ctx context.Context,
+	in *pb.GetUserIDByUsernameRequest) (*pb.GetUserIDByUsernameResponse, error) {
+
 	users, err := s.Service.GetUserIDByUsername(dto.PbAuth.FromGetUserIDByUsernameRequest(in))
 	if err != nil {
 		return nil, err

@@ -15,37 +15,35 @@ func BuildAdFilterQuery(filter model.AdFilter) (string, []interface{}) {
 
 	var subQuery string
 	// Создаем подзапрос для фильтрации по датам
-	if !filter.StartDate.IsZero() || !filter.EndDate.IsZero() || filter.UserID != 0 {
+	var subsb strings.Builder
 
-		var sb strings.Builder
+	if !filter.StartDate.IsZero() {
+		subsb.WriteString(fmt.Sprintf("ads.date >= $%d", argID))
+		args = append(args, filter.StartDate)
+		argID++
+	}
 
-		if !filter.StartDate.IsZero() {
-			sb.WriteString(fmt.Sprintf("ads.date >= $%d", argID))
-			args = append(args, filter.StartDate)
-			argID++
+	if !filter.EndDate.IsZero() {
+		if subsb.Len() != 0 {
+			subsb.WriteString(" AND ")
 		}
 
-		if !filter.EndDate.IsZero() {
-			if sb.Len() != 0 {
-				sb.WriteString(" AND ")
-			}
+		subsb.WriteString(fmt.Sprintf("ads.date <= $%d", argID))
+		args = append(args, filter.EndDate)
+		argID++
+	}
 
-			sb.WriteString(fmt.Sprintf("ads.date <= $%d", argID))
-			args = append(args, filter.EndDate)
-			argID++
+	if filter.UserID != 0 {
+		if subsb.Len() != 0 {
+			subsb.WriteString(" AND ")
 		}
 
-		if filter.UserID != 0 {
-			if sb.Len() != 0 {
-				sb.WriteString(" AND ")
-			}
-
-			sb.WriteString(fmt.Sprintf("ads.user_id = $%d", argID))
-			args = append(args, filter.UserID)
-			argID++
-		}
-
-		subQuery = fmt.Sprintf("SELECT * FROM ads WHERE %s", sb.String())
+		subsb.WriteString(fmt.Sprintf("ads.user_id = $%d", argID))
+		args = append(args, filter.UserID)
+		argID++
+	}
+	if subsb.Len() != 0 {
+		subQuery = fmt.Sprintf("SELECT * FROM ads WHERE %s", subsb.String())
 	}
 
 	const adsColumns = "ads.id, ads.user_id, ads.name, ads.date, ads.price, ads.description, ads.photo"

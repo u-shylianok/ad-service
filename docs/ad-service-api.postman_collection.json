@@ -372,7 +372,39 @@
 							"request": {
 								"method": "GET",
 								"header": [],
-								"url": null
+								"url": {
+									"raw": "localhost:8000/ads/search?username=test&startdate=2021-10-12&enddate=2021-10-15&tags=ТЕСТ&tags=КРАСНЫЙ",
+									"host": [
+										"localhost"
+									],
+									"port": "8000",
+									"path": [
+										"ads",
+										"search"
+									],
+									"query": [
+										{
+											"key": "username",
+											"value": "test"
+										},
+										{
+											"key": "startdate",
+											"value": "2021-10-12"
+										},
+										{
+											"key": "enddate",
+											"value": "2021-10-15"
+										},
+										{
+											"key": "tags",
+											"value": "ТЕСТ"
+										},
+										{
+											"key": "tags",
+											"value": "КРАСНЫЙ"
+										}
+									]
+								}
 							},
 							"response": []
 						}
