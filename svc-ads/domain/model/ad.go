@@ -29,7 +29,7 @@ type AdsSortingParam struct {
 }
 
 type AdFilter struct {
-	Username  string
+	UserID    uint32
 	StartDate time.Time
 	EndDate   time.Time
 	Tags      []string

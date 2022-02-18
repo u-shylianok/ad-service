@@ -17,6 +17,7 @@ type Auth interface {
 	ParseToken(accessToken string) (uint32, error)
 
 	GetUser(userID uint32) (model.UserResponse, error)
+	GetUserIDByUsername(username string) (uint32, error)
 	ListUsersInIDs(ids []uint32) ([]model.UserResponse, error)
 }
 

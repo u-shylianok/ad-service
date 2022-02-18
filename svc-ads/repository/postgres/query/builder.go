@@ -15,7 +15,7 @@ func BuildAdFilterQuery(filter model.AdFilter) (string, []interface{}) {
 
 	var subQuery string
 	// Создаем подзапрос для фильтрации по датам
-	if !filter.StartDate.IsZero() || !filter.EndDate.IsZero() {
+	if !filter.StartDate.IsZero() || !filter.EndDate.IsZero() || filter.UserID != 0 {
 
 		var sb strings.Builder
 
@@ -23,14 +23,25 @@ func BuildAdFilterQuery(filter model.AdFilter) (string, []interface{}) {
 			sb.WriteString(fmt.Sprintf("ads.date >= $%d", argID))
 			args = append(args, filter.StartDate)
 			argID++
+		}
 
-			if !filter.EndDate.IsZero() {
+		if !filter.EndDate.IsZero() {
+			if sb.Len() != 0 {
 				sb.WriteString(" AND ")
 			}
-		}
-		if !filter.EndDate.IsZero() {
-			args = append(args, filter.EndDate)
+
 			sb.WriteString(fmt.Sprintf("ads.date <= $%d", argID))
+			args = append(args, filter.EndDate)
+			argID++
+		}
+
+		if filter.UserID != 0 {
+			if sb.Len() != 0 {
+				sb.WriteString(" AND ")
+			}
+
+			sb.WriteString(fmt.Sprintf("ads.user_id = $%d", argID))
+			args = append(args, filter.UserID)
 			argID++
 		}
 
@@ -44,11 +55,6 @@ func BuildAdFilterQuery(filter model.AdFilter) (string, []interface{}) {
 	{
 		var sb strings.Builder
 
-		if filter.Username != "" {
-			sb.WriteString(fmt.Sprintf(" INNER JOIN users ON ads.user_id = users.id AND username = $%d", argID))
-			args = append(args, filter.Username)
-			argID++
-		}
 		if len(filter.Tags) > 0 {
 			values := []string{}
 			for _, tag := range filter.Tags {

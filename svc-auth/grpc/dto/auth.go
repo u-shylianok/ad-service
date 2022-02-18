@@ -56,6 +56,16 @@ func (c *pbAuthConvert) ToGetUserResponse(user model.UserResponse) *pbAuth.GetUs
 	}
 }
 
+func (c *pbAuthConvert) FromGetUserIDByUsernameRequest(in *pbAuth.GetUserIDByUsernameRequest) string {
+	return in.Username
+}
+
+func (c *pbAuthConvert) ToGetUserIDByUsernameResponse(id uint32) *pbAuth.GetUserIDByUsernameResponse {
+	return &pbAuth.GetUserIDByUsernameResponse{
+		Id: id,
+	}
+}
+
 func (c *pbAuthConvert) FromListUsersInIDsRequest(req *pbAuth.ListUsersInIDsRequest) []uint32 {
 	return req.Ids
 }

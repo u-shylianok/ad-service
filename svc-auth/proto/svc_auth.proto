@@ -10,6 +10,7 @@ service AuthService {
     rpc ParseToken(ParseTokenRequest) returns (ParseTokenResponse) {}
 
     rpc GetUser(GetUserRequest) returns (GetUserResponse) {}
+    rpc GetUserIDByUsername(GetUserIDByUsernameRequest) returns (GetUserIDByUsernameResponse) {}
     rpc ListUsersInIDs(ListUsersInIDsRequest) returns (ListUsersInIDsResponse) {}
 }
 
@@ -56,6 +57,14 @@ message UserResponse {
     uint32 id = 1;
     string name = 2;
     string username = 3;
+}
+
+message GetUserIDByUsernameRequest {
+    string username = 1;
+}
+
+message GetUserIDByUsernameResponse {
+    uint32 id = 1;
 }
 
 message ListUsersInIDsRequest {

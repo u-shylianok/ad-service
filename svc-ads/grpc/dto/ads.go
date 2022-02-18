@@ -84,17 +84,17 @@ func (c *pbAdsConvert) ToListAdsResponse(ads []model.Ad, users *pbAuth.ListUsers
 	}
 }
 
-func (c *pbAdsConvert) FromSearchAdsRequest(req *pbAds.SearchAdsRequest) model.AdFilter {
+func (c *pbAdsConvert) FromSearchAdsRequest(req *pbAds.SearchAdsRequest) (username string, adFilter model.AdFilter) {
 	return c.FromAdFilter(req.Filter)
 }
 
-func (c *pbAdsConvert) FromAdFilter(filter *pbAds.AdFilter) model.AdFilter {
-	return model.AdFilter{
-		Username:  filter.Username,
-		StartDate: filter.StartDate.AsTime(),
-		EndDate:   filter.EndDate.AsTime(),
-		Tags:      filter.Tags,
-	}
+func (c *pbAdsConvert) FromAdFilter(filter *pbAds.AdFilter) (username string, adFilter model.AdFilter) {
+	return filter.Username,
+		model.AdFilter{
+			StartDate: filter.StartDate.AsTime(),
+			EndDate:   filter.EndDate.AsTime(),
+			Tags:      filter.Tags,
+		}
 }
 
 func (c *pbAdsConvert) ToSearchAdsResponse(ads []model.Ad,
@@ -107,7 +107,7 @@ func (c *pbAdsConvert) ToSearchAdsResponse(ads []model.Ad,
 
 	result := make([]*pbAds.AdResponse, len(ads))
 	for i, ad := range ads {
-		result[i] = c.ToAdResponse(ad, usersMap[ad.ID])
+		result[i] = c.ToAdResponse(ad, usersMap[ad.UserID])
 	}
 	return &pbAds.SearchAdsResponse{
 		Ads: result,

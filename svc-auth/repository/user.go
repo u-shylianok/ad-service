@@ -47,6 +47,15 @@ func (r *UserPostgres) GetByID(id uint32) (model.User, error) {
 	return user, err
 }
 
+func (r *UserPostgres) GetIDByUsername(username string) (uint32, error) {
+	var id uint32
+	getUserIDQuery := "SELECT id FROM users WHERE username = $1"
+
+	err := r.db.Get(&id, getUserIDQuery, username)
+
+	return id, err
+}
+
 // Gets user slice with (id, name, username)
 func (r *UserPostgres) ListInIDs(ids []uint32) ([]model.User, error) {
 	var users []model.User

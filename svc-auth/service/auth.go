@@ -111,6 +111,10 @@ func (s *AuthService) GetUser(userID uint32) (model.UserResponse, error) {
 	return user.ToResponse(), nil
 }
 
+func (s *AuthService) GetUserIDByUsername(username string) (uint32, error) {
+	return s.repo.GetIDByUsername(username)
+}
+
 func (s *AuthService) ListUsersInIDs(ids []uint32) ([]model.UserResponse, error) {
 	users, err := s.repo.ListInIDs(ids)
 	if err != nil {

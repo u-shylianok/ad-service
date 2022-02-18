@@ -62,6 +62,14 @@ func (s *Server) GetUser(ctx context.Context, in *pb.GetUserRequest) (*pb.GetUse
 	return dto.PbAuth.ToGetUserResponse(user), nil
 }
 
+func (s *Server) GetUserIDByUsername(ctx context.Context, in *pb.GetUserIDByUsernameRequest) (*pb.GetUserIDByUsernameResponse, error) {
+	users, err := s.Service.GetUserIDByUsername(dto.PbAuth.FromGetUserIDByUsernameRequest(in))
+	if err != nil {
+		return nil, err
+	}
+	return dto.PbAuth.ToGetUserIDByUsernameResponse(users), nil
+}
+
 func (s *Server) ListUsersInIDs(ctx context.Context, in *pb.ListUsersInIDsRequest) (*pb.ListUsersInIDsResponse, error) {
 	users, err := s.Service.ListUsersInIDs(dto.PbAuth.FromListUsersInIDsRequest(in))
 	if err != nil {

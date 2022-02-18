@@ -61,7 +61,16 @@ func (s *Server) ListAds(ctx context.Context, in *pb.ListAdsRequest) (*pb.ListAd
 }
 
 func (s *Server) SearchAds(ctx context.Context, in *pb.SearchAdsRequest) (*pb.SearchAdsResponse, error) {
-	ads, err := s.Service.SearchAds(dto.PbAds.FromSearchAdsRequest(in))
+	username, filter := dto.PbAds.FromSearchAdsRequest(in)
+	if username != "" {
+		pbUserID, err := s.clients.AuthService.GetUserIDByUsername(context.Background(), dto.PbAuth.ToGetUserIDByUsernameRequest(username))
+		if err != nil {
+			return nil, err
+		}
+		filter.UserID = dto.PbAuth.FromGetUserIDByUsernameResponse(pbUserID)
+	}
+
+	ads, err := s.Service.SearchAds(filter)
 	if err != nil {
 		return nil, err
 	}

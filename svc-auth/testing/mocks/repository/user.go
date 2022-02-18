@@ -48,6 +48,19 @@ type UserMock struct {
 		result1 model.User
 		result2 error
 	}
+	GetIDByUsernameStub        func(string) (uint32, error)
+	getIDByUsernameMutex       sync.RWMutex
+	getIDByUsernameArgsForCall []struct {
+		arg1 string
+	}
+	getIDByUsernameReturns struct {
+		result1 uint32
+		result2 error
+	}
+	getIDByUsernameReturnsOnCall map[int]struct {
+		result1 uint32
+		result2 error
+	}
 	ListInIDsStub        func([]uint32) ([]model.User, error)
 	listInIDsMutex       sync.RWMutex
 	listInIDsArgsForCall []struct {
@@ -257,6 +270,70 @@ func (fake *UserMock) GetByIDReturnsOnCall(i int, result1 model.User, result2 er
 	}{result1, result2}
 }
 
+func (fake *UserMock) GetIDByUsername(arg1 string) (uint32, error) {
+	fake.getIDByUsernameMutex.Lock()
+	ret, specificReturn := fake.getIDByUsernameReturnsOnCall[len(fake.getIDByUsernameArgsForCall)]
+	fake.getIDByUsernameArgsForCall = append(fake.getIDByUsernameArgsForCall, struct {
+		arg1 string
+	}{arg1})
+	stub := fake.GetIDByUsernameStub
+	fakeReturns := fake.getIDByUsernameReturns
+	fake.recordInvocation("GetIDByUsername", []interface{}{arg1})
+	fake.getIDByUsernameMutex.Unlock()
+	if stub != nil {
+		return stub(arg1)
+	}
+	if specificReturn {
+		return ret.result1, ret.result2
+	}
+	return fakeReturns.result1, fakeReturns.result2
+}
+
+func (fake *UserMock) GetIDByUsernameCallCount() int {
+	fake.getIDByUsernameMutex.RLock()
+	defer fake.getIDByUsernameMutex.RUnlock()
+	return len(fake.getIDByUsernameArgsForCall)
+}
+
+func (fake *UserMock) GetIDByUsernameCalls(stub func(string) (uint32, error)) {
+	fake.getIDByUsernameMutex.Lock()
+	defer fake.getIDByUsernameMutex.Unlock()
+	fake.GetIDByUsernameStub = stub
+}
+
+func (fake *UserMock) GetIDByUsernameArgsForCall(i int) string {
+	fake.getIDByUsernameMutex.RLock()
+	defer fake.getIDByUsernameMutex.RUnlock()
+	argsForCall := fake.getIDByUsernameArgsForCall[i]
+	return argsForCall.arg1
+}
+
+func (fake *UserMock) GetIDByUsernameReturns(result1 uint32, result2 error) {
+	fake.getIDByUsernameMutex.Lock()
+	defer fake.getIDByUsernameMutex.Unlock()
+	fake.GetIDByUsernameStub = nil
+	fake.getIDByUsernameReturns = struct {
+		result1 uint32
+		result2 error
+	}{result1, result2}
+}
+
+func (fake *UserMock) GetIDByUsernameReturnsOnCall(i int, result1 uint32, result2 error) {
+	fake.getIDByUsernameMutex.Lock()
+	defer fake.getIDByUsernameMutex.Unlock()
+	fake.GetIDByUsernameStub = nil
+	if fake.getIDByUsernameReturnsOnCall == nil {
+		fake.getIDByUsernameReturnsOnCall = make(map[int]struct {
+			result1 uint32
+			result2 error
+		})
+	}
+	fake.getIDByUsernameReturnsOnCall[i] = struct {
+		result1 uint32
+		result2 error
+	}{result1, result2}
+}
+
 func (fake *UserMock) ListInIDs(arg1 []uint32) ([]model.User, error) {
 	var arg1Copy []uint32
 	if arg1 != nil {
@@ -335,6 +412,8 @@ func (fake *UserMock) Invocations() map[string][][]interface{} {
 	defer fake.getMutex.RUnlock()
 	fake.getByIDMutex.RLock()
 	defer fake.getByIDMutex.RUnlock()
+	fake.getIDByUsernameMutex.RLock()
+	defer fake.getIDByUsernameMutex.RUnlock()
 	fake.listInIDsMutex.RLock()
 	defer fake.listInIDsMutex.RUnlock()
 	copiedInvocations := map[string][][]interface{}{}

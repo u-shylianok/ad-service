@@ -119,6 +119,34 @@
 								}
 							},
 							"response": []
+						},
+						{
+							"name": "Update Ad [id=8]",
+							"request": {
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"name\": \"ТЕСТ ИЗМЕНЕНИЯ\",\n    \"price\": 123123,\n    \"description\": \"Добавляем - проверяем\",\n    \"main_photo\": \"https://picsum.photos/id/121/200/200\",\n    \"other_photos\": [\n        \"https://picsum.photos/id/122/200/200\",\n        \"https://picsum.photos/id/123/200/200\"\n    ],\n    \"tags\": [\n        \"Новый тэг\",\n        \"КРАСНЫЙ\",\n        \"Тэг 2\",\n        \"ВАЖНОЕ\"\n    ]\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "localhost:8000/ads/8",
+									"host": [
+										"localhost"
+									],
+									"port": "8000",
+									"path": [
+										"ads",
+										"8"
+									]
+								}
+							},
+							"response": []
 						}
 					]
 				},
@@ -338,7 +366,17 @@
 				},
 				{
 					"name": "/ads/search",
-					"item": []
+					"item": [
+						{
+							"name": "Search Ads",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": null
+							},
+							"response": []
+						}
+					]
 				},
 				{
 					"name": "/ads/:id",

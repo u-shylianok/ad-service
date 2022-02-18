@@ -17,3 +17,13 @@ func (c *pbAuthConvert) ToListUsersInIDsRequest(usersIDs []uint32) *pbAuth.ListU
 		Ids: usersIDs,
 	}
 }
+
+func (c *pbAuthConvert) ToGetUserIDByUsernameRequest(username string) *pbAuth.GetUserIDByUsernameRequest {
+	return &pbAuth.GetUserIDByUsernameRequest{
+		Username: username,
+	}
+}
+
+func (c *pbAuthConvert) FromGetUserIDByUsernameResponse(in *pbAuth.GetUserIDByUsernameResponse) uint32 {
+	return in.Id
+}
