@@ -17,7 +17,6 @@ coverage.xml
 .ropeproject
 .*rc
 .env/*
-.env
 env/*
 actions-runner/
 .elasticbeanstalk
@@ -51,7 +50,10 @@ vendor/
 # binary
 main
 bin/
-build/app/ad-service
+api-gateway/build/api-gateway
+svc-ads/build/svc-ads
+svc-auth/build/svc-auth
+
 
 # Elastic Beanstalk Files
 .elasticbeanstalk/*
