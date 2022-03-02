@@ -1,14 +1,16 @@
-.PHONY: build docker_build docker_up start debug_start down clean cleanall tidy test $(TOOLS) tools gen_mocks gen_proto lint
+.PHONY: build docker_build docker_up docker_up_mig start start_mig debug_start down clean cleanall tidy test $(TOOLS) tools gen_mocks gen_proto lint
 
-TOOLS += github.com/maxbrunsfeld/counterfeiter/v6
+TOOLS += github.com/maxbrunsfeld/counterfeiter/v6@latest
+TOOLS += github.com/pressly/goose/v3/cmd/goose@latest
 
 API_GATEWAY ?= api-gateway
 SVC_ADS ?= svc-ads
 SVC_AUTH ?= svc-auth
+SVC_MIGRATIONS ?= svc-migrations
 DB_ADS ?= db-ads
 DB_AUTH ?= db-auth
 
-CONTAINERS ?= $(API_GATEWAY) $(SVC_ADS) $(SVC_AUTH) $(DB_ADS) $(DB_AUTH)
+CONTAINERS ?= $(API_GATEWAY) $(SVC_ADS) $(SVC_AUTH) $(DB_ADS) $(DB_AUTH) $(SVC_MIGRATIONS)
 
 INFO ?= [MAKE INFO]:
 ERROR ?= [MAKE ERROR]:
@@ -17,6 +19,7 @@ build:
 	cd $(API_GATEWAY) && $(MAKE) --silent build
 	cd $(SVC_ADS) && $(MAKE) --silent build
 	cd $(SVC_AUTH) && $(MAKE) --silent build
+	cd $(SVC_MIGRATIONS) && $(MAKE) --silent build
 
 docker_build:
 	docker-compose build
@@ -24,7 +27,12 @@ docker_build:
 docker_up:
 	docker-compose up
 
+docker_up_mig:
+	docker-compose --profile migrations up
+
 start: build docker_build docker_up
+
+start_mig: build docker_build docker_up_mig
 
 debug_start:
 	LOG_LEVEL=debug $(MAKE) start
@@ -55,7 +63,7 @@ test:
 $(TOOLS): %:
 	GOBIN=$(GOBIN) go install $*
 
-tools: deps $(TOOLS)
+tools: $(TOOLS)
 
 gen_mocks:
 	cd $(SVC_ADS) && $(MAKE) --silent gen_mocks

@@ -100,3 +100,32 @@ services:
       retries: 20
     container_name: ${DB_AUTH}
 
+  svc-migrations:
+    build:
+      context: ./${SVC_MIGRATIONS}
+      target: ${SVC_MIGRATIONS}
+    image: ${SVC_MIGRATIONS}:latest
+    restart: on-failure
+    ports:
+      - ${SVC_MIGRATIONS_PORT}:${SVC_MIGRATIONS_PORT}
+    environment:
+      - DB_AUTH_HOST=${DB_AUTH}
+      - DB_AUTH_PORT=5432
+      - DB_AUTH_USER=postgres
+      - DB_AUTH_PASSWORD=postgres
+      - DB_AUTH_DBNAME=postgres
+      - DB_AUTH_SSL=disable
+      - DB_ADS_HOST=${DB_ADS}
+      - DB_ADS_PORT=5432
+      - DB_ADS_USER=postgres
+      - DB_ADS_PASSWORD=postgres
+      - DB_ADS_DBNAME=postgres
+      - DB_ADS_SSL=disable
+      - LOG_LEVEL=${LOG_LEVEL:-default}
+    depends_on:
+      - ${DB_ADS}
+      - ${DB_AUTH}
+    profiles:
+      - migrations
+    container_name: ${SVC_MIGRATIONS}
+
